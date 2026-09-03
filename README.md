@@ -83,6 +83,7 @@ NOTE: Due to its extensive use of acceleration structures and caching, this libr
     * [Relationship basics](#relationship-basics)
     * [Relations](#relations)
     * [Targets](#targets)
+    * [Relation degree counts](#relation-degree-counts)
     * [Entity dependencies](#entity-dependencies)
     * [Combination constraints](#combination-constraints)
     * [Exclusivity](#exclusivity)
@@ -2522,6 +2523,23 @@ w.targets(rabbit, eats, [&what_rabbit_eats](ecs::Entity entity) {
   what_rabbit_eats.push_back(entity);
 });
 ```
+
+### Relation degree counts
+The direct degree of a relationship is available through `World::source_count` and
+`World::target_count`. `source_count(relation, target)` counts sources pointing to a target;
+pass `ecs::All` as the target to count sources for every target of one relation.
+`target_count(entity, relation)` counts targets attached to one source.
+
+```cpp
+const uint32_t incoming = w.source_count(ecs::Parent, root);
+const uint32_t outgoing = w.target_count(child, ecs::Parent);
+```
+
+Both methods return the complete count. `source_count_kind` and `target_count_kind` report
+whether the operation is `ecs::CountKind::Stored`, `Walk`, or `Scan`; the corresponding
+`try_source_count` and `try_target_count` methods return `true` only when they can write the
+count without walking relation entries. Exclusive, non-fragmenting relations use the stored
+O(1) path. Archetype-stored relations use the walk path.
 
 ### Relations
 Relations of a relationship can be retrieved via `World::relation` and `World::relations`.

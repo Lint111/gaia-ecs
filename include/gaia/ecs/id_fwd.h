@@ -12,5 +12,8 @@ namespace gaia {
 		using EntityId = IdentifierId;
 		//! Numeric component identifier type.
 		using ComponentId = IdentifierId;
+
+		//! Cost class reported by relation degree queries.
+		enum class CountKind : uint8_t;
 	} // namespace ecs
 } // namespace gaia

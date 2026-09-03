@@ -2,6 +2,7 @@
 // The file is generated. Do not edit it.
 #pragma once
 
+
 #if __has_include(<version.h>)
 	#include <version.h>
 #endif
@@ -825,6 +826,7 @@ namespace gaia {
 
 //------------------------------------------------------------------------------
 
+
 //------------------------------------------------------------------------------
 // DO NOT MODIFY THIS FILE
 //------------------------------------------------------------------------------
@@ -894,7 +896,7 @@ namespace gaia {
 				GAIA_MSVC_WARNING_POP()                                                                                        \
 			}
 	#else
-	// For non-Debug builds simulate asserts
+		// For non-Debug builds simulate asserts
 		#if GAIA_DEBUG
 			#define GAIA_ASSERT_ENABLED 1
 			#define GAIA_ASSERT(cond)                                                                                        \
@@ -1047,6 +1049,7 @@ namespace gaia {
 #else
 	#include <alloca.h>
 #endif
+
 
 #include <cstddef>
 #include <type_traits>
@@ -1246,7 +1249,8 @@ namespace gaia {
 		//! \param it Iterator to offset.
 		//! \return Offset iterator.
 		template <typename It, typename Diff>
-		GAIA_NODISCARD constexpr reverse_iterator<It, Diff> operator+(Diff offset, const reverse_iterator<It, Diff>& it) {
+		GAIA_NODISCARD constexpr reverse_iterator<It, Diff> operator+(
+				Diff offset, const reverse_iterator<It, Diff>& it) {
 			return it + offset;
 		}
 
@@ -4609,7 +4613,9 @@ namespace tracy {
 	#endif
 #endif
 
+
 #include <cstdint>
+
 
 // The same gaia headers used inside span_impl.h must be included here.
 // Amalgamated file would not be generated properly otherwise
@@ -4626,9 +4632,11 @@ namespace tracy {
 // (See accompanying file ../../LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-	#include <initializer_list>
-	#include <tuple>
-	#include <type_traits>
+
+#include <initializer_list>
+#include <tuple>
+#include <type_traits>
+
 
 namespace gaia {
 	namespace core {
@@ -4770,11 +4778,11 @@ namespace gaia {
 			template <span_size_type E = Extent, typename std::enable_if<(E == DynamicSpanExtent || E <= 0), int>::type = 0>
 			constexpr span() noexcept {}
 
-			//! Rejects temporary initializer-list storage because its backing array expires at the end of the full
-			//! expression.
+			//! Rejects temporary initializer-list storage because its backing array expires at the end of the full expression.
 			//! \tparam U Initializer-list element type.
 			template <
-					typename U, typename std::enable_if<std::is_convertible<U (*)[], element_kind (*)[]>::value, int>::type = 0>
+					typename U,
+					typename std::enable_if<std::is_convertible<U (*)[], element_kind (*)[]>::value, int>::type = 0>
 			span(std::initializer_list<U>) = delete;
 
 			//! Constructs a view over count elements starting at ptr.
@@ -5376,9 +5384,11 @@ namespace gaia {
 	} // namespace core
 } // namespace gaia
 
+
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace meta {
@@ -5742,6 +5752,7 @@ namespace gaia {
 	} // namespace meta
 } // namespace gaia
 
+
 namespace gaia {
 	namespace meta {
 
@@ -5831,9 +5842,11 @@ namespace gaia {
 	} // namespace meta
 } // namespace gaia
 
+
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
 
 #include <cstdint>
 #include <cstring>
@@ -7240,6 +7253,7 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
+
 namespace gaia {
 	namespace mem {
 		//! Reports whether a type supports a copy operation used by Gaia-ECS storage.
@@ -7887,6 +7901,7 @@ namespace gaia {
 
 #include <cinttypes>
 
+
 namespace gaia {
 	namespace mem {
 		//! \cond INTERNAL
@@ -7935,6 +7950,8 @@ namespace gaia {
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+
+
 
 namespace gaia {
 	namespace cnt {
@@ -8162,10 +8179,12 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -8572,10 +8591,13 @@ namespace gaia {
 #include <cstdint>
 #include <cstdio>
 
+
+
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -10320,6 +10342,7 @@ namespace gaia {
 
 #include <cinttypes>
 
+
 namespace gaia {
 	namespace mem {
 		//! \cond INTERNAL
@@ -10474,8 +10497,10 @@ namespace gaia {
 	} // namespace mem
 } // namespace gaia
 
+
 #include <cstdint>
 #include <type_traits>
+
 
 #include <cstdint>
 #include <type_traits>
@@ -11025,10 +11050,12 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -11678,10 +11705,12 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -12601,10 +12630,12 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -13451,6 +13482,7 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
+
 namespace gaia {
 	namespace cnt {
 		//! Dynamically sized bit set.
@@ -13939,6 +13971,7 @@ namespace gaia {
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
+
 
 namespace gaia {
 	namespace cnt {
@@ -15365,20 +15398,21 @@ namespace gaia {
 // SOFTWARE.
 
 #ifndef ROBIN_HOOD_H_INCLUDED
-	#define ROBIN_HOOD_H_INCLUDED
+#define ROBIN_HOOD_H_INCLUDED
 
-	// see https://semver.org/
-	#define ROBIN_HOOD_VERSION_MAJOR 3 // for incompatible API changes
-	#define ROBIN_HOOD_VERSION_MINOR 11 // for adding functionality in a backwards-compatible manner
-	#define ROBIN_HOOD_VERSION_PATCH 5 // for backwards-compatible bug fixes
+// see https://semver.org/
+#define ROBIN_HOOD_VERSION_MAJOR 3 // for incompatible API changes
+#define ROBIN_HOOD_VERSION_MINOR 11 // for adding functionality in a backwards-compatible manner
+#define ROBIN_HOOD_VERSION_PATCH 5 // for backwards-compatible bug fixes
 
-	#include <cstdlib>
-	#include <cstring>
-	#include <initializer_list>
-	#include <new>
-	#include <tuple>
-	#include <type_traits>
-	#include <utility>
+
+#include <cstdlib>
+#include <cstring>
+#include <initializer_list>
+#include <new>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
 //! \file
 //! \brief Compile-time serialization entry points.
@@ -15387,14 +15421,18 @@ namespace gaia {
 //! Best suited when the serializer type is known at compile time.
 //! This is a binary traversal API. JSON document I/O uses ser::ser_json.
 
-	#include <type_traits>
-	#include <utility>
 
-	#include <type_traits>
-	#include <utility>
+#include <type_traits>
+#include <utility>
 
-	#include <cstdint>
-	#include <type_traits>
+
+#include <type_traits>
+#include <utility>
+
+
+#include <cstdint>
+#include <type_traits>
+
 
 namespace gaia {
 	namespace ser {
@@ -15753,7 +15791,7 @@ namespace gaia {
 				load_dispatch(s, arg, loadTrivial);
 			}
 
-	#if GAIA_ASSERT_ENABLED
+#if GAIA_ASSERT_ENABLED
 			template <typename Writer, typename T>
 			void check_one(Writer& s, const T& arg) {
 				T tmp{};
@@ -15770,7 +15808,7 @@ namespace gaia {
 				// Return back to the original position in the buffer.
 				s.seek(pos0);
 			}
-	#endif
+#endif
 
 			//! Minimal writer used by ser::bytes to count produced bytes without storing data.
 			class size_counter {
@@ -15831,7 +15869,7 @@ namespace gaia {
 			detail::load_one(reader, data);
 		}
 
-	#if GAIA_ASSERT_ENABLED
+#if GAIA_ASSERT_ENABLED
 		//! Write \param data using \tparam Writer at compile-time, then read it afterwards.
 		//! Used to verify that both save and load work correctly.
 		//! \param writer Writer used to serialize \a data.
@@ -15844,116 +15882,116 @@ namespace gaia {
 		void check(Writer& writer, const T& data) {
 			detail::check_one(writer, data);
 		}
-	#endif
+#endif
 	} // namespace ser
 } // namespace gaia
 
-	// #define ROBIN_HOOD_STD_SMARTPOINTERS
-	#if defined(ROBIN_HOOD_STD_SMARTPOINTERS)
-		#include <memory>
-	#endif
+// #define ROBIN_HOOD_STD_SMARTPOINTERS
+#if defined(ROBIN_HOOD_STD_SMARTPOINTERS)
+	#include <memory>
+#endif
 
-	// #define ROBIN_HOOD_LOG_ENABLED
-	#ifdef ROBIN_HOOD_LOG_ENABLED
-		#define ROBIN_HOOD_LOG(x, ...) GAIA_LOG_D("L:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+// #define ROBIN_HOOD_LOG_ENABLED
+#ifdef ROBIN_HOOD_LOG_ENABLED
+	#define ROBIN_HOOD_LOG(x, ...) GAIA_LOG_D("L:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else
+	#define ROBIN_HOOD_LOG(x, ...)
+#endif
+
+// #define ROBIN_HOOD_TRACE_ENABLED
+#ifdef ROBIN_HOOD_TRACE_ENABLED
+	#define ROBIN_HOOD_TRACE(x, ...) GAIA_LOG_D("T:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else
+	#define ROBIN_HOOD_TRACE(x, ...)
+#endif
+
+// all non-argument macros should use this facility. See
+// https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/
+#define ROBIN_HOOD(x) ROBIN_HOOD_PRIVATE_DEFINITION_##x()
+
+// mark unused members with this macro
+#define ROBIN_HOOD_UNUSED(identifier)
+
+// bitness
+#if SIZE_MAX == UINT32_MAX
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 32
+#elif SIZE_MAX == UINT64_MAX
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 64
+#else
+	#error Unsupported bitness
+#endif
+
+// exceptions
+#if !defined(__cpp_exceptions) && !defined(__EXCEPTIONS) && !defined(_CPPUNWIND)
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 0
+	#define ROBIN_HOOD_STD_OUT_OF_RANGE void
+#else
+	#include <stdexcept>
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 1
+	#define ROBIN_HOOD_STD_OUT_OF_RANGE std::out_of_range
+#endif
+
+// count leading/trailing bits
+#if !defined(ROBIN_HOOD_DISABLE_INTRINSICS)
+	#if ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() == 32
+		#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ(x)
+		#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ(x)
 	#else
-		#define ROBIN_HOOD_LOG(x, ...)
+		#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ64(x)
+		#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ64(x)
 	#endif
+#endif
 
-	// #define ROBIN_HOOD_TRACE_ENABLED
-	#ifdef ROBIN_HOOD_TRACE_ENABLED
-		#define ROBIN_HOOD_TRACE(x, ...) GAIA_LOG_D("T:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-	#else
-		#define ROBIN_HOOD_TRACE(x, ...)
-	#endif
+// fallthrough
+#ifndef __has_cpp_attribute // For backwards compatibility
+	#define __has_cpp_attribute(x) 0
+#endif
+#if __has_cpp_attribute(fallthrough)
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH() [[fallthrough]]
+#else
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH()
+#endif
 
-	// all non-argument macros should use this facility. See
-	// https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/
-	#define ROBIN_HOOD(x) ROBIN_HOOD_PRIVATE_DEFINITION_##x()
-
-	// mark unused members with this macro
-	#define ROBIN_HOOD_UNUSED(identifier)
-
-	// bitness
-	#if SIZE_MAX == UINT32_MAX
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 32
-	#elif SIZE_MAX == UINT64_MAX
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 64
-	#else
-		#error Unsupported bitness
-	#endif
-
-	// exceptions
-	#if !defined(__cpp_exceptions) && !defined(__EXCEPTIONS) && !defined(_CPPUNWIND)
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 0
-		#define ROBIN_HOOD_STD_OUT_OF_RANGE void
-	#else
-		#include <stdexcept>
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 1
-		#define ROBIN_HOOD_STD_OUT_OF_RANGE std::out_of_range
-	#endif
-
-	// count leading/trailing bits
-	#if !defined(ROBIN_HOOD_DISABLE_INTRINSICS)
-		#if ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() == 32
-			#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ(x)
-			#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ(x)
-		#else
-			#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ64(x)
-			#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ64(x)
-		#endif
-	#endif
-
-	// fallthrough
-	#ifndef __has_cpp_attribute // For backwards compatibility
-		#define __has_cpp_attribute(x) 0
-	#endif
-	#if __has_cpp_attribute(fallthrough)
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH() [[fallthrough]]
-	#else
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH()
-	#endif
-
-	// detect if native wchar_t type is availiable in MSVC
-	#ifdef _MSC_VER
-		#ifdef _NATIVE_WCHAR_T_DEFINED
-			#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
-		#else
-			#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 0
-		#endif
-	#else
+// detect if native wchar_t type is availiable in MSVC
+#ifdef _MSC_VER
+	#ifdef _NATIVE_WCHAR_T_DEFINED
 		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
+	#else
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 0
 	#endif
+#else
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
+#endif
 
-	// detect if MSVC supports the pair(std::piecewise_construct_t,...) constructor being constexpr
-	#ifdef _MSC_VER
-		#if _MSC_VER <= 1900
-			#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 1
-		#else
-			#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
-		#endif
+// detect if MSVC supports the pair(std::piecewise_construct_t,...) constructor being constexpr
+#ifdef _MSC_VER
+	#if _MSC_VER <= 1900
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 1
 	#else
 		#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
 	#endif
+#else
+	#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
+#endif
 
-	// workaround missing "is_trivially_copyable" in g++ < 5.0
-	// See https://stackoverflow.com/a/31798726/48181
-	#if GAIA_COMPILER_GCC && __GNUC__ < 5
-		#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) __has_trivial_copy(__VA_ARGS__)
-	#else
-		#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) std::is_trivially_copyable<__VA_ARGS__>::value
-	#endif
+// workaround missing "is_trivially_copyable" in g++ < 5.0
+// See https://stackoverflow.com/a/31798726/48181
+#if GAIA_COMPILER_GCC && __GNUC__ < 5
+	#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) __has_trivial_copy(__VA_ARGS__)
+#else
+	#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) std::is_trivially_copyable<__VA_ARGS__>::value
+#endif
 
 namespace robin_hood {
 
 	namespace detail {
 
-	// make sure we static_cast to the correct type for hash_int
-	#if ROBIN_HOOD(BITNESS) == 64
+// make sure we static_cast to the correct type for hash_int
+#if ROBIN_HOOD(BITNESS) == 64
 		using SizeT = uint64_t;
-	#else
+#else
 		using SizeT = uint32_t;
-	#endif
+#endif
 
 		template <typename T>
 		T rotr(T x, unsigned k) {
@@ -15983,16 +16021,16 @@ namespace robin_hood {
 		// inlinings more difficult. Throws are also generally the slow path.
 		template <typename E, typename... Args>
 		[[noreturn]] GAIA_NOINLINE
-	#if ROBIN_HOOD(HAS_EXCEPTIONS)
+#if ROBIN_HOOD(HAS_EXCEPTIONS)
 				void doThrow(Args&&... args) {
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 			throw E(GAIA_FWD(args)...);
 		}
-	#else
+#else
 				void doThrow(Args&&... ROBIN_HOOD_UNUSED(args) /*unused*/) {
 			abort();
 		}
-	#endif
+#endif
 
 		template <typename E, typename T, typename... Args>
 		T* assertNotNull(T* t, Args&&... args) {
@@ -16239,9 +16277,9 @@ namespace robin_hood {
 		template <typename... U1, typename... U2>
 		// MSVC 2015 produces error "C2476: ‘constexpr’ constructor does not initialize all members"
 		// if this constructor is constexpr
-	#if !ROBIN_HOOD(BROKEN_CONSTEXPR)
+#if !ROBIN_HOOD(BROKEN_CONSTEXPR)
 		constexpr
-	#endif
+#endif
 				pair(std::piecewise_construct_t /*unused*/, std::tuple<U1...> a, std::tuple<U2...> b) noexcept(noexcept(pair(
 						std::declval<std::tuple<U1...>&>(), std::declval<std::tuple<U2...>&>(), std::index_sequence_for<U1...>(),
 						std::index_sequence_for<U2...>()))):
@@ -16387,7 +16425,7 @@ namespace robin_hood {
 		}
 	};
 
-	#ifdef ROBIN_HOOD_STD_SMARTPOINTERS
+#ifdef ROBIN_HOOD_STD_SMARTPOINTERS
 	template <typename T>
 	struct hash<std::unique_ptr<T>> {
 		size_t operator()(std::unique_ptr<T> const& ptr) const noexcept {
@@ -16401,7 +16439,7 @@ namespace robin_hood {
 			return hash_int(reinterpret_cast<detail::SizeT>(ptr.get()));
 		}
 	};
-	#endif
+#endif
 
 	template <typename Enum>
 	struct hash<Enum, typename std::enable_if<std::is_enum<Enum>::value>::type> {
@@ -16421,18 +16459,18 @@ namespace robin_hood {
 		}
 	};
 
-	#define ROBIN_HOOD_HASH_INT(T)                                                                                       \
-		template <>                                                                                                        \
-		struct hash<T> {                                                                                                   \
-			size_t operator()(T const& obj) const noexcept {                                                                 \
-				return hash_int(static_cast<uint64_t>(obj));                                                                   \
-			}                                                                                                                \
-		}
+#define ROBIN_HOOD_HASH_INT(T)                                                                                         \
+	template <>                                                                                                          \
+	struct hash<T> {                                                                                                     \
+		size_t operator()(T const& obj) const noexcept {                                                                   \
+			return hash_int(static_cast<uint64_t>(obj));                                                                     \
+		}                                                                                                                  \
+	}
 
-	#if defined(__GNUC__) && !defined(__clang__)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wuseless-cast"
-	#endif
+#if defined(__GNUC__) && !defined(__clang__)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 	// see https://en.cppreference.com/w/cpp/utility/hash
 	ROBIN_HOOD_HASH_INT(bool);
 	ROBIN_HOOD_HASH_INT(char);
@@ -16440,9 +16478,9 @@ namespace robin_hood {
 	ROBIN_HOOD_HASH_INT(unsigned char);
 	ROBIN_HOOD_HASH_INT(char16_t);
 	ROBIN_HOOD_HASH_INT(char32_t);
-	#if ROBIN_HOOD(HAS_NATIVE_WCHART)
+#if ROBIN_HOOD(HAS_NATIVE_WCHART)
 	ROBIN_HOOD_HASH_INT(wchar_t);
-	#endif
+#endif
 	ROBIN_HOOD_HASH_INT(short);
 	ROBIN_HOOD_HASH_INT(unsigned short);
 	ROBIN_HOOD_HASH_INT(int);
@@ -16451,9 +16489,9 @@ namespace robin_hood {
 	ROBIN_HOOD_HASH_INT(long long);
 	ROBIN_HOOD_HASH_INT(unsigned long);
 	ROBIN_HOOD_HASH_INT(unsigned long long);
-	#if defined(__GNUC__) && !defined(__clang__)
-		#pragma GCC diagnostic pop
-	#endif
+#if defined(__GNUC__) && !defined(__clang__)
+	#pragma GCC diagnostic pop
+#endif
 	namespace detail {
 		template <typename, typename = void>
 		struct has_is_transparent: public std::false_type {};
@@ -16880,7 +16918,7 @@ namespace robin_hood {
 						mKeyVals += sizeof(size_t);
 						GAIA_MSVC_WARNING_POP()
 					}
-	#if defined(ROBIN_HOOD_DISABLE_INTRINSICS)
+#if defined(ROBIN_HOOD_DISABLE_INTRINSICS)
 					// we know for certain that within the next 8 bytes we'll find a non-zero one.
 					if GAIA_UNLIKELY (0U == detail::unaligned_load<uint32_t>(mInfo)) {
 						mInfo += 4;
@@ -16894,15 +16932,15 @@ namespace robin_hood {
 						mInfo += 1;
 						mKeyVals += 1;
 					}
-	#else
-		#if GAIA_LITTLE_ENDIAN
+#else
+	#if GAIA_LITTLE_ENDIAN
 					auto inc = ROBIN_HOOD_COUNT_TRAILING_ZEROES(n) / 8;
-		#else
+	#else
 					auto inc = ROBIN_HOOD_COUNT_LEADING_ZEROES(n) / 8;
-		#endif
+	#endif
 					mInfo += inc;
 					mKeyVals += inc;
-	#endif
+#endif
 				}
 
 				friend class Table<IsFlat, MaxLoadFactor100, key_type, mapped_type, hasher, key_equal>;
@@ -17823,9 +17861,9 @@ namespace robin_hood {
 
 			// calculation only allowed for 2^n values
 			GAIA_NODISCARD size_t calcNumBytesTotal(size_t numElements) const {
-	#if ROBIN_HOOD(BITNESS) == 64
+#if ROBIN_HOOD(BITNESS) == 64
 				return (numElements * sizeof(Node)) + calcNumBytesInfo(numElements);
-	#else
+#else
 				// make sure we're doing 64bit operations, so we are at least safe against 32bit overflows.
 				auto const ne = static_cast<uint64_t>(numElements);
 				auto const s = static_cast<uint64_t>(sizeof(Node));
@@ -17838,7 +17876,7 @@ namespace robin_hood {
 					throwOverflowError();
 				}
 				return total;
-	#endif
+#endif
 			}
 
 		private:
@@ -17914,11 +17952,11 @@ namespace robin_hood {
 			}
 
 			GAIA_NOINLINE void throwOverflowError() const {
-	#if ROBIN_HOOD(HAS_EXCEPTIONS)
+#if ROBIN_HOOD(HAS_EXCEPTIONS)
 				throw std::overflow_error("robin_hood::map overflow");
-	#else
+#else
 				abort();
-	#endif
+#endif
 			}
 
 			template <typename OtherKey, typename... Args>
@@ -18281,10 +18319,12 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
+
 #include <cinttypes>
 #include <cstdint>
 #include <cstring>
 #include <type_traits>
+
 
 namespace gaia {
 	namespace mem {
@@ -19836,7 +19876,8 @@ namespace gaia {
 			//! Forward mutable iterator matching the element data layout.
 			using iterator = std::conditional_t<mem::is_soa_layout_v<T>, iterator_soa, iterator_aos>;
 			//! Reverse mutable iterator matching the element data layout.
-			using iterator_reverse = std::conditional_t<mem::is_soa_layout_v<T>, iterator_soa_reverse, iterator_aos_reverse>;
+			using iterator_reverse =
+					std::conditional_t<mem::is_soa_layout_v<T>, iterator_soa_reverse, iterator_aos_reverse>;
 			//! Forward read-only iterator matching the element data layout.
 			using const_iterator = std::conditional_t<mem::is_soa_layout_v<T>, const_iterator_soa, const_iterator_aos>;
 			//! Reverse read-only iterator matching the element data layout.
@@ -20174,12 +20215,14 @@ namespace gaia {
 
 } // namespace gaia
 
+
 #include <cstddef>
 #include <initializer_list>
 #include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -20786,12 +20829,14 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 #include <cstddef>
 #include <initializer_list>
 #include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -21572,11 +21617,13 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 #include <cstddef>
 #include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -22149,6 +22196,7 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
+
 namespace gaia {
 	namespace cnt {
 		//! Flat hash set used by Gaia-ECS containers.
@@ -22162,6 +22210,7 @@ namespace gaia {
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace cnt {
@@ -24056,6 +24105,7 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
+
 namespace gaia {
 	namespace cnt {
 		//! \cond INTERNAL
@@ -24295,6 +24345,7 @@ namespace gaia {
 			}
 
 		public:
+
 			constexpr sringbuffer() noexcept = default;
 
 			//! Constructs a ring buffer from an iterator range.
@@ -24578,11 +24629,13 @@ namespace gaia {
 
 } // namespace gaia
 
+
 #include <cstddef>
 #include <cstdint>
 #include <new>
 #include <type_traits>
 #include <utility>
+
 
 #include <functional>
 #include <type_traits>
@@ -24928,6 +24981,7 @@ namespace gaia {
 #include <tuple>
 #include <typeinfo>
 #include <utility>
+
 
 namespace gaia {
 	namespace util {
@@ -25646,6 +25700,7 @@ namespace gaia {
 #include <cstdint>
 #include <cstring>
 
+
 namespace gaia {
 	namespace util {
 		//! Lightweight non-owning string view over a character sequence.
@@ -26293,7 +26348,10 @@ namespace gaia {
 	} // namespace util
 } // namespace gaia
 
+
+
 #include <type_traits>
+
 
 namespace gaia {
 	namespace ser {
@@ -26453,6 +26511,7 @@ namespace gaia {
 
 #include <type_traits>
 #include <utility>
+
 
 namespace gaia {
 	namespace ser {
@@ -26832,6 +26891,7 @@ namespace gaia {
 	#include <cstring>
 	#include <limits>
 	#include <type_traits>
+
 
 namespace gaia {
 	namespace ser {
@@ -27910,6 +27970,8 @@ namespace gaia {
 
 #endif
 
+
+
 #if GAIA_PLATFORM_WINDOWS
 	#include <cstdio>
 	#include <windows.h>
@@ -27953,6 +28015,8 @@ namespace gaia {
 #endif
 #include <atomic>
 #include <thread>
+
+
 
 #if GAIA_PLATFORM_WINDOWS
 	#define GAIA_USE_MT_STD 1
@@ -28103,6 +28167,7 @@ namespace gaia {
 #include <atomic>
 #include <mutex>
 
+
 namespace gaia {
 	namespace mt {
 		namespace detail {
@@ -28236,7 +28301,10 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
+
+
 #include <atomic>
+
 
 #include <cstdint>
 #include <type_traits>
@@ -28946,8 +29014,10 @@ namespace gaia {
 	} // namespace mt
 } // namespace gaia
 
+
 #include <atomic>
 #include <cinttypes>
+
 
 #define GAIA_LOG_JOB_STATES 0
 
@@ -29558,7 +29628,10 @@ namespace gaia {
 	} // namespace mt
 } // namespace gaia
 
+
 #include <atomic>
+
+
 
 #if GAIA_PLATFORM_WINDOWS
 	#include <windows.h>
@@ -31404,12 +31477,14 @@ namespace gaia {
 	} // namespace mt
 } // namespace gaia
 
+
 #include <cinttypes>
 #include <cstdint>
 
 // #include "gaia/cnt/dbitset.h"
 
 #include <cstdarg>
+
 
 namespace gaia {
 	namespace ecs {
@@ -31446,6 +31521,9 @@ namespace gaia {
 		using EntityId = IdentifierId;
 		//! Numeric component identifier type.
 		using ComponentId = IdentifierId;
+
+		//! Cost class reported by relation degree queries.
+		enum class CountKind : uint8_t;
 	} // namespace ecs
 } // namespace gaia
 #include <cstdint>
@@ -31520,6 +31598,12 @@ namespace gaia {
 		util::str_view entity_name(const World& world, Entity entity);
 		util::str_view entity_name(const World& world, EntityId entityId);
 		Entity target(const World& world, Entity entity, Entity relation);
+		uint32_t source_count(const World& world, Entity relation, Entity target);
+		uint32_t target_count(const World& world, Entity entity, Entity relation);
+		bool try_source_count(const World& world, Entity relation, Entity target, uint32_t& out);
+		bool try_target_count(const World& world, Entity entity, Entity relation, uint32_t& out);
+		CountKind source_count_kind(const World& world, Entity relation, Entity target);
+		CountKind target_count_kind(const World& world, Entity entity, Entity relation);
 		//! Invokes \a func for each live target of \a entity through \a relation.
 		//! This is a small C-style adapter used by header-only query/observer internals.
 		void
@@ -31670,6 +31754,7 @@ namespace gaia {
 
 #include <cstdint>
 
+
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -31735,11 +31820,14 @@ namespace gaia {
 
 #include <cstdint>
 
-#include <cstdint>
-#include <type_traits>
 
 #include <cstdint>
 #include <type_traits>
+
+
+#include <cstdint>
+#include <type_traits>
+
 
 namespace gaia {
 	namespace ecs {
@@ -31758,6 +31846,16 @@ namespace gaia {
 
 			//! Number of supported storage modes.
 			Count = 2
+		};
+
+		//! Cost class reported by relation degree queries.
+		enum class CountKind : uint8_t {
+			//! Count is available from dedicated relation storage.
+			Stored,
+			//! Count walks relation entries or archetype records.
+			Walk,
+			//! Count scans a broader wildcard result.
+			Scan
 		};
 
 //! Declares the storage mode used when registering a typed C++ component.
@@ -32958,9 +33056,11 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
+
 #include <cinttypes>
 #include <cstdint>
 #include <cstring>
+
 
 namespace gaia {
 	namespace ecs {
@@ -33655,6 +33755,7 @@ namespace gaia {
 
 #include <cstdint>
 
+
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -33813,7 +33914,9 @@ namespace gaia {
 #include <cstring>
 #include <type_traits>
 
+
 #include <cstdint>
+
 
 namespace gaia {
 	namespace core {
@@ -33933,10 +34036,12 @@ namespace gaia {
 #include <cstring>
 #include <type_traits>
 
+
 #include <cstdint>
 #include <cstring>
 #include <tuple>
 #include <type_traits>
+
 
 namespace gaia {
 	namespace ecs {
@@ -36358,6 +36463,7 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
+
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -37072,8 +37178,9 @@ namespace gaia {
 				if (cntEntities > 0) {
 					auto* dst = m_records.pRecords = (ComponentRecord*)&data(headerOffsets.firstByte_Records);
 					GAIA_FOR_(cntEntities, j) {
-						dst[j].comp = pItems[j] == nullptr ? Component(IdentifierIdBad, 0, 0, 0, DataStorageType::Table)
-																							 : archetype_component(ids[j], pItems[j]->comp);
+						dst[j].comp = pItems[j] == nullptr
+								? Component(IdentifierIdBad, 0, 0, 0, DataStorageType::Table)
+								: archetype_component(ids[j], pItems[j]->comp);
 						dst[j].pData = &data(compOffs[j]);
 						dst[j].pItem = pItems[j];
 					}
@@ -38978,6 +39085,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
+
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -39468,9 +39576,8 @@ namespace gaia {
 			//! \param cap Candidate entity count used for the estimate.
 			//! \param maxDataOffset Maximum byte offset available for component payloads.
 			//! \return True if the chunk can still fit the candidate entity count. False otherwise.
-			static bool est_max_entities_per_chunk(
-					uint32_t offs, const Entity* ids, const ComponentCacheItem* const* pItems, uint32_t cnt, uint32_t cap,
-					uint32_t maxDataOffset) {
+			static bool est_max_entities_per_chunk(uint32_t offs, const Entity* ids,
+					const ComponentCacheItem* const* pItems, uint32_t cnt, uint32_t cap, uint32_t maxDataOffset) {
 				GAIA_FOR(cnt) {
 					const auto comp = comp_from_item(ids[i], pItems[i]);
 					if (!component_uses_table_storage(comp))
@@ -39648,11 +39755,11 @@ namespace gaia {
 						const uint32_t currOff = offs.firstByte_EntityData + (count * sizeof(Entity));
 
 						if (!est_max_entities_per_chunk(
-										currOff, ids.data(), newArch->m_shape.compItems, entsGeneric, count, dataLimit))
+								currOff, ids.data(), newArch->m_shape.compItems, entsGeneric, count, dataLimit))
 							return false;
 						if (!est_max_entities_per_chunk(
-										currOff, ids.data() + entsGeneric, newArch->m_shape.compItems + entsGeneric, cnt - entsGeneric, 1,
-										dataLimit))
+								currOff, ids.data() + entsGeneric, newArch->m_shape.compItems + entsGeneric, cnt - entsGeneric, 1,
+								dataLimit))
 							return false;
 
 						return true;
@@ -40557,8 +40664,10 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
+
 #include <cstdint>
 #include <cstring>
+
 
 namespace gaia {
 	namespace ecs {
@@ -41689,6 +41798,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
+
 #include <cstdint>
 
 #if GAIA_OBSERVERS_ENABLED
@@ -41713,6 +41823,7 @@ namespace gaia {
 #endif
 
 #include <type_traits>
+
 
 namespace gaia {
 	namespace ecs {
@@ -45980,6 +46091,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
+
 namespace gaia {
 	namespace ecs {
 		//! \cond INTERNAL
@@ -46356,6 +46468,7 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
+
 #include <cctype>
 #include <cstdarg>
 #include <cstddef>
@@ -46365,7 +46478,9 @@ namespace gaia {
 #include <cstring>
 #include <type_traits>
 
+
 #include <cstdint>
+
 
 namespace gaia {
 	namespace ecs {
@@ -46430,6 +46545,7 @@ namespace gaia {
 } // namespace gaia
 
 #include <cstdint>
+
 
 namespace gaia {
 	namespace ecs {
@@ -46560,6 +46676,7 @@ namespace gaia {
 
 #include <cstdint>
 
+
 namespace gaia {
 	namespace ecs {
 		class Archetype;
@@ -46608,6 +46725,7 @@ namespace gaia {
 } // namespace gaia
 
 #include <cstdint>
+
 
 namespace gaia {
 	namespace ecs {
@@ -46839,14 +46957,20 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
+
 #include <cinttypes>
+
 
 #include <cstdarg>
 #include <cstdint>
 #include <type_traits>
 
+
+
+
 #include <cstdint>
 #include <cstring>
+
 
 //! \cond INTERNAL
 namespace gaia {
@@ -46943,6 +47067,7 @@ namespace gaia {
 #include <cstdint>
 #include <cstdio>
 #include <type_traits>
+
 
 namespace gaia {
 	namespace ecs {
@@ -54864,7 +54989,9 @@ namespace gaia {
 } // namespace gaia
 //! \endcond
 
+
 #include <cstdint>
+
 
 namespace gaia {
 	namespace ecs {
@@ -62385,6 +62512,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
+
 namespace gaia {
 	namespace ecs {
 		namespace detail {
@@ -62524,6 +62652,7 @@ namespace gaia {
 		} // namespace detail
 	} // namespace ecs
 } // namespace gaia
+
 
 namespace gaia {
 	namespace ecs {
@@ -64708,6 +64837,7 @@ namespace gaia {
 } // namespace gaia
 #endif
 
+
 #if GAIA_OBSERVERS_ENABLED
 namespace gaia {
 	namespace ecs {
@@ -65657,6 +65787,7 @@ namespace gaia {
 } // namespace gaia
 #endif
 
+
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -65820,6 +65951,7 @@ namespace gaia {
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
+
 
 //! \cond INTERNAL
 namespace gaia {
@@ -66368,6 +66500,7 @@ namespace gaia {
 } // namespace gaia
 //! \endcond
 
+
 #if GAIA_SYSTEMS_ENABLED
 namespace gaia {
 	namespace ecs {
@@ -66488,6 +66621,7 @@ namespace gaia {
 #endif
 
 #include <cstdint>
+
 
 namespace gaia {
 	namespace ecs {
@@ -74965,6 +75099,148 @@ namespace gaia {
 				return EntityBad;
 			}
 
+			//! Returns the number of sources that reference \a target through \a relation.
+			//! A target of `All` counts sources for every target of the relation.
+			//! \param relation Relation entity.
+			//! \param target Target entity, or `All` for every target of the relation.
+			//! \return Number of live sources.
+			//! \note Non-fragmenting relations use O(1) stored counts. Archetype relations walk
+			//!       matching archetype records.
+			GAIA_NODISCARD uint32_t source_count(Entity relation, Entity target) const {
+				if (relation == All) {
+					if (!valid(target))
+						return 0;
+
+					return (uint32_t)sources_all_cache(target).size();
+				}
+				if (!valid(relation) || (target != All && !valid(target)))
+					return 0;
+
+				if (relation_uses_non_fragmenting_storage(relation)) {
+					const auto* pStore = nonfragmenting_relation_store(relation);
+					if (pStore == nullptr)
+						return 0;
+
+					if (target == All)
+						return pStore->source_count();
+
+					const auto* pSources = pStore->sources(target);
+					return pSources != nullptr ? (uint32_t)pSources->size() : 0;
+				}
+
+				const auto pair = Pair(relation, target);
+				const auto it = m_entityToArchetypeMap.find(EntityLookupKey(pair));
+				if (it == m_entityToArchetypeMap.end())
+					return 0;
+
+				uint32_t cnt = 0;
+				for (const auto& record: it->second) {
+					const auto* pArchetype = record.pArchetype;
+					if (pArchetype->is_req_del())
+						continue;
+
+					for (const auto* pChunk: pArchetype->chunks())
+						cnt += pChunk->size();
+				}
+
+				return cnt;
+			}
+
+			//! Returns the number of targets that \a entity references through \a relation.
+			//! \param entity Source entity.
+			//! \param relation Relation entity, or `All` for every relation.
+			//! \return Number of live targets.
+			//! \note Non-fragmenting relations use O(1) exclusive lookup. Archetype relations walk
+			//!       relation pair indices on the source archetype.
+			GAIA_NODISCARD uint32_t target_count(Entity entity, Entity relation) const {
+				if (!valid(entity) || (relation != All && !valid(relation)))
+					return 0;
+
+				if (relation == All)
+					return (uint32_t)targets_all_cache(entity).size();
+
+				if (relation_uses_non_fragmenting_storage(relation))
+					return target(entity, relation) != EntityBad ? 1U : 0U;
+
+				const auto& ec = fetch(entity);
+				const auto* pArchetype = ec.pArchetype;
+				if (pArchetype->pairs() == 0)
+					return 0;
+
+				uint32_t cnt = 0;
+				const auto ids = pArchetype->ids_view();
+				for (auto idsIdx: pArchetype->pair_rel_indices(relation)) {
+					if (pair_target_if_alive(ids[idsIdx]) != EntityBad)
+						++cnt;
+				}
+
+				return cnt;
+			}
+
+			//! Tries to return a relation source count without walking relation entries.
+			//! \param relation Relation entity.
+			//! \param target Target entity, or `All` for every target of the relation.
+			//! \param out Receives the count when the stored fast path is available.
+			//! \return True when \a out was written in O(1); false when a walk or scan is required.
+			GAIA_NODISCARD bool try_source_count(Entity relation, Entity target, uint32_t& out) const {
+				if (relation == All || !valid(relation) || (target != All && !valid(target)) ||
+						!relation_uses_non_fragmenting_storage(relation))
+					return false;
+
+				const auto* pStore = nonfragmenting_relation_store(relation);
+				if (pStore == nullptr) {
+					out = 0;
+					return true;
+				}
+
+				if (target == All) {
+					out = pStore->source_count();
+					return true;
+				}
+
+				const auto* pSources = pStore->sources(target);
+				out = pSources != nullptr ? (uint32_t)pSources->size() : 0;
+				return true;
+			}
+
+			//! Tries to return a relation target count without walking relation entries.
+			//! \param entity Source entity.
+			//! \param relation Relation entity.
+			//! \param out Receives the count when the stored fast path is available.
+			//! \return True when \a out was written in O(1); false when a walk or scan is required.
+			GAIA_NODISCARD bool try_target_count(Entity entity, Entity relation, uint32_t& out) const {
+				if (relation == All || !valid(entity) || !valid(relation) ||
+						!relation_uses_non_fragmenting_storage(relation))
+					return false;
+
+				out = target(entity, relation) != EntityBad ? 1U : 0U;
+				return true;
+			}
+
+			//! Returns the cost class for a source count.
+			//! \param relation Relation entity.
+			//! \param target Target entity, or `All` for every target of the relation.
+			//! \return Stored for dedicated relation storage, Walk for archetype records, or Scan for wildcards.
+			GAIA_NODISCARD CountKind source_count_kind(Entity relation, Entity target) const {
+				(void)target;
+				if (relation == All)
+					return CountKind::Scan;
+
+				return relation_uses_non_fragmenting_storage(relation) ? CountKind::Stored : CountKind::Walk;
+			}
+
+			//! Returns the cost class for a target count.
+			//! \param entity Source entity.
+			//! \param relation Relation entity, or `All` for every relation.
+			//! \return Stored for dedicated relation storage, Walk for archetype pair indices, or Scan for wildcards.
+			GAIA_NODISCARD CountKind target_count_kind(Entity entity, Entity relation) const {
+				(void)entity;
+				if (relation == All)
+					return CountKind::Scan;
+
+				return relation_uses_non_fragmenting_storage(relation) ? CountKind::Stored : CountKind::Walk;
+			}
+
 			//! Returns the relationship targets for the \a relation entity on \a entity.
 			//! \param entity Source entity
 			//! \param relation Relation entity
@@ -80807,6 +81083,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
+
 namespace gaia {
 	namespace ecs {
 		// Component API
@@ -80900,6 +81177,32 @@ namespace gaia {
 
 		GAIA_NODISCARD inline Entity target(const World& world, Entity entity, Entity relation) {
 			return world.target(entity, relation);
+		}
+
+		GAIA_NODISCARD inline uint32_t source_count(const World& world, Entity relation, Entity target) {
+			return world.source_count(relation, target);
+		}
+
+		GAIA_NODISCARD inline uint32_t target_count(const World& world, Entity entity, Entity relation) {
+			return world.target_count(entity, relation);
+		}
+
+		GAIA_NODISCARD inline bool try_source_count(
+				const World& world, Entity relation, Entity target, uint32_t& out) {
+			return world.try_source_count(relation, target, out);
+		}
+
+		GAIA_NODISCARD inline bool try_target_count(
+				const World& world, Entity entity, Entity relation, uint32_t& out) {
+			return world.try_target_count(entity, relation, out);
+		}
+
+		GAIA_NODISCARD inline CountKind source_count_kind(const World& world, Entity relation, Entity target) {
+			return world.source_count_kind(relation, target);
+		}
+
+		GAIA_NODISCARD inline CountKind target_count_kind(const World& world, Entity entity, Entity relation) {
+			return world.target_count_kind(entity, relation);
 		}
 
 		// Traversal API
@@ -81014,7 +81317,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 #if GAIA_OBSERVERS_ENABLED
-	#if GAIA_OBSERVERS_ENABLED
+#if GAIA_OBSERVERS_ENABLED
 namespace gaia {
 	namespace ecs {
 		inline void ObserverRegistry::DiffDispatcher::collect_query_matches(
@@ -81446,7 +81749,8 @@ namespace gaia {
 
 				// Some removal paths delete the target before this function runs. Their last
 				// valid matches were captured in the before snapshot and are the event targets.
-				if (ctx.targetsRemovedAfterPrepare && (snapshot.event == ObserverEvent::OnDel || snapshot.monitorsQuery)) {
+				if (ctx.targetsRemovedAfterPrepare &&
+						(snapshot.event == ObserverEvent::OnDel || snapshot.monitorsQuery)) {
 					GAIA_ASSERT(snapshot.matchesBeforeIdx < ctx.matchesBeforeCache.size());
 					const auto& matchesBefore = ctx.matchesBeforeCache[snapshot.matchesBeforeIdx].matches;
 					SharedDispatch::execute_targets(world, *pObs, EntitySpan{matchesBefore}, ObserverEvent::OnDel);
@@ -81472,7 +81776,8 @@ namespace gaia {
 
 				// Newly created entities have no meaningful before result. Every matching
 				// entity in the after snapshot is therefore an added match.
-				if (ctx.targetsAddedAfterPrepare && (snapshot.event == ObserverEvent::OnAdd || snapshot.monitorsQuery)) {
+				if (ctx.targetsAddedAfterPrepare &&
+						(snapshot.event == ObserverEvent::OnAdd || snapshot.monitorsQuery)) {
 					SharedDispatch::execute_targets(world, *pObs, EntitySpan{matchesAfter}, ObserverEvent::OnAdd);
 					continue;
 				}
@@ -81600,7 +81905,8 @@ namespace gaia {
 
 				if (matches)
 					SharedDispatch::execute_targets(
-							world, obs, targets, obs.plan.hasNegativeTerm ? ObserverEvent::OnDel : ObserverEvent::OnAdd);
+							world, obs, targets,
+							obs.plan.hasNegativeTerm ? ObserverEvent::OnDel : ObserverEvent::OnAdd);
 			}
 		}
 
@@ -81667,7 +81973,8 @@ namespace gaia {
 
 				if (matches)
 					SharedDispatch::execute_targets(
-							world, obs, targets, obs.plan.hasNegativeTerm ? ObserverEvent::OnAdd : ObserverEvent::OnDel);
+							world, obs, targets,
+							obs.plan.hasNegativeTerm ? ObserverEvent::OnAdd : ObserverEvent::OnDel);
 			}
 		}
 
@@ -82442,10 +82749,12 @@ namespace gaia {
 		}
 	} // namespace ecs
 } // namespace gaia
-	#endif
+#endif
 #endif
 
+
 #include <cinttypes>
+
 
 #if GAIA_OBSERVERS_ENABLED
 namespace gaia {
@@ -83059,7 +83368,9 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-	#if GAIA_OBSERVERS_ENABLED
+
+
+#if GAIA_OBSERVERS_ENABLED
 namespace gaia {
 	namespace ecs {
 		template <typename T>
@@ -83146,10 +83457,10 @@ namespace gaia {
 			const auto runMappedChunk = detail::typed_run_mapped_chunk_ptr<Func>(InputArgs{});
 			const auto invokeInherited = typed_invoke_inherited_ptr<Func>(InputArgs{});
 
-		#if GAIA_ASSERT_ENABLED
+	#if GAIA_ASSERT_ENABLED
 			ctx.query.match_all(queryInfo);
 			GAIA_ASSERT(typed_query_args_match_query(queryInfo, InputArgs{}));
-		#endif
+	#endif
 
 			ctx.on_each_func = [e = m_entity, func, execState, runDirectChunk, runMappedChunk,
 													invokeInherited](Iter& it) mutable {
@@ -83173,11 +83484,12 @@ namespace gaia {
 		}
 	} // namespace ecs
 } // namespace gaia
-	#endif
+#endif
 
 #endif
 
 #include <cinttypes>
+
 
 #if GAIA_SYSTEMS_ENABLED
 namespace gaia {
@@ -83847,7 +84159,9 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-	#if GAIA_SYSTEMS_ENABLED
+
+
+#if GAIA_SYSTEMS_ENABLED
 namespace gaia {
 	namespace ecs {
 		//! Adds a typed required term to the underlying system query.
@@ -84049,7 +84363,7 @@ namespace gaia {
 		}
 	} // namespace ecs
 } // namespace gaia
-	#endif
+#endif
 #else
 namespace gaia {
 	namespace ecs {
@@ -84446,10 +84760,11 @@ namespace gaia {
 
 #if GAIA_JSON_ENABLED
 
-	#if GAIA_JSON_ENABLED
+#if GAIA_JSON_ENABLED
 
-		#include <cstdio>
-		#include <cstring>
+	#include <cstdio>
+	#include <cstring>
+
 
 namespace gaia {
 	namespace ecs {
@@ -86501,12 +86816,12 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-	#endif
+#endif
 
-	#if GAIA_JSON_ENABLED
+#if GAIA_JSON_ENABLED
 
-		#include <cstdint>
-		#include <cstring>
+	#include <cstdint>
+	#include <cstring>
 
 namespace gaia {
 	namespace ecs {
@@ -86745,12 +87060,12 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-	#endif
+#endif
 
-	#if GAIA_JSON_ENABLED
+#if GAIA_JSON_ENABLED
 
-		#include <cstdio>
-		#include <cstring>
+	#include <cstdio>
+	#include <cstring>
 
 namespace gaia {
 	namespace ecs {
@@ -87158,7 +87473,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-	#endif
+#endif
 #endif
 
 #if GAIA_SYSTEMS_ENABLED

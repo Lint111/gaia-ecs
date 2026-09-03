@@ -8409,6 +8409,148 @@ namespace gaia {
 				return EntityBad;
 			}
 
+			//! Returns the number of sources that reference \a target through \a relation.
+			//! A target of `All` counts sources for every target of the relation.
+			//! \param relation Relation entity.
+			//! \param target Target entity, or `All` for every target of the relation.
+			//! \return Number of live sources.
+			//! \note Non-fragmenting relations use O(1) stored counts. Archetype relations walk
+			//!       matching archetype records.
+			GAIA_NODISCARD uint32_t source_count(Entity relation, Entity target) const {
+				if (relation == All) {
+					if (!valid(target))
+						return 0;
+
+					return (uint32_t)sources_all_cache(target).size();
+				}
+				if (!valid(relation) || (target != All && !valid(target)))
+					return 0;
+
+				if (relation_uses_non_fragmenting_storage(relation)) {
+					const auto* pStore = nonfragmenting_relation_store(relation);
+					if (pStore == nullptr)
+						return 0;
+
+					if (target == All)
+						return pStore->source_count();
+
+					const auto* pSources = pStore->sources(target);
+					return pSources != nullptr ? (uint32_t)pSources->size() : 0;
+				}
+
+				const auto pair = Pair(relation, target);
+				const auto it = m_entityToArchetypeMap.find(EntityLookupKey(pair));
+				if (it == m_entityToArchetypeMap.end())
+					return 0;
+
+				uint32_t cnt = 0;
+				for (const auto& record: it->second) {
+					const auto* pArchetype = record.pArchetype;
+					if (pArchetype->is_req_del())
+						continue;
+
+					for (const auto* pChunk: pArchetype->chunks())
+						cnt += pChunk->size();
+				}
+
+				return cnt;
+			}
+
+			//! Returns the number of targets that \a entity references through \a relation.
+			//! \param entity Source entity.
+			//! \param relation Relation entity, or `All` for every relation.
+			//! \return Number of live targets.
+			//! \note Non-fragmenting relations use O(1) exclusive lookup. Archetype relations walk
+			//!       relation pair indices on the source archetype.
+			GAIA_NODISCARD uint32_t target_count(Entity entity, Entity relation) const {
+				if (!valid(entity) || (relation != All && !valid(relation)))
+					return 0;
+
+				if (relation == All)
+					return (uint32_t)targets_all_cache(entity).size();
+
+				if (relation_uses_non_fragmenting_storage(relation))
+					return target(entity, relation) != EntityBad ? 1U : 0U;
+
+				const auto& ec = fetch(entity);
+				const auto* pArchetype = ec.pArchetype;
+				if (pArchetype->pairs() == 0)
+					return 0;
+
+				uint32_t cnt = 0;
+				const auto ids = pArchetype->ids_view();
+				for (auto idsIdx: pArchetype->pair_rel_indices(relation)) {
+					if (pair_target_if_alive(ids[idsIdx]) != EntityBad)
+						++cnt;
+				}
+
+				return cnt;
+			}
+
+			//! Tries to return a relation source count without walking relation entries.
+			//! \param relation Relation entity.
+			//! \param target Target entity, or `All` for every target of the relation.
+			//! \param out Receives the count when the stored fast path is available.
+			//! \return True when \a out was written in O(1); false when a walk or scan is required.
+			GAIA_NODISCARD bool try_source_count(Entity relation, Entity target, uint32_t& out) const {
+				if (relation == All || !valid(relation) || (target != All && !valid(target)) ||
+						!relation_uses_non_fragmenting_storage(relation))
+					return false;
+
+				const auto* pStore = nonfragmenting_relation_store(relation);
+				if (pStore == nullptr) {
+					out = 0;
+					return true;
+				}
+
+				if (target == All) {
+					out = pStore->source_count();
+					return true;
+				}
+
+				const auto* pSources = pStore->sources(target);
+				out = pSources != nullptr ? (uint32_t)pSources->size() : 0;
+				return true;
+			}
+
+			//! Tries to return a relation target count without walking relation entries.
+			//! \param entity Source entity.
+			//! \param relation Relation entity.
+			//! \param out Receives the count when the stored fast path is available.
+			//! \return True when \a out was written in O(1); false when a walk or scan is required.
+			GAIA_NODISCARD bool try_target_count(Entity entity, Entity relation, uint32_t& out) const {
+				if (relation == All || !valid(entity) || !valid(relation) ||
+						!relation_uses_non_fragmenting_storage(relation))
+					return false;
+
+				out = target(entity, relation) != EntityBad ? 1U : 0U;
+				return true;
+			}
+
+			//! Returns the cost class for a source count.
+			//! \param relation Relation entity.
+			//! \param target Target entity, or `All` for every target of the relation.
+			//! \return Stored for dedicated relation storage, Walk for archetype records, or Scan for wildcards.
+			GAIA_NODISCARD CountKind source_count_kind(Entity relation, Entity target) const {
+				(void)target;
+				if (relation == All)
+					return CountKind::Scan;
+
+				return relation_uses_non_fragmenting_storage(relation) ? CountKind::Stored : CountKind::Walk;
+			}
+
+			//! Returns the cost class for a target count.
+			//! \param entity Source entity.
+			//! \param relation Relation entity, or `All` for every relation.
+			//! \return Stored for dedicated relation storage, Walk for archetype pair indices, or Scan for wildcards.
+			GAIA_NODISCARD CountKind target_count_kind(Entity entity, Entity relation) const {
+				(void)entity;
+				if (relation == All)
+					return CountKind::Scan;
+
+				return relation_uses_non_fragmenting_storage(relation) ? CountKind::Stored : CountKind::Walk;
+			}
+
 			//! Returns the relationship targets for the \a relation entity on \a entity.
 			//! \param entity Source entity
 			//! \param relation Relation entity

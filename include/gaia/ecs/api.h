@@ -54,6 +54,12 @@ namespace gaia {
 		util::str_view entity_name(const World& world, Entity entity);
 		util::str_view entity_name(const World& world, EntityId entityId);
 		Entity target(const World& world, Entity entity, Entity relation);
+		uint32_t source_count(const World& world, Entity relation, Entity target);
+		uint32_t target_count(const World& world, Entity entity, Entity relation);
+		bool try_source_count(const World& world, Entity relation, Entity target, uint32_t& out);
+		bool try_target_count(const World& world, Entity entity, Entity relation, uint32_t& out);
+		CountKind source_count_kind(const World& world, Entity relation, Entity target);
+		CountKind target_count_kind(const World& world, Entity entity, Entity relation);
 		//! Invokes \a func for each live target of \a entity through \a relation.
 		//! This is a small C-style adapter used by header-only query/observer internals.
 		void

@@ -95,6 +95,32 @@ namespace gaia {
 			return world.target(entity, relation);
 		}
 
+		GAIA_NODISCARD inline uint32_t source_count(const World& world, Entity relation, Entity target) {
+			return world.source_count(relation, target);
+		}
+
+		GAIA_NODISCARD inline uint32_t target_count(const World& world, Entity entity, Entity relation) {
+			return world.target_count(entity, relation);
+		}
+
+		GAIA_NODISCARD inline bool try_source_count(
+				const World& world, Entity relation, Entity target, uint32_t& out) {
+			return world.try_source_count(relation, target, out);
+		}
+
+		GAIA_NODISCARD inline bool try_target_count(
+				const World& world, Entity entity, Entity relation, uint32_t& out) {
+			return world.try_target_count(entity, relation, out);
+		}
+
+		GAIA_NODISCARD inline CountKind source_count_kind(const World& world, Entity relation, Entity target) {
+			return world.source_count_kind(relation, target);
+		}
+
+		GAIA_NODISCARD inline CountKind target_count_kind(const World& world, Entity entity, Entity relation) {
+			return world.target_count_kind(entity, relation);
+		}
+
 		// Traversal API
 
 		template <typename Func>

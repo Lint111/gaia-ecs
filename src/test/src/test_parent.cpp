@@ -56,6 +56,100 @@ TEST_CASE("Parent - targets and sources use non-fragmenting relation storage") {
 	CHECK(sources[0] == child);
 }
 
+TEST_CASE("Relation degree counts - non-fragmenting relations use stored counts") {
+	TestWorld twld;
+
+	const auto root = wld.add();
+	const auto absentTarget = wld.add();
+	const auto absentSource = wld.add();
+
+	CHECK(wld.source_count(ecs::Parent, root) == 0);
+	CHECK(wld.target_count(absentSource, ecs::Parent) == 0);
+	CHECK(wld.source_count_kind(ecs::Parent, root) == ecs::CountKind::Stored);
+	CHECK(wld.target_count_kind(absentSource, ecs::Parent) == ecs::CountKind::Stored);
+
+	uint32_t count = 99;
+	CHECK(wld.try_source_count(ecs::Parent, root, count));
+	CHECK(count == 0);
+	CHECK(wld.try_target_count(absentSource, ecs::Parent, count));
+	CHECK(count == 0);
+
+	const auto childA = wld.add();
+	const auto childB = wld.add();
+	const auto childC = wld.add();
+	wld.parent(childA, root);
+	wld.parent(childB, root);
+	wld.parent(childC, root);
+
+	uint32_t handCount = 0;
+	wld.sources(ecs::Parent, root, [&](ecs::Entity) {
+		++handCount;
+	});
+	CHECK(handCount == 3);
+	CHECK(wld.source_count(ecs::Parent, root) == handCount);
+	CHECK(wld.source_count(ecs::Parent, absentTarget) == 0);
+	CHECK(wld.source_count(ecs::Parent, ecs::All) == handCount);
+
+	for (const auto child: {childA, childB, childC}) {
+		uint32_t handTargetCount = 0;
+		wld.targets(child, ecs::Parent, [&](ecs::Entity) {
+			++handTargetCount;
+		});
+		CHECK(handTargetCount == 1);
+		CHECK(wld.target_count(child, ecs::Parent) == handTargetCount);
+	}
+	CHECK(wld.target_count(absentSource, ecs::Parent) == 0);
+
+	CHECK(ecs::source_count(wld, ecs::Parent, root) == 3);
+	CHECK(ecs::target_count(wld, childA, ecs::Parent) == 1);
+	CHECK(ecs::try_source_count(wld, ecs::Parent, root, count));
+	CHECK(count == 3);
+}
+
+TEST_CASE("Relation degree counts - archetype relations walk pair entries") {
+	TestWorld twld;
+
+	const auto relation = wld.add();
+	const auto targetA = wld.add();
+	const auto targetB = wld.add();
+	const auto targetC = wld.add();
+	const auto absentTarget = wld.add();
+	const auto source = wld.add();
+	const auto otherSource = wld.add();
+
+	wld.add(source, ecs::Pair(relation, targetA));
+	wld.add(source, ecs::Pair(relation, targetB));
+	wld.add(source, ecs::Pair(relation, targetC));
+	wld.add(otherSource, ecs::Pair(relation, targetA));
+
+	CHECK(wld.source_count_kind(relation, targetA) == ecs::CountKind::Walk);
+	CHECK(wld.target_count_kind(source, relation) == ecs::CountKind::Walk);
+
+	uint32_t count = 99;
+	CHECK_FALSE(wld.try_source_count(relation, targetA, count));
+	CHECK_FALSE(wld.try_target_count(source, relation, count));
+
+	uint32_t handSourceCount = 0;
+	wld.sources(relation, targetA, [&](ecs::Entity) {
+		++handSourceCount;
+	});
+	CHECK(handSourceCount == 2);
+	CHECK(wld.source_count(relation, targetA) == handSourceCount);
+	CHECK(wld.source_count(relation, absentTarget) == 0);
+
+	uint32_t handTargetCount = 0;
+	wld.targets(source, relation, [&](ecs::Entity) {
+		++handTargetCount;
+	});
+	CHECK(handTargetCount == 3);
+	CHECK(wld.target_count(source, relation) == handTargetCount);
+	CHECK(wld.target_count(otherSource, relation) == 1);
+	CHECK(wld.target_count(absentTarget, relation) == 0);
+
+	CHECK(ecs::source_count(wld, relation, targetB) == 1);
+	CHECK(ecs::target_count(wld, source, relation) == 3);
+}
+
 TEST_CASE("Non-fragmenting relation - exact pair sources have independent storage") {
 	TestWorld twld;
 

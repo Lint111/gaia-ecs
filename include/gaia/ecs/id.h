@@ -29,6 +29,16 @@ namespace gaia {
 			Count = 2
 		};
 
+		//! Cost class reported by relation degree queries.
+		enum class CountKind : uint8_t {
+			//! Count is available from dedicated relation storage.
+			Stored,
+			//! Count walks relation entries or archetype records.
+			Walk,
+			//! Count scans a broader wildcard result.
+			Scan
+		};
+
 //! Declares the storage mode used when registering a typed C++ component.
 //! \param storage_name `DataStorageType` enumerator name such as `Table` or `Sparse`.
 #define GAIA_STORAGE(storage_name) static constexpr auto gaia_Data_Storage = ::gaia::ecs::DataStorageType::storage_name
