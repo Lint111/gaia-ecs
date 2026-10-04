@@ -192,6 +192,15 @@ TEST_CASE("ECS - Concurrent parallel root queries share one world safely") {
 	queryA.fetch();
 	queryB.fetch();
 
+	// Job setup and cleanup mutate world scheduler state and use process-wide allocators.
+	// Keep those operations on this thread; only query execution runs concurrently below.
+	ecs::SchedJob jobsA[QueryRuns];
+	ecs::SchedJob jobsB[QueryRuns];
+	GAIA_FOR(QueryRuns) {
+		jobsA[i] = queryA.job([](ConcurrentRootQueryA& value) { ++value.value; }, ecs::QueryExecType::Parallel);
+		jobsB[i] = queryB.job([](ConcurrentRootQueryB& value) { ++value.value; }, ecs::QueryExecType::Parallel);
+	}
+
 	std::mutex startMutex;
 	std::condition_variable startCondition;
 	uint32_t ready = 0;
@@ -205,21 +214,15 @@ TEST_CASE("ECS - Concurrent parallel root queries share one world safely") {
 	auto runA = [&]() {
 		wait_for_start();
 		GAIA_FOR(QueryRuns) {
-			auto job = queryA.job(
-					[](ConcurrentRootQueryA& value) { ++value.value; }, ecs::QueryExecType::Parallel);
-			job.submit();
-			job.wait();
-			job.del();
+			jobsA[i].submit();
+			jobsA[i].wait();
 		}
 	};
 	auto runB = [&]() {
 		wait_for_start();
 		GAIA_FOR(QueryRuns) {
-			auto job = queryB.job(
-					[](ConcurrentRootQueryB& value) { ++value.value; }, ecs::QueryExecType::Parallel);
-			job.submit();
-			job.wait();
-			job.del();
+			jobsB[i].submit();
+			jobsB[i].wait();
 		}
 	};
 
@@ -233,6 +236,10 @@ TEST_CASE("ECS - Concurrent parallel root queries share one world safely") {
 	startCondition.notify_all();
 	threadA.join();
 	threadB.join();
+	GAIA_FOR(QueryRuns) {
+		jobsA[i].del();
+		jobsB[i].del();
+	}
 
 	uint32_t rowsA = 0;
 	uint32_t rowsB = 0;
