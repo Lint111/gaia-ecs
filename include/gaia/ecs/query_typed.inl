@@ -1049,7 +1049,7 @@ namespace gaia {
 				unlock(*m_storage.world());
 				commit_cmd_buffer_st(*m_storage.world());
 				commit_cmd_buffer_mt(*m_storage.world());
-				m_changedWorldVersion = *m_worldVersion;
+				m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 			}
 
 			template <typename Func, typename... T>
@@ -1190,7 +1190,7 @@ namespace gaia {
 						unlock(*m_storage.world());
 						commit_cmd_buffer_st(*m_storage.world());
 						commit_cmd_buffer_mt(*m_storage.world());
-						m_changedWorldVersion = *m_worldVersion;
+						m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 						return;
 					}
 				}
@@ -1229,7 +1229,7 @@ namespace gaia {
 				unlock(*m_storage.world());
 				commit_cmd_buffer_st(*m_storage.world());
 				commit_cmd_buffer_mt(*m_storage.world());
-				m_changedWorldVersion = *m_worldVersion;
+				m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 			}
 
 			inline void QueryImpl::run_query_on_chunks_direct_iter(
@@ -1280,7 +1280,7 @@ namespace gaia {
 				unlock(*m_storage.world());
 				commit_cmd_buffer_st(*m_storage.world());
 				commit_cmd_buffer_mt(*m_storage.world());
-				m_changedWorldVersion = *m_worldVersion;
+				m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 			}
 
 			inline void QueryImpl::run_query_on_chunks_direct(
@@ -1342,7 +1342,7 @@ namespace gaia {
 				unlock(*m_storage.world());
 				commit_cmd_buffer_st(*m_storage.world());
 				commit_cmd_buffer_mt(*m_storage.world());
-				m_changedWorldVersion = *m_worldVersion;
+				m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 			}
 
 			template <QueryExecType ExecType>

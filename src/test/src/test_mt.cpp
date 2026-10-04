@@ -1,7 +1,10 @@
 #include "test_common.h"
 
 #include <chrono>
+#include <condition_variable>
 #include <limits>
+#include <mutex>
+#include <thread>
 
 //------------------------------------------------------------------------------
 // Multithreading
@@ -20,6 +23,33 @@ struct JobParallelRefProbe {
 
 struct ExternalExecProbeComp {
 	uint32_t value = 0;
+};
+
+struct ConcurrentRootQueryA {
+	uint32_t value = 0;
+};
+
+struct ConcurrentRootQueryB {
+	uint32_t value = 0;
+};
+
+struct InlineConcurrentRootScheduler {
+	static ecs::SchedToken run_parallel(void*, const ecs::SchedParDesc* pDesc) {
+		if (pDesc->itemCount != 0)
+			pDesc->invoke(pDesc->pCtx, 0, pDesc->itemCount);
+		return {};
+	}
+
+	static void wait(void*, ecs::SchedToken) {}
+	static void del(void*, ecs::SchedToken) {}
+
+	static ecs::Sched sched() {
+		ecs::Sched sched{};
+		sched.sched_par = &InlineConcurrentRootScheduler::run_parallel;
+		sched.wait = &InlineConcurrentRootScheduler::wait;
+		sched.del = &InlineConcurrentRootScheduler::del;
+		return sched;
+	}
 };
 
 struct ExternalSchedProbe {
@@ -144,6 +174,96 @@ struct ExternalSchedProbe {
 		return sched;
 	}
 };
+
+TEST_CASE("ECS - Concurrent parallel root queries share one world safely") {
+	TestWorld twld;
+	wld.set_sched(InlineConcurrentRootScheduler::sched());
+
+	constexpr uint32_t EntityCount = 512;
+	constexpr uint32_t QueryRuns = 16;
+	GAIA_FOR(EntityCount) {
+		auto e = wld.add();
+		wld.add<ConcurrentRootQueryA>(e);
+		wld.add<ConcurrentRootQueryB>(e);
+	}
+
+	auto queryA = wld.query().all<ConcurrentRootQueryA&>();
+	auto queryB = wld.query().all<ConcurrentRootQueryB&>();
+	queryA.fetch();
+	queryB.fetch();
+
+	std::mutex startMutex;
+	std::condition_variable startCondition;
+	uint32_t ready = 0;
+	bool start = false;
+	auto wait_for_start = [&]() {
+		std::unique_lock<std::mutex> lock(startMutex);
+		++ready;
+		startCondition.notify_all();
+		startCondition.wait(lock, [&]() { return start; });
+	};
+	auto runA = [&]() {
+		wait_for_start();
+		GAIA_FOR(QueryRuns) {
+			auto job = queryA.job(
+					[](ConcurrentRootQueryA& value) { ++value.value; }, ecs::QueryExecType::Parallel);
+			job.submit();
+			job.wait();
+			job.del();
+		}
+	};
+	auto runB = [&]() {
+		wait_for_start();
+		GAIA_FOR(QueryRuns) {
+			auto job = queryB.job(
+					[](ConcurrentRootQueryB& value) { ++value.value; }, ecs::QueryExecType::Parallel);
+			job.submit();
+			job.wait();
+			job.del();
+		}
+	};
+
+	std::thread threadA(runA);
+	std::thread threadB(runB);
+	{
+		std::unique_lock<std::mutex> lock(startMutex);
+		startCondition.wait(lock, [&]() { return ready == 2; });
+		start = true;
+	}
+	startCondition.notify_all();
+	threadA.join();
+	threadB.join();
+
+	uint32_t rowsA = 0;
+	uint32_t rowsB = 0;
+	wld.query().all<const ConcurrentRootQueryA>().each([&](const ConcurrentRootQueryA& value) {
+		rowsA += value.value;
+	});
+	wld.query().all<const ConcurrentRootQueryB>().each([&](const ConcurrentRootQueryB& value) {
+		rowsB += value.value;
+	});
+	CHECK(rowsA == EntityCount * QueryRuns);
+	CHECK(rowsB == EntityCount * QueryRuns);
+	CHECK(ecs::world_version(wld) != 0);
+}
+
+TEST_CASE("ECS - Concurrent version updates preserve zero wrap rule") {
+	uint32_t version = std::numeric_limits<uint32_t>::max();
+	ecs::update_version(version);
+	CHECK(ecs::load_version(version) == 1);
+
+	constexpr uint32_t ThreadCount = 8;
+	constexpr uint32_t UpdatesPerThread = 4096;
+	std::thread workers[ThreadCount];
+	for (auto& worker: workers) {
+		worker = std::thread([&]() {
+			GAIA_FOR(UpdatesPerThread) ecs::update_version(version);
+		});
+	}
+	for (auto& worker: workers)
+		worker.join();
+	CHECK(ecs::load_version(version) == 1 + ThreadCount * UpdatesPerThread);
+}
 
 TEST_CASE("ECS - Query jobs use external scheduler wrappers") {
 	TestWorld twld;

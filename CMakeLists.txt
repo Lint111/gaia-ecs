@@ -166,7 +166,7 @@ if(GAIA_USE_LIBCPP)
     target_link_options(${PROJECT_NAME} BEFORE INTERFACE -stdlib=libc++)
 endif()
 
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
 # Install
 install(TARGETS ${PROJECT_NAME}

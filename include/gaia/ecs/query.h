@@ -2575,7 +2575,7 @@ namespace gaia {
 						commit_cmd_buffer_st(*pWorld);
 						commit_cmd_buffer_mt(*pWorld);
 						if (pJobCtx->pSelf != nullptr)
-							pJobCtx->pSelf->m_changedWorldVersion = *pJobCtx->pSelf->m_worldVersion;
+							pJobCtx->pSelf->m_changedWorldVersion = ::gaia::ecs::load_version(*pJobCtx->pSelf->m_worldVersion);
 					}
 
 					delete pJobCtx;
@@ -2585,7 +2585,7 @@ namespace gaia {
 				GAIA_NODISCARD SchedJob add_parallel_query_job(Func func) {
 					static_assert(ExecType != QueryExecType::Default);
 					if (m_batches.empty()) {
-						m_changedWorldVersion = *m_worldVersion;
+						m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 						return {};
 					}
 
@@ -3240,7 +3240,7 @@ namespace gaia {
 						run_query<false, ExecType, TMode>(queryInfo, func);
 
 					// Changed-filter state is instance-local for cached queries.
-					m_changedWorldVersion = *m_worldVersion;
+					m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 				}
 
 				template <typename Func>
@@ -3731,7 +3731,7 @@ namespace gaia {
 					else
 						run_query_runtime_planned<false, ExecType>(queryInfo, plan, constraints, func);
 
-					m_changedWorldVersion = *m_worldVersion;
+					m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 				}
 
 				//! Checks whether typed callbacks can use dense chunk iteration while preserving required cache ordering.
@@ -3981,7 +3981,7 @@ namespace gaia {
 					unlock(*m_storage.world());
 					commit_cmd_buffer_st(*m_storage.world());
 					commit_cmd_buffer_mt(*m_storage.world());
-					m_changedWorldVersion = *m_worldVersion;
+					m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 				}
 
 				//! Runs a public iterator callback through the fastest supported runtime path.
@@ -5561,7 +5561,7 @@ namespace gaia {
 					auto* pWorld = m_storage.world();
 					commit_cmd_buffer_st(*pWorld);
 					commit_cmd_buffer_mt(*pWorld);
-					m_changedWorldVersion = *m_worldVersion;
+					m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 				}
 
 				//! Runs an iterator-based each() callback over directly seeded entities using one-row chunk views.
@@ -6752,7 +6752,7 @@ namespace gaia {
 							});
 						}
 
-						m_changedWorldVersion = *m_worldVersion;
+						m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 						return;
 					}
 
@@ -6765,7 +6765,7 @@ namespace gaia {
 
 					const auto cacheRange = selected_query_cache_range(queryInfo);
 					if (!cacheRange.valid) {
-						m_changedWorldVersion = *m_worldVersion;
+						m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 						return;
 					}
 					const auto idxFrom = cacheRange.idxFrom;
@@ -6816,7 +6816,7 @@ namespace gaia {
 						}
 					}
 
-					m_changedWorldVersion = *m_worldVersion;
+					m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 				}
 
 				//! \cond INTERNAL
@@ -6840,7 +6840,7 @@ namespace gaia {
 							});
 						}
 
-						m_changedWorldVersion = *m_worldVersion;
+						m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 						return;
 					}
 
@@ -6853,7 +6853,7 @@ namespace gaia {
 
 					const auto cacheRange = selected_query_cache_range(queryInfo);
 					if (!cacheRange.valid) {
-						m_changedWorldVersion = *m_worldVersion;
+						m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 						return;
 					}
 					const auto idxFrom = cacheRange.idxFrom;
@@ -6906,7 +6906,7 @@ namespace gaia {
 						}
 					}
 
-					m_changedWorldVersion = *m_worldVersion;
+					m_changedWorldVersion = ::gaia::ecs::load_version(*m_worldVersion);
 				}
 
 				//! \endcond

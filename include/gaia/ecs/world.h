@@ -10039,6 +10039,7 @@ namespace gaia {
 
 			//! Returns the current version of the world.
 			//! \return World version number.
+			//! Use load_version() when reading the referenced value alongside concurrent queries.
 			GAIA_NODISCARD uint32_t& world_version() {
 				return m_worldVersion;
 			}
@@ -16525,7 +16526,7 @@ namespace gaia {
 	namespace ecs {
 		//! Returns the world's current structural version.
 		inline uint32_t world_version(const World& world) {
-			return world.m_worldVersion;
+			return load_version(world.m_worldVersion);
 		}
 
 		//! Returns the version of the world's pending archetype-deletion set.
