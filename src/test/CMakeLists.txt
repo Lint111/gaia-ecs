@@ -1,6 +1,13 @@
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	# GCC 15 reports optimized null-dereference false positives from Gaia's inlined headers.
+	# Existing upstream tests also ignore some [[nodiscard]] component-registration handles.
+	# Keep both warnings visible without making these test-only diagnostics fatal.
+	add_compile_options(-Wno-error=null-dereference -Wno-error=unused-result)
+endif()
+
 set(GAIA_TEST_SOURCES
 	src/main.cpp
 	src/test_core.cpp

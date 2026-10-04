@@ -77292,6 +77292,7 @@ namespace gaia {
 
 			//! Returns the current version of the world.
 			//! \return World version number.
+			//! Use load_version() when reading the referenced value alongside concurrent queries.
 			GAIA_NODISCARD uint32_t& world_version() {
 				return m_worldVersion;
 			}

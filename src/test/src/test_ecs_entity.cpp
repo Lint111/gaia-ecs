@@ -1578,7 +1578,7 @@ TEST_CASE("Entity bulk deletion - OnDel observer on many rows") {
 	uint32_t hits = 0;
 	bool bulk = true;
 	bool extraDeleted = false;
-	wld.observer()
+	(void)wld.observer()
 			.all<Position>()
 			.event(ecs::ObserverEvent::OnDel)
 			.on_each([&](ecs::Iter& it) {

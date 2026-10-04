@@ -205,7 +205,7 @@ struct PositionSparse {
 };
 struct SparseTestWorld: TestWorld {
 	SparseTestWorld() {
-		m_w.add<PositionSparse>();
+		(void)m_w.add<PositionSparse>();
 	}
 };
 struct PositionSoA {
