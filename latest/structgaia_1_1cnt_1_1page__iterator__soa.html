@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -115,7 +115,7 @@ $(document).ready(function(){initNavTree('structgaia_1_1cnt_1_1page__iterator__s
 </div><!--header-->
 <div class="contents">
 
-<p>Iterator over structure-of-arrays elements in paged storage.  
+<p>Iterator over SoA elements in paged storage. SoA pages keep each member in a separate array, so there is no addressable <code>T</code> record for the ordinary page iterator to expose as <code>T&amp;</code> or <code>T*</code>. This iterator resolves each position through the SoA view policy and returns the resulting element view by value.  
  <a href="structgaia_1_1cnt_1_1page__iterator__soa.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="paged__storage_8h_source.html">paged_storage.h</a>&gt;</code></p>
@@ -163,16 +163,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a92e17bb5eda44e6f434e125958a2eff0" id="r_a92e17bb5eda44e6f434e125958a2eff0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a0803c3535decf3297c5b32524388cf05">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a92e17bb5eda44e6f434e125958a2eff0">operator++</a> (<a class="el" href="classgaia_1_1cnt_1_1darr.html">int</a>)</td></tr>
 <tr class="memdesc:a92e17bb5eda44e6f434e125958a2eff0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances to the next element.  <br /></td></tr>
 <tr class="separator:a92e17bb5eda44e6f434e125958a2eff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb83b3d7640587ead328eb2657c01885" id="r_acb83b3d7640587ead328eb2657c01885"><td class="memItemLeft" align="right" valign="top">GAIA_NODISCARD <a class="el" href="classgaia_1_1cnt_1_1darr.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#acb83b3d7640587ead328eb2657c01885">operator==</a> (<a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a> <a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a0803c3535decf3297c5b32524388cf05">iterator</a> &amp;other) <a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a></td></tr>
+<tr class="memitem:acb83b3d7640587ead328eb2657c01885" id="r_acb83b3d7640587ead328eb2657c01885"><td class="memItemLeft" align="right" valign="top">GAIA_NODISCARD <a class="el" href="classgaia_1_1cnt_1_1darr.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#acb83b3d7640587ead328eb2657c01885">operator==</a> (<a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a> <a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a0803c3535decf3297c5b32524388cf05">iterator</a> &amp;<a class="el" href="classgaia_1_1cnt_1_1darr.html">other</a>) <a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a></td></tr>
 <tr class="memdesc:acb83b3d7640587ead328eb2657c01885"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks whether two iterators have the same position.  <br /></td></tr>
 <tr class="separator:acb83b3d7640587ead328eb2657c01885"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9389c72cdbbc6b2ea79fb1c6760c4bf1" id="r_a9389c72cdbbc6b2ea79fb1c6760c4bf1"><td class="memItemLeft" align="right" valign="top">GAIA_NODISCARD <a class="el" href="classgaia_1_1cnt_1_1darr.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a9389c72cdbbc6b2ea79fb1c6760c4bf1">operator!=</a> (<a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a> <a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a0803c3535decf3297c5b32524388cf05">iterator</a> &amp;other) <a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a></td></tr>
+<tr class="memitem:a9389c72cdbbc6b2ea79fb1c6760c4bf1" id="r_a9389c72cdbbc6b2ea79fb1c6760c4bf1"><td class="memItemLeft" align="right" valign="top">GAIA_NODISCARD <a class="el" href="classgaia_1_1cnt_1_1darr.html">bool</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a9389c72cdbbc6b2ea79fb1c6760c4bf1">operator!=</a> (<a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a> <a class="el" href="structgaia_1_1cnt_1_1page__iterator__soa.html#a0803c3535decf3297c5b32524388cf05">iterator</a> &amp;<a class="el" href="classgaia_1_1cnt_1_1darr.html">other</a>) <a class="el" href="classgaia_1_1cnt_1_1darr.html">const</a></td></tr>
 <tr class="memdesc:a9389c72cdbbc6b2ea79fb1c6760c4bf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks whether two iterators have different positions.  <br /></td></tr>
 <tr class="separator:a9389c72cdbbc6b2ea79fb1c6760c4bf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;<a class="el" href="classgaia_1_1cnt_1_1darr.html">typename</a> <a class="el" href="classgaia_1_1cnt_1_1darr.html">T</a>, <a class="el" href="classgaia_1_1cnt_1_1darr.html">typename</a> Allocator, <a class="el" href="classgaia_1_1cnt_1_1darr.html">bool</a> IsFwd&gt;<br />
-struct gaia::cnt::page_iterator_soa&lt; T, Allocator, IsFwd &gt;</div><p>Iterator over structure-of-arrays elements in paged storage. </p>
+struct gaia::cnt::page_iterator_soa&lt; T, Allocator, IsFwd &gt;</div><p>Iterator over SoA elements in paged storage. SoA pages keep each member in a separate array, so there is no addressable <code>T</code> record for the ordinary page iterator to expose as <code>T&amp;</code> or <code>T*</code>. This iterator resolves each position through the SoA view policy and returns the resulting element view by value. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>Element type. </td></tr>

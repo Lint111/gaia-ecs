@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -155,7 +155,7 @@ $(document).ready(function(){initNavTree('semaphore_8h_source.html',''); initRes
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        m_handle = dispatch_semaphore_create(count);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        GAIA_ASSERT(m_handle != <span class="keyword">nullptr</span>);</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        [[maybe_unused]] <span class="keywordtype">int</span> ret = sem_init(&amp;m_handle, 0, count);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        [[maybe_unused]] <span class="keywordtype">int</span> ret = sem_init(&amp;m_handle, 0, (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>)count);</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        GAIA_ASSERT(ret == 0);</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>      }</div>

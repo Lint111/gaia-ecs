@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -137,6 +137,12 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1OrderByTravView.html">OrderByTravView</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lightweight view that executes a query in deterministic relation traversal order.  <a href="classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1OrderByTravView.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1ParallelScope.html">ParallelScope</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Records <code>OnSet</code> notifications and sorted-query invalidations produced by a parallel region instead of applying them from worker threads, then applies them on the coordinator thread once the region joins. Observers therefore always run on the thread that started the query, in work-item order, exactly like the serial path. Sorted-query invalidation flips a shared <code>SortEntities</code> dirty bit that is not safe to touch from a worker thread. The observer channel is active only when GAIA_OBSERVERS_ENABLED; the sorted-query channel always defers.  <a href="classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1ParallelScope.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1ParallelSlot.html">ParallelSlot</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Binds a parallel work-item range to its shared deferred-notification slot for the lifetime of the scope. Work items are distributed in disjoint ranges, so the first item of a range identifies a queue no other thread writes to. Both the observer (<code>OnSet</code>) and sorted-query-invalidation deferral channels read this same slot, so a single binding serves both.  <a href="classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1ParallelSlot.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryCacheRange.html">QueryCacheRange</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cache range selected by the query's optional group id filter.  <a href="structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryCacheRange.html#details">More...</a><br /></td></tr>
@@ -286,6 +292,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>destroy</b> ()</td></
 <tr class="memitem:a59a4b01c0b837c7663b154b4d3ea9e47" id="r_a59a4b01c0b837c7663b154b4d3ea9e47"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html">QueryImpl</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a59a4b01c0b837c7663b154b4d3ea9e47">in</a> (<a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> entity, <a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> options=<a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a>{})</td></tr>
 <tr class="memdesc:a59a4b01c0b837c7663b154b4d3ea9e47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds an inherited <code>in(entity)</code> requirement.  <br /></td></tr>
 <tr class="separator:a59a4b01c0b837c7663b154b4d3ea9e47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bb625f42bd06424b135c925f974212b" id="r_a7bb625f42bd06424b135c925f974212b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html">QueryImpl</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a7bb625f42bd06424b135c925f974212b">no_access</a> ()</td></tr>
+<tr class="memdesc:a7bb625f42bd06424b135c925f974212b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes the preceding <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a50c530c703d95463e2a09c11ceac6c58" title="Adds a required typed term.">all()</a>, <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0f7f8dac68bd251feb3181fae8690acd" title="Adds an OR typed term.">or_()</a>, or <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a44aceb299d8832301d7637fd7e0e2a0e" title="Adds an optional typed term.">any()</a> term presence-only. Call while building the query, before its first execution or fetch. Later terms keep their own access. Scans pending builder commands once and updates the term in place without growing the command buffer.  <br /></td></tr>
+<tr class="separator:a7bb625f42bd06424b135c925f974212b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac95afbb703fe6505908d75ec844e54b9" id="r_ac95afbb703fe6505908d75ec844e54b9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html">QueryImpl</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac95afbb703fe6505908d75ec844e54b9">all</a> (<a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> entity, const <a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp;options=<a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a>{})</td></tr>
 <tr class="memdesc:ac95afbb703fe6505908d75ec844e54b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a required entity or pair term.  <br /></td></tr>
 <tr class="separator:ac95afbb703fe6505908d75ec844e54b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -421,7 +430,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>destroy</b> ()</td></
 <tr class="separator:a2d88fc8023ce3388ede3788316d33306"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9172840a29b328cd834eea73309527f4" id="r_a9172840a29b328cd834eea73309527f4"><td class="memTemplParams" colspan="2">template&lt;typename Func , std::enable_if_t&lt; detail::is_query_iter_callback_v&lt; Func &gt;, int &gt;  = 0&gt; </td></tr>
 <tr class="memitem:a9172840a29b328cd834eea73309527f4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4">each</a> (Func func)</td></tr>
-<tr class="memdesc:a9172840a29b328cd834eea73309527f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterates query matches using the default execution mode.  <br /></td></tr>
+<tr class="memdesc:a9172840a29b328cd834eea73309527f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterates query matches using the default execution mode. Each callback receives a contiguous chunk window. DontFragment / sparse entity-filter terms restrict that window to matching rows, the same set <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count()</a> reports. A chunk with mixed membership can therefore invoke <em>func</em> more than once.  <br /></td></tr>
 <tr class="separator:a9172840a29b328cd834eea73309527f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9172840a29b328cd834eea73309527f4" id="r_a9172840a29b328cd834eea73309527f4"><td class="memTemplParams" colspan="2">template&lt;typename Func , std::enable_if_t&lt;!detail::is_query_iter_callback_v&lt; Func &gt;, int &gt;  = 0&gt; </td></tr>
 <tr class="memitem:a9172840a29b328cd834eea73309527f4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4">each</a> (Func func)</td></tr>
@@ -452,7 +461,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>destroy</b> ()</td></
 <tr class="memdesc:a39f9d1a71d4a4e02aa08d01422e57762"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterates matching archetypes instead of individual entities.  <br /></td></tr>
 <tr class="separator:a39f9d1a71d4a4e02aa08d01422e57762"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4dc5228c7c25c83a4ff180f50de489d" id="r_ac4dc5228c7c25c83a4ff180f50de489d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac4dc5228c7c25c83a4ff180f50de489d">empty</a> (Constraints constraints=Constraints::EnabledOnly)</td></tr>
-<tr class="memdesc:ac4dc5228c7c25c83a4ff180f50de489d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns true or false depending on whether there are any entities matching the query.  <br /></td></tr>
+<tr class="memdesc:ac4dc5228c7c25c83a4ff180f50de489d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns whether no entities match the query.  <br /></td></tr>
 <tr class="separator:ac4dc5228c7c25c83a4ff180f50de489d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb331e63037dcb0e875d9de04613856e" id="r_abb331e63037dcb0e875d9de04613856e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e">count</a> (Constraints constraints=Constraints::EnabledOnly)</td></tr>
 <tr class="memdesc:abb331e63037dcb0e875d9de04613856e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the number of entities matching the query.  <br /></td></tr>
@@ -836,7 +845,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>SystemBuilder</b></t
 </div><div class="memdoc">
 
 <p>Returns the effective read/write access for an id. </p>
-<p>Effective access combines positive query terms and explicit <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a2b2c39b6e514fc082664e77c7c271bcf" title="Declares an additional component or pair type read by this query callback.">reads()</a>/writes() declarations. Pair query terms do not imply data access. Use explicit <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a54113ef0bb7babf43c525522dbafb927" title="Declares an additional id read by this query callback.">reads(Entity)</a> or <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a6e09618b2abf5478d29c6ccadddfd752" title="Declares an additional id written by this query callback.">writes(Entity)</a> when a pair id is a custom scheduling key. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Effective access combines payload-bearing query terms and explicit <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a2b2c39b6e514fc082664e77c7c271bcf" title="Declares an additional component or pair type read by this query callback.">reads()</a>/writes() declarations. Pair patterns overlap when their fixed endpoints agree. Wildcards and variables match any endpoint. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity</td><td>Component/entity id to inspect. </td></tr>
   </table>
@@ -884,7 +893,7 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>SystemBuilder</b></t
 <p>Expression is a string between separators. Spaces are trimmed automatically.</p>
 <p>Supported modifiers: "," - separates expressions "||" - query::or_(OR chain with at least two OR terms) "?" - query::any (optional) "!" - query::none "&amp;" - read-write access "%e" - entity value "(rel,tgt)" - relationship pair, a wildcard character in either rel or tgt is translated into All "$name" - query variable (<code>$this</code> is reserved) "Id(src)" - source lookup (src can be a variable, e.g. Planet($planet), or $this for default source)</p>
 <p>Example: struct Position {...}; struct Velocity {...}; struct RigidBody {...}; struct Fuel {...}; auto player = w.add(); w.query().add("&amp;Position, !Velocity, ?RigidBody, (Fuel,*), %e", player.value()); Translates into: w.query() .<a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a50c530c703d95463e2a09c11ceac6c58" title="Adds a required typed term.">all&lt;Position&amp;&gt;()</a> .<a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ab46d739b1ffa87544e639b6cb082956d" title="Adds an excluded typed term.">no&lt;Velocity&gt;()</a> .<a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a44aceb299d8832301d7637fd7e0e2a0e" title="Adds an optional typed term.">any&lt;RigidBody&gt;()</a> .all(Pair(w.add&lt;Fuel&gt;().entity, All)&gt;() .all(Player);</p>
-<p>Adds one or more query terms described by a string expression. <a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> names are resolved immediately while the expression is parsed and the resulting component ids are baked into the query terms. Later scope, path or alias changes do not rewrite an already parsed query. Names in <em>str</em> are resolved while add(...) parses the expression and the resulting ids are baked into the query. Active component scope and lookup-path state affect parsing only at that moment and do not rewrite the query later. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Adds one or more query terms described by a string expression. <a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> names are resolved immediately while the expression is parsed and the resulting component ids are baked into the query terms. Later scope, path or alias changes do not rewrite an already parsed query. Names in <em>str</em> are resolved while add(...) parses the expression and the resulting ids are baked into the query. Active component scope and lookup-path state affect parsing only at that moment and do not rewrite the query later. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">str</td><td>Null-terminated string with the query expression. </td></tr>
     <tr><td class="paramname">...</td><td>Optional varargs consumed by <code>e</code> substitutions inside <em>str</em>. </td></tr>
@@ -950,7 +959,7 @@ template&lt;typename T &gt; </div>
 <p>Adds a required typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -979,7 +988,7 @@ template&lt;typename T &gt; </div>
 <p>Adds a required typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1059,7 +1068,7 @@ template&lt;typename T &gt; </div>
 <p>Adds an optional typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1088,7 +1097,7 @@ template&lt;typename T &gt; </div>
 <p>Adds an optional typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1473,7 +1482,7 @@ template&lt;typename T &gt; </div>
 <p>Marks a typed term for <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#aca61ae31f97ef9503ff11c032601e82e" title="Marks a typed term for changed() filtering.">changed()</a> filtering. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1508,7 +1517,7 @@ template&lt;typename T &gt; </div>
 <p>Marks a runtime component or pair for <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#aca61ae31f97ef9503ff11c032601e82e" title="Marks a typed term for changed() filtering.">changed()</a> filtering. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">entity</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair id to monitor. </td></tr>
+    <tr><td class="paramname">entity</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair id to monitor. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1577,7 +1586,7 @@ template&lt;typename T &gt; </div>
 <p>Calculates the row range of a chunk after applying row constraints and depth-order barrier state. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pChunk</td><td><a class="el" href="classgaia_1_1ecs_1_1Chunk.html">Chunk</a> to inspect. </td></tr>
+    <tr><td class="paramname">pChunk</td><td><a class="el" href="classgaia_1_1ecs_1_1Chunk.html" title="Fixed-capacity archetype storage unit holding entities and their component columns.">Chunk</a> to inspect. </td></tr>
     <tr><td class="paramname">constraints</td><td>Entity-row subset exposed to the callback. </td></tr>
     <tr><td class="paramname">needsBarrierCache</td><td>True when barrier state participates in row selection. </td></tr>
     <tr><td class="paramname">barrierPasses</td><td>Cached barrier result for the archetype containing the chunk. </td></tr>
@@ -1712,8 +1721,8 @@ template&lt;typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Calculates the number of entities matching the query. </p>
-<dl class="section warning"><dt>Warning</dt><dd>Only use if you only care about the number of entities matching the query. The result is not cached and repeated calls to the function might be slow.If you already called <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0850fa2a03c76080120e5bc655b377ec" title="Appends all components or entities matching the query to the output array.">arr()</a>, use the size provided by the array.Use <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac4dc5228c7c25c83a4ff180f50de489d" title="Returns true or false depending on whether there are any entities matching the query.">empty()</a> instead of calling <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count()</a> == 0. </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>For <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#aca61ae31f97ef9503ff11c032601e82e" title="Marks a typed term for changed() filtering.">changed()</a> queries this is a non-consuming probe. It does not advance the query's changed-reporting state. Iteration APIs such as <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4" title="Iterates query matches using the default execution mode.">each()</a>/arr() do consume it. </dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Only use if you only care about the number of entities matching the query. The result is not cached and repeated calls to the function might be slow.If you already called <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0850fa2a03c76080120e5bc655b377ec" title="Appends all components or entities matching the query to the output array.">arr()</a>, use the size provided by the array.Use <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac4dc5228c7c25c83a4ff180f50de489d" title="Returns whether no entities match the query.">empty()</a> instead of calling <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count()</a> == 0. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>For <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#aca61ae31f97ef9503ff11c032601e82e" title="Marks a typed term for changed() filtering.">changed()</a> queries this is a non-consuming probe. It does not advance the query's changed-reporting state. Iteration APIs such as <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4" title="Iterates query matches using the default execution mode. Each callback receives a contiguous chunk wi...">each()</a>/arr() do consume it. </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>The number of matching entities </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1777,7 +1786,7 @@ template&lt;typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Sets the user-owned context pointer visible through Iter::ctx() during iterator callbacks. Changing the pointer does not affect query identity, query matching, shared-cache lookup, or cached query storage. Identical shared-cache query shapes may therefore keep different context pointers. </p>
-<dl class="section note"><dt>Note</dt><dd>Gaia-ECS stores only the pointer. The caller owns allocation, lifetime, destruction, and any synchronization needed when a parallel query callback reads or writes the pointed-to data. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Gaia-ECS stores only the pointer. The caller owns allocation, lifetime, destruction, and any synchronization needed when a parallel query callback reads or writes the pointed-to data. To make shared context access visible to scheduling, use the same Gaia entity as a resource key in <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a54113ef0bb7babf43c525522dbafb927" title="Declares an additional id read by this query callback.">reads(Entity)</a> or <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a6e09618b2abf5478d29c6ccadddfd752" title="Declares an additional id written by this query callback.">writes(Entity)</a> on every query that accesses the context. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pCtx</td><td>Context pointer. May be null. </td></tr>
@@ -1785,6 +1794,9 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Self reference. </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a54113ef0bb7babf43c525522dbafb927" title="Declares an additional id read by this query callback.">reads(Entity)</a> </dd>
+<dd>
+<a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a6e09618b2abf5478d29c6ccadddfd752" title="Declares an additional id written by this query callback.">writes(Entity)</a> </dd></dl>
 
 </div>
 </div>
@@ -1968,7 +1980,7 @@ template&lt;typename Func , std::enable_if_t&lt; detail::is_query_iter_callback_
 </table>
 </div><div class="memdoc">
 
-<p>Iterates query matches using the default execution mode. </p>
+<p>Iterates query matches using the default execution mode. Each callback receives a contiguous chunk window. DontFragment / sparse entity-filter terms restrict that window to matching rows, the same set <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count()</a> reports. A chunk with mixed membership can therefore invoke <em>func</em> more than once. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">Func</td><td>Iterator callback type invocable with <code><a class="el" href="classgaia_1_1ecs_1_1Iter.html" title="Iterator for iterating entity subsets selected by Constraints. Disabled entities always precede enabl...">Iter</a>&amp;</code>. </td></tr>
@@ -1981,7 +1993,9 @@ template&lt;typename Func , std::enable_if_t&lt; detail::is_query_iter_callback_
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See also</dt><dd>Iter::ctx() const </dd></dl>
+<dl class="section see"><dt>See also</dt><dd>Iter::ctx() const </dd>
+<dd>
+<a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count(Constraints)</a> </dd></dl>
 
 </div>
 </div>
@@ -2785,10 +2799,10 @@ template&lt;typename Func , std::enable_if_t&lt;!detail::is_query_walk_core_call
 </table>
 </div><div class="memdoc">
 
-<p>Returns true or false depending on whether there are any entities matching the query. </p>
-<dl class="section warning"><dt>Warning</dt><dd>Only use if you only care if there are any entities matching the query. The result is not cached and repeated calls to the function might be slow. If you already called <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0850fa2a03c76080120e5bc655b377ec" title="Appends all components or entities matching the query to the output array.">arr()</a>, checking if it is empty is preferred. Use <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac4dc5228c7c25c83a4ff180f50de489d" title="Returns true or false depending on whether there are any entities matching the query.">empty()</a> instead of calling <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count()</a>==0. </dd></dl>
-<dl class="section note"><dt>Note</dt><dd>For <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#aca61ae31f97ef9503ff11c032601e82e" title="Marks a typed term for changed() filtering.">changed()</a> queries this is a non-consuming probe. It does not advance the query's changed-reporting state. Iteration APIs such as <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4" title="Iterates query matches using the default execution mode.">each()</a>/arr() do consume it. </dd></dl>
-<dl class="section return"><dt>Returns</dt><dd>True if there are any entities matching the query. False otherwise. </dd></dl>
+<p>Returns whether no entities match the query. </p>
+<dl class="section warning"><dt>Warning</dt><dd>Only use if you only care if there are any entities matching the query. The result is not cached and repeated calls to the function might be slow. If you already called <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0850fa2a03c76080120e5bc655b377ec" title="Appends all components or entities matching the query to the output array.">arr()</a>, checking if it is empty is preferred. Use <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac4dc5228c7c25c83a4ff180f50de489d" title="Returns whether no entities match the query.">empty()</a> instead of calling <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abb331e63037dcb0e875d9de04613856e" title="Calculates the number of entities matching the query.">count()</a>==0. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>For <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#aca61ae31f97ef9503ff11c032601e82e" title="Marks a typed term for changed() filtering.">changed()</a> queries this is a non-consuming probe. It does not advance the query's changed-reporting state. Iteration APIs such as <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4" title="Iterates query matches using the default execution mode. Each callback receives a contiguous chunk wi...">each()</a>/arr() do consume it. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if no entities match the query. False otherwise. </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">constraints</td><td>Entity-row subset included in the probe. </td></tr>
@@ -2896,7 +2910,7 @@ template&lt;typename Func , std::enable_if_t&lt;!detail::is_query_walk_core_call
 </div><div class="memdoc">
 
 <p>Returns the cache handle generation of this query. </p>
-<dl class="section return"><dt>Returns</dt><dd>Query generation, or QueryIdBad for uncached queries. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Query generation, or QueryIdBad for uncached or world-invalidated queries. </dd></dl>
 
 </div>
 </div>
@@ -2967,7 +2981,7 @@ template&lt;typename T &gt; </div>
 <p>Organizes matching archetypes into groups according to the grouping function. Does not order iteration by group id. Use group_id(...) to filter one group. Use depth_order(...) or sort_by(...) when iteration order matters. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> to group by. It is registered if it hasn't been registered yet. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> to group by. It is registered if it hasn't been registered yet. </td></tr>
   </table>
   </dd>
 </dl>
@@ -3100,7 +3114,7 @@ template&lt;typename T &gt; </div>
 <p>Selects the group to iterate over. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> to treat as a group to iterate over. It is registered if it hasn't been registered yet. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> to treat as a group to iterate over. It is registered if it hasn't been registered yet. </td></tr>
   </table>
   </dd>
 </dl>
@@ -3290,7 +3304,7 @@ template&lt;typename Container &gt; </div>
 </div><div class="memdoc">
 
 <p>Returns the cache handle id of this query. </p>
-<dl class="section return"><dt>Returns</dt><dd>Query id, or QueryIdBad for uncached queries. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Query id, or QueryIdBad for uncached or world-invalidated queries. </dd></dl>
 
 </div>
 </div>
@@ -3589,7 +3603,7 @@ template&lt;typename Func &gt; </div>
 <p>Adds a query execution job without submitting it. </p>
 <p>The returned <a class="el" href="classgaia_1_1ecs_1_1SchedJob.html" title="Move-only wrapper for scheduler-owned ECS work.">SchedJob</a> is backed by the world's ECS scheduler descriptor rather than a <a class="el" href="structgaia_1_1mt_1_1JobHandle.html" title="Packed identifier for a job-pool slot, generation, and priority.">gaia::mt::JobHandle</a>, so external schedulers can provide their own token, submission, dependency, wait, and cleanup behavior. The job owns only the callback copy and scheduler token. The query and world must outlive the job. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">Func</td><td>Query callback type accepted by <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4" title="Iterates query matches using the default execution mode.">each()</a>. </td></tr>
+    <tr><td class="paramname">Func</td><td>Query callback type accepted by <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a9172840a29b328cd834eea73309527f4" title="Iterates query matches using the default execution mode. Each callback receives a contiguous chunk wi...">each()</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -3867,7 +3881,7 @@ template&lt;typename Func &gt; </div>
 <p>Returns whether a chunk passes the query's changed filters. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">chunk</td><td><a class="el" href="classgaia_1_1ecs_1_1Chunk.html">Chunk</a> being evaluated. </td></tr>
+    <tr><td class="paramname">chunk</td><td><a class="el" href="classgaia_1_1ecs_1_1Chunk.html" title="Fixed-capacity archetype storage unit holding entities and their component columns.">Chunk</a> being evaluated. </td></tr>
     <tr><td class="paramname">queryInfo</td><td>Query metadata containing changed-filter terms. </td></tr>
     <tr><td class="paramname">changedWorldVersion</td><td><a class="el" href="classgaia_1_1ecs_1_1World.html" title="Owns entities, components, archetypes, queries, observers, and systems.">World</a> version captured by the previous query pass. </td></tr>
   </table>
@@ -3926,7 +3940,7 @@ template&lt;typename Func &gt; </div>
 <p>Returns whether a chunk passes the query's changed filters. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">chunk</td><td><a class="el" href="classgaia_1_1ecs_1_1Chunk.html">Chunk</a> being evaluated. </td></tr>
+    <tr><td class="paramname">chunk</td><td><a class="el" href="classgaia_1_1ecs_1_1Chunk.html" title="Fixed-capacity archetype storage unit holding entities and their component columns.">Chunk</a> being evaluated. </td></tr>
     <tr><td class="paramname">queryInfo</td><td>Query metadata containing changed-filter terms. </td></tr>
     <tr><td class="paramname">changedWorldVersion</td><td><a class="el" href="classgaia_1_1ecs_1_1World.html" title="Owns entities, components, archetypes, queries, observers, and systems.">World</a> version captured by the previous query pass. </td></tr>
     <tr><td class="paramname">compIndices</td><td>Per-archetype mapping from query term index to chunk component column. </td></tr>
@@ -3981,7 +3995,7 @@ template&lt;typename Func &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">queryInfo</td><td>Query info </td></tr>
-    <tr><td class="paramname">archetype</td><td><a class="el" href="classgaia_1_1ecs_1_1Archetype.html">Archetype</a> </td></tr>
+    <tr><td class="paramname">archetype</td><td><a class="el" href="classgaia_1_1ecs_1_1Archetype.html" title="Fixed-shape group of chunks storing entities that share the same component layout....">Archetype</a> </td></tr>
     <tr><td class="paramname">targetEntities</td><td>Optional target-entity filter </td></tr>
   </table>
   </dd>
@@ -4062,7 +4076,7 @@ template&lt;typename Func &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">queryInfo</td><td>Query info </td></tr>
-    <tr><td class="paramname">archetype</td><td><a class="el" href="classgaia_1_1ecs_1_1Archetype.html">Archetype</a> </td></tr>
+    <tr><td class="paramname">archetype</td><td><a class="el" href="classgaia_1_1ecs_1_1Archetype.html" title="Fixed-shape group of chunks storing entities that share the same component layout....">Archetype</a> </td></tr>
     <tr><td class="paramname">targetEntities</td><td>Candidate target entities </td></tr>
   </table>
   </dd>
@@ -4137,7 +4151,7 @@ template&lt;typename T &gt; </div>
 <p>Adds an excluded typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4166,7 +4180,7 @@ template&lt;typename T &gt; </div>
 <p>Adds an excluded typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4217,11 +4231,39 @@ template&lt;typename T &gt; </div>
 <p>Adds an excluded entity or pair term. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">entity</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> or pair id that must not match. </td></tr>
+    <tr><td class="paramname">entity</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html" title="Identifier of an entity or component instance in the world. Packs the entity index,...">Entity</a> or pair id that must not match. </td></tr>
     <tr><td class="paramname">options</td><td>Term options. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>Self reference. </dd></dl>
+
+</div>
+</div>
+<a id="a7bb625f42bd06424b135c925f974212b" name="a7bb625f42bd06424b135c925f974212b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bb625f42bd06424b135c925f974212b">&#9670;&#160;</a></span>no_access()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html">QueryImpl</a> &amp; gaia::ecs::detail::QueryImpl::no_access </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Makes the preceding <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a50c530c703d95463e2a09c11ceac6c58" title="Adds a required typed term.">all()</a>, <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0f7f8dac68bd251feb3181fae8690acd" title="Adds an OR typed term.">or_()</a>, or <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a44aceb299d8832301d7637fd7e0e2a0e" title="Adds an optional typed term.">any()</a> term presence-only. Call while building the query, before its first execution or fetch. Later terms keep their own access. Scans pending builder commands once and updates the term in place without growing the command buffer. </p>
 <dl class="section return"><dt>Returns</dt><dd>Self reference. </dd></dl>
 
 </div>
@@ -4246,7 +4288,7 @@ template&lt;typename T &gt; </div>
 <p>Adds an OR typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4275,7 +4317,7 @@ template&lt;typename T &gt; </div>
 <p>Adds an OR typed term. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a> or pair type. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a> or pair type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4326,7 +4368,7 @@ template&lt;typename T &gt; </div>
 <p>OR terms (at least one has to match). A single OR term is canonicalized to ALL during query normalization. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">entity</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> or pair id. </td></tr>
+    <tr><td class="paramname">entity</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html" title="Identifier of an entity or component instance in the world. Packs the entity index,...">Entity</a> or pair id. </td></tr>
     <tr><td class="paramname">options</td><td>Term options. </td></tr>
   </table>
   </dd>
@@ -4556,7 +4598,7 @@ template&lt;typename T &gt; </div>
 <p>Declares an additional component or pair type read by this query callback. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a>, entity type, or pair type to mark as read. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a>, entity type, or pair type to mark as read. </td></tr>
   </table>
   </dd>
 </dl>
@@ -4590,7 +4632,7 @@ template&lt;typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Declares an additional id read by this query callback. </p>
-<p>Use this for data accessed inside the query kernel but not present as a positive query term. The declaration is scheduling metadata only. It does not change query matching or cache identity. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Use this for data accessed inside the query kernel but not present as a positive query term. The declaration is scheduling metadata only. It does not change query matching or cache identity. A plain Gaia entity may be used as a resource key for shared context or other application-owned state. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity</td><td>Component/entity id read by user code. </td></tr>
   </table>
@@ -4964,7 +5006,7 @@ template&lt;bool HasFilters, bool HasGroups, typename Func &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">name</td><td>Null-terminated variable name previously assigned by var_name(...). </td></tr>
-    <tr><td class="paramname">value</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> value to bind. </td></tr>
+    <tr><td class="paramname">value</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html" title="Identifier of an entity or component instance in the world. Packs the entity index,...">Entity</a> value to bind. </td></tr>
   </table>
   </dd>
 </dl>
@@ -5010,7 +5052,7 @@ template&lt;bool HasFilters, bool HasGroups, typename Func &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">varEntity</td><td>Query variable entity (<code>Var0..Var7</code>) </td></tr>
-    <tr><td class="paramname">value</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> value to bind </td></tr>
+    <tr><td class="paramname">value</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html" title="Identifier of an entity or component instance in the world. Packs the entity index,...">Entity</a> value to bind </td></tr>
   </table>
   </dd>
 </dl>
@@ -5056,7 +5098,7 @@ template&lt;bool HasFilters, bool HasGroups, typename Func &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">name</td><td>Variable name previously assigned by var_name(...) </td></tr>
-    <tr><td class="paramname">value</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html">Entity</a> value to bind </td></tr>
+    <tr><td class="paramname">value</td><td><a class="el" href="structgaia_1_1ecs_1_1Entity.html" title="Identifier of an entity or component instance in the world. Packs the entity index,...">Entity</a> value to bind </td></tr>
   </table>
   </dd>
 </dl>
@@ -5562,7 +5604,7 @@ template&lt;typename T &gt; </div>
 <p>Declares an additional component or pair type written by this query callback. </p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html">Component</a>, entity type, or pair type to mark as written. </td></tr>
+    <tr><td class="paramname">T</td><td><a class="el" href="structgaia_1_1ecs_1_1Component.html" title="Identifier of a registered component type. Packs the component id, size, alignment,...">Component</a>, entity type, or pair type to mark as written. </td></tr>
   </table>
   </dd>
 </dl>
@@ -5596,7 +5638,7 @@ template&lt;typename T &gt; </div>
 </div><div class="memdoc">
 
 <p>Declares an additional id written by this query callback. </p>
-<p>A write conflicts with any read or write of the same id when comparing two queries with <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac1abf80c1227b1e32ad41f27046fea2b" title="Returns whether this query conflicts with another query&#39;s effective access declarations.">conflicts_with()</a>. The declaration is scheduling metadata only. It does not change query matching or cache identity. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>A write conflicts with any read or write of the same id when comparing two queries with <a class="el" href="classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ac1abf80c1227b1e32ad41f27046fea2b" title="Returns whether this query conflicts with another query&#39;s effective access declarations.">conflicts_with()</a>. The declaration is scheduling metadata only. It does not change query matching or cache identity. A plain Gaia entity may be used as a resource key for shared context or other application-owned state. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">entity</td><td>Component/entity id written by user code. </td></tr>
   </table>

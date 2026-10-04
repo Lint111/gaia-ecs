@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -198,13 +198,13 @@ $(document).ready(function(){initNavTree('fwd__llist_8h_source.html',''); initRe
 </div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
 <div class="foldopen" id="foldopen00101" data-start="{" data-end="}">
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a2c7fe2e21f76c40538084ff90abbedce">  101</a></span>      GAIA_NODISCARD <span class="keywordtype">bool</span> <a class="code hl_function" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a2c7fe2e21f76c40538084ff90abbedce">operator==</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html">iterator</a>&amp; other)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keywordflow">return</span> m_pNode == other.m_pNode;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a2c7fe2e21f76c40538084ff90abbedce">  101</a></span>      GAIA_NODISCARD <span class="keywordtype">bool</span> <a class="code hl_function" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a2c7fe2e21f76c40538084ff90abbedce">operator==</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html">iterator</a>&amp; <a class="code hl_class" href="classgaia_1_1cnt_1_1darr.html">other</a>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keywordflow">return</span> m_pNode == <a class="code hl_class" href="classgaia_1_1cnt_1_1darr.html">other</a>.m_pNode;</div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>      }</div>
 </div>
 <div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a76e2bb25566fc2bbc0e7f67aa424c915">  107</a></span>      GAIA_NODISCARD <span class="keywordtype">bool</span> <a class="code hl_function" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a76e2bb25566fc2bbc0e7f67aa424c915">operator!=</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html">iterator</a>&amp; other)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keywordflow">return</span> m_pNode != other.m_pNode;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a76e2bb25566fc2bbc0e7f67aa424c915">  107</a></span>      GAIA_NODISCARD <span class="keywordtype">bool</span> <a class="code hl_function" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html#a76e2bb25566fc2bbc0e7f67aa424c915">operator!=</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structgaia_1_1cnt_1_1fwd__llist__iterator.html">iterator</a>&amp; <a class="code hl_class" href="classgaia_1_1cnt_1_1darr.html">other</a>)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keywordflow">return</span> m_pNode != <a class="code hl_class" href="classgaia_1_1cnt_1_1darr.html">other</a>.m_pNode;</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>      }</div>
 </div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    };</div>
@@ -324,7 +324,7 @@ $(document).ready(function(){initNavTree('fwd__llist_8h_source.html',''); initRe
 </div>
 <div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>  } <span class="comment">// namespace cnt</span></div>
 <div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>} <span class="comment">// namespace gaia</span></div>
-<div class="ttc" id="aclassgaia_1_1cnt_1_1darr_html"><div class="ttname"><a href="classgaia_1_1cnt_1_1darr.html">gaia::cnt::darr</a></div><div class="ttdoc">Array with variable size of elements of type.</div><div class="ttdef"><b>Definition</b> darray_impl.h:27</div></div>
+<div class="ttc" id="aclassgaia_1_1cnt_1_1darr_html"><div class="ttname"><a href="classgaia_1_1cnt_1_1darr.html">gaia::cnt::darr</a></div><div class="ttdoc">Array with variable size of elements of type.</div><div class="ttdef"><b>Definition</b> darray_impl.h:28</div></div>
 <div class="ttc" id="astructgaia_1_1cnt_1_1fwd__llist__base_html"><div class="ttname"><a href="structgaia_1_1cnt_1_1fwd__llist__base.html">gaia::cnt::fwd_llist_base</a></div><div class="ttdoc">Each fwd_llist node either has to inherit from fwd_llist_base or it has to provide get_fwd_llist_link...</div><div class="ttdef"><b>Definition</b> fwd_llist.h:29</div></div>
 <div class="ttc" id="astructgaia_1_1cnt_1_1fwd__llist__base_html_a2f48a015f7f70c479a2252ead05c48e2"><div class="ttname"><a href="structgaia_1_1cnt_1_1fwd__llist__base.html#a2f48a015f7f70c479a2252ead05c48e2">gaia::cnt::fwd_llist_base::get_fwd_llist_link</a></div><div class="ttdeci">fwd_llist_link&lt; T &gt; &amp; get_fwd_llist_link()</div><div class="ttdoc">Returns the mutable intrusive link.</div><div class="ttdef"><b>Definition</b> fwd_llist.h:35</div></div>
 <div class="ttc" id="astructgaia_1_1cnt_1_1fwd__llist__base_html_a6cbb565b0dc96c5dc001482e7c48d5ec"><div class="ttname"><a href="structgaia_1_1cnt_1_1fwd__llist__base.html#a6cbb565b0dc96c5dc001482e7c48d5ec">gaia::cnt::fwd_llist_base::get_fwd_llist_link</a></div><div class="ttdeci">const fwd_llist_link&lt; T &gt; &amp; get_fwd_llist_link() const</div><div class="ttdoc">Returns the immutable intrusive link.</div><div class="ttdef"><b>Definition</b> fwd_llist.h:40</div></div>
@@ -356,7 +356,7 @@ $(document).ready(function(){initNavTree('fwd__llist_8h_source.html',''); initRe
 <div class="ttc" id="astructgaia_1_1cnt_1_1fwd__llist_html_aebaf28e6f321f22ea4b81c95c49cb258"><div class="ttname"><a href="structgaia_1_1cnt_1_1fwd__llist.html#aebaf28e6f321f22ea4b81c95c49cb258">gaia::cnt::fwd_llist::end</a></div><div class="ttdeci">fwd_llist_iterator&lt; T &gt; end()</div><div class="ttdoc">Returns the mutable end sentinel.</div><div class="ttdef"><b>Definition</b> fwd_llist.h:213</div></div>
 <div class="ttc" id="astructgaia_1_1cnt_1_1fwd__llist_html_aee033689256f6ddf2dcfb831d35760d5"><div class="ttname"><a href="structgaia_1_1cnt_1_1fwd__llist.html#aee033689256f6ddf2dcfb831d35760d5">gaia::cnt::fwd_llist::end</a></div><div class="ttdeci">fwd_llist_iterator&lt; const T &gt; end() const</div><div class="ttdoc">Returns the const end sentinel.</div><div class="ttdef"><b>Definition</b> fwd_llist.h:219</div></div>
 <div class="ttc" id="astructgaia_1_1cnt_1_1fwd__llist_html_aff0555f68a1d076a1f15abada91a850e"><div class="ttname"><a href="structgaia_1_1cnt_1_1fwd__llist.html#aff0555f68a1d076a1f15abada91a850e">gaia::cnt::fwd_llist::clear</a></div><div class="ttdeci">void clear()</div><div class="ttdoc">Clears the list.</div><div class="ttdef"><b>Definition</b> fwd_llist.h:125</div></div>
-<div class="ttc" id="astructgaia_1_1core_1_1forward__iterator__tag_html"><div class="ttname"><a href="structgaia_1_1core_1_1forward__iterator__tag.html">gaia::core::forward_iterator_tag</a></div><div class="ttdef"><b>Definition</b> iterator.h:12</div></div>
+<div class="ttc" id="astructgaia_1_1core_1_1forward__iterator__tag_html"><div class="ttname"><a href="structgaia_1_1core_1_1forward__iterator__tag.html">gaia::core::forward_iterator_tag</a></div><div class="ttdef"><b>Definition</b> iterator.h:13</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

@@ -30,7 +30,12 @@ var structgaia_1_1ecs_1_1QueryCtx =
       [ "SingleAllDirect", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063cafcaca7329ff24b8a2ec74fa08d5125c7", null ],
       [ "SingleAllSemanticIs", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063cacd9add9c689290bb177b817ea41963e4", null ],
       [ "SingleAllInIs", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063caf444b0e1e2aa950729534c1a4df7debb", null ],
-      [ "SingleAllInherited", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063cae81c4d5a37f341121c0220f9e998caed", null ]
+      [ "SingleAllInherited", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063cae81c4d5a37f341121c0220f9e998caed", null ],
+      [ "SingleAllDirectMixed", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063ca2ee63533de1302af77d6f265aa9a52e5", null ],
+      [ "SingleAllDirectMixedDirect", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063ca3c10d5fabb6c6e9f1060b826b508d628", null ],
+      [ "SingleAllSemanticIsMixed", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063ca0999f998b9e45c346d8954e45269d07e", null ],
+      [ "SingleAllInIsMixed", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063cae92c9bdc74c1afc1aadf2a32f369f808", null ],
+      [ "SingleAllInheritedMixed", "structgaia_1_1ecs_1_1QueryCtx.html#ab8166867f88443ab6730b17e3e3b063ca7052d45fb9edbd849118176e0312521c", null ]
     ] ],
     [ "DynamicCacheKind", "structgaia_1_1ecs_1_1QueryCtx.html#adb9e3e7d3f0ff86c236849de7c619ee6", [
       [ "None", "structgaia_1_1ecs_1_1QueryCtx.html#adb9e3e7d3f0ff86c236849de7c619ee6a6adf97f83acf6453d4a6a4b1070f3754", null ],
@@ -50,7 +55,9 @@ var structgaia_1_1ecs_1_1QueryCtx =
       [ "HasVariableTerms", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aac9ee9a6ed8a0013fc0314f09cc856386", null ],
       [ "MatchPrefab", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa215832865698b1b73c8f68e54605ff66", null ],
       [ "HasPrefabTerms", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa06582455bf05bd8cfad9ddf4127e7d59", null ],
-      [ "OrderGroups", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa5cd29e78d8ddc77a98f09c9e822a2a80", null ]
+      [ "OrderGroups", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa5cd29e78d8ddc77a98f09c9e822a2a80", null ],
+      [ "HasMatchTerms", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aaf409bc85d21b5276ca8f25ff752f9dbd", null ],
+      [ "HasPairTerms", "structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aabc672a58ae67b544dcb4376b3903ab8d", null ]
     ] ],
     [ "equals_no_handle_assumption", "structgaia_1_1ecs_1_1QueryCtx.html#abbcce5017137595a7a0eafa578983f96", null ],
     [ "init", "structgaia_1_1ecs_1_1QueryCtx.html#af22f5a7d339ad8e72b4ffd4aa165756b", null ],

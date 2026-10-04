@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -1317,10 +1317,11 @@ The pointed-to context must remain alive until the returned handle completes. </
 <p>Wait until a job associated with the jobHandle finishes executing. Cleans up any job allocations and dependencies associated with <em>jobHandle</em>. The calling thread participates in frame job processing until <em>jobHandle</em> is done. For background jobs, the calling thread only runs background work when no background workers are configured. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">jobHandle</td><td><a class="el" href="structgaia_1_1mt_1_1Job.html" title="Callable and scheduling options for a single job.">Job</a> handle to wait for </td></tr>
+    <tr><td class="paramname">jobHandle</td><td><a class="el" href="structgaia_1_1mt_1_1Job.html" title="Callable and scheduling options for a single job.">Job</a> handle to wait for. </td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section warning"><dt>Warning</dt><dd>Must be called from the effective main thread. </dd></dl>
 
 </div>
 </div>

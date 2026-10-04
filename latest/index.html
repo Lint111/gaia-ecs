@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -170,6 +170,7 @@ Table of Contents</h1>
 <li><a class="el" href="index.html#uncached-query">Uncached query</a></li>
 <li><a class="el" href="index.html#query-remarks">Query remarks</a></li>
 <li><a class="el" href="index.html#iteration">Iteration</a></li>
+<li><a class="el" href="index.html#iterate-ids">Iterate ids</a></li>
 <li><a class="el" href="index.html#constraints">Constraints</a></li>
 <li><a class="el" href="index.html#change-detection">Change detection</a></li>
 <li><a class="el" href="index.html#grouping">Grouping</a></li>
@@ -190,7 +191,7 @@ Table of Contents</h1>
 <li><a class="el" href="index.html#hierarchies">Hierarchies</a></li>
 </ul>
 </li>
-<li><a class="el" href="index.html#unique-components">Unique components</a></li>
+<li><a class="el" href="index.html#shared-data">Shared data</a></li>
 <li><a class="el" href="index.html#delayed-execution">Delayed execution</a><ul>
 <li><a class="el" href="index.html#command-merging-rules">Command Merging rules</a></li>
 </ul>
@@ -224,6 +225,7 @@ Table of Contents</h1>
 </ul>
 </li>
 <li><a class="el" href="index.html#multithreading">Multithreading</a><ul>
+<li><a class="el" href="index.html#worlds-threads-and-allocation-arenas">Worlds, threads, and allocation arenas</a></li>
 <li><a class="el" href="index.html#jobs">Jobs</a></li>
 <li><a class="el" href="index.html#job-dependencies">Job dependencies</a></li>
 <li><a class="el" href="index.html#priorities">Priorities</a></li>
@@ -245,6 +247,7 @@ Table of Contents</h1>
 <li><a class="el" href="index.html#installation">Installation</a><ul>
 <li><a class="el" href="index.html#cmake">CMake</a><ul>
 <li><a class="el" href="index.html#project-settings">Project settings</a></li>
+<li><a class="el" href="index.html#debug-builds">Debug builds</a></li>
 <li><a class="el" href="index.html#sanitizers">Sanitizers</a></li>
 <li><a class="el" href="index.html#single-header">Single-header</a></li>
 </ul>
@@ -519,24 +522,32 @@ Selecting a storage mode</h4>
 <div class="line">w.add&lt;Cooldown&gt;(e);</div>
 <div class="line"><span class="keyword">auto</span> cooldownValue = w.set&lt;Cooldown&gt;(e);</div>
 <div class="line">cooldownValue.value = 1.5f;</div>
-</div><!-- fragment --><p><code>GAIA_STORAGE(Table)</code> is the default and usually does not need to be written. A typed component's declared policy is authoritative: adding <code>ecs::Sparse</code> or <code>ecs::DontFragment</code> to a typed table component does not change its storage. Runtime component descriptors can still select their storage mode before instances are attached.</p>
+</div><!-- fragment --><p><code>GAIA_STORAGE(Table)</code> is the default and usually does not need to be written. A typed component's declared payload storage is authoritative for data-bearing structs: adding <code>ecs::Sparse</code> or <code>ecs::DontFragment</code> to a typed table payload such as <code>Position</code> does not change its storage. Empty tags are the exception. They can latch <code>ecs::DontFragment</code> after registration and before any instances exist. Runtime component descriptors can still select their storage mode before instances are attached.</p>
 <h4><a class="anchor" id="non-fragmenting-membership"></a>
 Non-fragmenting membership</h4>
-<p><code>ecs::DontFragment</code> controls archetype membership, not payload storage. It keeps the component id outside the entity's archetype, so adding or removing the component does not move the entity between archetypes. Typed non-fragmenting components must declare <code>GAIA_STORAGE(Sparse)</code> because table payloads require an archetype column.</p>
-<div class="fragment"><div class="line"><span class="keyword">struct </span>Cooldown {</div>
-<div class="line">  GAIA_STORAGE(Sparse);</div>
+<p><code>ecs::DontFragment</code> controls archetype membership, not payload storage. It keeps the component id outside the entity's archetype, so adding or removing the component does not move the entity between archetypes.</p>
+<p>Empty tags do not need <code>Sparse</code>. Declare <code>GAIA_STORAGE(DontFragment)</code>, or call <code>world.add(componentEntity, ecs::DontFragment)</code> immediately after registration and before any instances exist. Data-bearing AoS structs that should stay outside archetype identity declare <code>GAIA_STORAGE(DontFragment)</code> (sparse payload plus non-fragmenting membership) or <code>GAIA_STORAGE(Sparse)</code> plus a runtime <code>DontFragment</code> latch. Table payloads still require an archetype column, so a typed table data component cannot become non-fragmenting at runtime.</p>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>Pending {</div>
+<div class="line">  GAIA_STORAGE(DontFragment);</div>
+<div class="line">};</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">struct </span>Cooldown {</div>
+<div class="line">  GAIA_STORAGE(DontFragment);</div>
 <div class="line">  <span class="keywordtype">float</span> value = 0.0f;</div>
 <div class="line">};</div>
 <div class="line"> </div>
 <div class="line">ecs::World w;</div>
-<div class="line"><span class="keyword">const</span> <span class="keyword">auto</span>&amp; cooldown = w.add&lt;Cooldown&gt;();</div>
-<div class="line"><span class="comment">// Keep Cooldown membership outside archetype identity.</span></div>
-<div class="line">w.add(cooldown.entity, ecs::DontFragment);</div>
-<div class="line"> </div>
 <div class="line"><span class="keyword">auto</span> e = w.add();</div>
+<div class="line">w.add&lt;Pending&gt;(e);</div>
 <div class="line">w.add&lt;Cooldown&gt;(e);</div>
 <div class="line"><span class="keyword">auto</span> cooldownValue = w.set&lt;Cooldown&gt;(e);</div>
 <div class="line">cooldownValue.value = 1.5f;</div>
+</div><!-- fragment --><p>An empty tag without a compile-time declaration can still latch before instances exist:</p>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>Pending {};</div>
+<div class="line"> </div>
+<div class="line">ecs::World w;</div>
+<div class="line"><span class="keyword">const</span> <span class="keyword">auto</span>&amp; pending = w.add&lt;Pending&gt;();</div>
+<div class="line">w.add(pending.entity, ecs::DontFragment);</div>
 </div><!-- fragment --><p>The resulting configurations are:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -546,20 +557,30 @@ Non-fragmenting membership</h4>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>GAIA_STORAGE(Sparse)</code>   </td><td class="markdownTableBodyNone"><code>Sparse</code>   </td><td class="markdownTableBodyNone">In archetype   </td><td class="markdownTableBodyNone">Yes    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>GAIA_STORAGE(Sparse)</code> + <code>DontFragment</code>   </td><td class="markdownTableBodyNone"><code>Sparse</code>   </td><td class="markdownTableBodyNone">Outside archetype   </td><td class="markdownTableBodyNone">No   </td></tr>
+<td class="markdownTableBodyNone"><code>GAIA_STORAGE(Sparse)</code> + <code>DontFragment</code>   </td><td class="markdownTableBodyNone"><code>Sparse</code>   </td><td class="markdownTableBodyNone">Outside archetype   </td><td class="markdownTableBodyNone">No    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>GAIA_STORAGE(DontFragment)</code> empty tag   </td><td class="markdownTableBodyNone"><code>Table</code> (size 0)   </td><td class="markdownTableBodyNone">Outside archetype   </td><td class="markdownTableBodyNone">No    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone">empty tag + runtime <code>DontFragment</code> before instances   </td><td class="markdownTableBodyNone"><code>Table</code> (size 0)   </td><td class="markdownTableBodyNone">Outside archetype   </td><td class="markdownTableBodyNone">No    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>GAIA_STORAGE(DontFragment)</code> AoS payload   </td><td class="markdownTableBodyNone"><code>Sparse</code>   </td><td class="markdownTableBodyNone">Outside archetype   </td><td class="markdownTableBodyNone">No   </td></tr>
 </table>
+<p>Data-bearing relationships use the same payload/membership split. When the payload type of an exact <code>(relation, target)</code> pair uses sparse storage, Gaia keeps one separate sparse payload store for that exact pair. The pair id still participates in the entity's archetype identity. This preserves normal relationship query matching without putting the payload in a chunk column. For an <code>Exclusive</code> relation marked <code>DontFragment</code>, both pair membership and its sparse payload stay outside the archetype, so changing the target does not move the source entity.</p>
+<p>Empty <code>Exclusive</code>+<code>DontFragment</code> ids such as <code>Parent</code> and <code>OnInstantiate</code> remain relation traits. They do not take the empty-tag membership path.</p>
 <p>Rule of thumb:</p><ul>
 <li>Keep hot, common, frequently iterated data in table storage.</li>
 <li>Use <code>Sparse</code> when the payload needs a stable address, but the component should still participate in archetype identity.</li>
-<li>Use <code>GAIA_STORAGE(Sparse)</code> with <code>DontFragment</code> for frequently toggled typed optional state such as cooldowns, temporary status effects, markers, or runtime tool state.</li>
+<li>Use <code>GAIA_STORAGE(DontFragment)</code> for empty optional markers and for typed optional AoS state such as cooldowns, temporary status effects, or runtime tool state.</li>
+<li>Queries whose required terms include a <code>DontFragment</code> id use entity-seed matching, same as other non-fragmenting ids. Queries that only exclude a <code>DontFragment</code> id still walk the table neighbor and apply per-entity filters. Adding the tag is cheap because the archetype does not change. Iterating or counting those tags is slower than iterating an archetype-resident empty tag. <code>count()</code>, <code>arr()</code>, typed <code>each()</code>, and <code>Iter&amp; each()</code> all use the same filters, so <code>it.size()</code> and chunk views cover only matching rows. <code>changed()</code> on an empty <code>DontFragment</code> tag uses the same chunk-granular entity-order signal as other non-fragmenting ids.</li>
+<li><code>GAIA_STORAGE(Sparse)</code> plus a runtime <code>DontFragment</code> latch is equivalent for data-bearing AoS payloads.</li>
 <li>Avoid sparse storage for components such as <code>Position</code> or <code>Velocity</code> that benefit from sequential table access, unless profiling justifies it.</li>
 </ul>
 <p>Directly adding or removing an already-registered <code>DontFragment</code> component is safe during serial query iteration because the entity does not move to another archetype. If the active query filters on that component, later rows are matched against the current world state rather than a snapshot taken before iteration.</p>
 <p>&gt;<b>NOTE:<br  />
-</b> SoA components do not support sparse storage and remain in table storage. <code>GAIA_STORAGE(Sparse)</code> and <code>ecs::Sparse</code> apply only to plain AoS generic components.<br  />
+</b> Component layout and storage follow the same rules for ordinary components and relationship payloads. Table storage supports AoS and SoA layouts. Sparse storage is intended for individually addressed payloads and supports only plain AoS components. <code>GAIA_STORAGE(Sparse)</code>, <code>GAIA_STORAGE(DontFragment)</code>, and <code>ecs::Sparse</code> cannot be combined with a SoA layout.<br  />
 </p>
 <p>&gt;<b>NOTE:<br  />
-</b> Runtime component storage and fragmentation traits must be set before the component has instances attached to entities. They do not override a typed component's <code>GAIA_STORAGE</code> policy.<br  />
+</b> Runtime component storage and fragmentation traits must be set before the component has instances attached to entities. They do not override a typed data component's <code>GAIA_STORAGE</code> policy. Empty tags may still latch <code>ecs::DontFragment</code> before instances exist.<br  />
 </p>
 <p>&gt;<b>NOTE:<br  />
 </b> Once a component is marked <code>ecs::Sparse</code> or <code>ecs::DontFragment</code>, it stays that way. Both entities carry the <a class="el" href="index.html#entity-dependencies">ecs::Requires trait</a>.<br  />
@@ -679,11 +700,23 @@ Observers</h3>
 <p>Because observers are query-backed, query shaping helpers such as <code>depth_order(...)</code> can be used on them as well when you want cached top-down breadth-first iteration over fragmenting hierarchies like <code>ChildOf</code>.</p>
 <p>Observers also expose the same query cache controls as plain queries. By default an observer keeps cached query state locally. Use <code>scope(ecs::QueryCacheScope::Shared)</code> only when many identical observer query shapes are rebuilt and you want them to reuse one shared cache entry. Use <code>kind(ecs::QueryCacheKind::None)</code> only for special cases where you explicitly do not want observer query caches.</p>
 <p>Observer events currently mean:</p><ul>
-<li><code>OnAdd</code> - an entity starts matching because ids were added</li>
-<li><code>OnDel</code> - an entity stops matching because ids were removed</li>
+<li><code>OnAdd</code> - observe the query's add-side event. A negative term maps removal of its excluded id to this event</li>
+<li><code>OnDel</code> - observe the query's delete-side event. A negative term maps addition of its excluded id to this event</li>
 <li><code>OnSet</code> - a value of an already present component was explicitly written</li>
 </ul>
-<p><code>OnSet</code> is triggered by APIs such as <code>set&lt;T&gt;(entity)</code>, <code>set&lt;T&gt;(entity, object)</code>, <code>acc_mut(entity).set&lt;T&gt;(...)</code>, <code>modify&lt;T, true&gt;(entity)</code>, and <code>modify&lt;T, true&gt;(entity, object)</code>. It is not triggered by <code>sset(...)</code>, <code>modify&lt;T, false&gt;(...)</code>, or by the initial <code>add&lt;T&gt;(entity, value)</code> that creates the component.</p>
+<p>Use <code>.monitor()</code> when the callback must run only when the complete query changes from unmatched to matched or from matched to unmatched. The callback reads the actual transition from <code>it.event()</code>: <code>OnAdd</code> means the entity entered the result and <code>OnDel</code> means it left. Monitoring observers evaluate membership before and after a relevant structural change, so they cost more than ordinary event observers.</p>
+<div class="fragment"><div class="line">w.observer()</div>
+<div class="line">  .monitor()</div>
+<div class="line">  .all&lt;Position&gt;()</div>
+<div class="line">  .no&lt;Frozen&gt;()</div>
+<div class="line">  .on_each([](ecs::Iter&amp; it) {</div>
+<div class="line">    <span class="keywordflow">if</span> (it.event() == ecs::ObserverEvent::OnAdd) {</div>
+<div class="line">      <span class="comment">// The entity now matches both terms.</span></div>
+<div class="line">    } <span class="keywordflow">else</span> {</div>
+<div class="line">      <span class="comment">// The entity no longer matches both terms.</span></div>
+<div class="line">    }</div>
+<div class="line">  });</div>
+</div><!-- fragment --><p><code>OnSet</code> is triggered by APIs such as <code>set&lt;T&gt;(entity)</code>, <code>set&lt;T&gt;(entity, object)</code>, <code>acc_mut(entity).set&lt;T&gt;(...)</code>, <code>modify&lt;T, true&gt;(entity)</code>, and <code>modify&lt;T, true&gt;(entity, object)</code>. It is not triggered by <code>sset(...)</code>, <code>modify&lt;T, false&gt;(...)</code>, or by the initial <code>add&lt;T&gt;(entity, value)</code> that creates the component.</p>
 <p><code>set&lt;T&gt;(entity)</code> uses a write-back proxy, so <code>OnSet</code> is emitted after the full expression or scope writes the final value back.</p>
 <p>Mutable query and observer callbacks follow the same rule. When a callback writes through <code>Position&amp;</code> or <code>it.view_mut&lt;Position&gt;()</code>, <code>OnSet</code> is emitted after the callback returns, not in the middle of the callback.</p>
 <p>Following is an observer that generates an OnAdd event every time some entity is added Position and Velocity.</p>
@@ -863,7 +896,7 @@ Set or get component value</h3>
 <div class="line"><span class="comment">// The proxy went out of scope, so the new value is now stored.</span></div>
 <div class="line"><span class="keyword">const</span> <span class="keyword">auto</span>&amp; updated = w.get&lt;Position&gt;(e);</div>
 <div class="line"><span class="comment">// updated is {10, 20, 30}</span></div>
-</div><!-- fragment --><p>If you need the write to happen immediately, use <code>acc_mut(entity).set&lt;T&gt;(...)</code> instead of <code>w.set&lt;T&gt;(entity)</code>. For runtime object/component entities, the immediate form is <code>acc_mut(entity).set&lt;T&gt;(object, value)</code>.</p>
+</div><!-- fragment --><p>If you need the write to happen immediately, use <code>acc_mut(entity).set&lt;T&gt;(...)</code> instead of <code>w.set&lt;T&gt;(entity)</code>. For runtime object/component entities, the immediate form is <code>acc_mut(entity).set&lt;T&gt;(object, value)</code>. Typed entity accessors also support <code>GAIA_STORAGE(Sparse)</code> and <code>GAIA_STORAGE(DontFragment)</code> payloads: <code>acc(entity).get&lt;T&gt;()</code> reads their sparse storage, and <code>acc_mut(entity).set&lt;T&gt;(value)</code> writes immediately, updates changed-query tracking, and emits <code>OnSet</code> after the write. <code>mut&lt;T&gt;()</code>, <code>smut&lt;T&gt;()</code>, and <code>sset&lt;T&gt;(value)</code> remain silent, matching the component-ID accessor overloads.</p>
 <p>When setting multiple component values at once it is more efficient doing it via chaining:</p>
 <div class="fragment"><div class="line">w.acc_mut(e)</div>
 <div class="line"><span class="comment">// Change Velocity&#39;s value on entity &quot;e&quot;</span></div>
@@ -925,7 +958,8 @@ Copy entity</h3>
 <div class="line"><span class="comment">// Value of Position on &quot;e2&quot; will be {0, 100, 0}.</span></div>
 <div class="line"><span class="comment">// Value of Velocity on &quot;e2&quot; will be {0, 0, 1}.</span></div>
 <div class="line">ecs::Entity e2 = w.copy(e);</div>
-</div><!-- fragment --> <h3><a class="anchor" id="entity-cleanup"></a>
+</div><!-- fragment --><p><code>copy</code>, <code>copy_n</code>, <code>copy_ext</code>, and <code>copy_ext_n</code> clone into new ordinary entities. An exact pair record can be the source. The destination receives the pair's components, sparse payloads, and non-fragmenting relation pairs, but not the pair identity.</p>
+<h3><a class="anchor" id="entity-cleanup"></a>
 Entity cleanup</h3>
 <p>Anything attached to an entity can be easily removed using <code>World::clear</code>. This is useful when you need to quickly reset your entity and still want to keep your Entity's id (deleting the entity would mean that as some point it could be recycled and its id could be used by some newly created entity).</p>
 <div class="fragment"><div class="line">ecs::Entity e = w.add();</div>
@@ -955,7 +989,9 @@ Batched creation</h3>
 <div class="line">w.add(e, velocity, Velocity{0, 0, 1});</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Create 1000 more entities like &quot;e&quot;.</span></div>
-<div class="line"><span class="comment">// Their component values are not initialized to any particular value.</span></div>
+<div class="line"><span class="comment">// Table component values are not copied. Non-fragmenting ids (DontFragment tags,</span></div>
+<div class="line"><span class="comment">// DontFragment payloads, and relation pairs such as ChildOf) are copied.</span></div>
+<div class="line"><span class="comment">// Fragmenting sparse ids receive a default payload. Names are not copied.</span></div>
 <div class="line">w.add_n(e, 1000);</div>
 <div class="line">w.add_n(e, 1000, [](Entity newEntity) {</div>
 <div class="line">  <span class="comment">// Do something with the new entity</span></div>
@@ -1018,7 +1054,27 @@ SafeEntity</h4>
 <div class="line"><span class="comment">// Internally, w.del(player) is called.</span></div>
 <div class="line"><span class="comment">// ... it&#39;s not safe to use player at this point anymore.</span></div>
 <div class="line"><span class="keywordtype">bool</span> isValid = w.valid(player); <span class="comment">// false</span></div>
-</div><!-- fragment --><p>ecs::SafeEntity is fully compatible with ecs::Entity and can be used just like it in all scenarios.</p>
+</div><!-- fragment --><p>A <a class="el" href="index.html#cleanup-rules">cleanup rule</a> that deletes the entity along with something else, such as its <code>ChildOf</code> parent, deletes its components even while an <code>ecs::SafeEntity</code> references it. The entity is no longer valid, but its record stays reserved until the last <code>ecs::SafeEntity</code> goes out of scope, so the wrapper never touches a recycled entity.</p>
+<p>An <code>ecs::SafeEntity</code> on a pair also holds its relation and its target. A pair id names its endpoints by id only, so the pair can only stay valid while both endpoints do, and while their ids cannot name anything else.</p>
+<div class="fragment"><div class="line">ecs::World w;</div>
+<div class="line">ecs::Entity likes = w.add();</div>
+<div class="line">ecs::Entity apples = w.add();</div>
+<div class="line">ecs::Entity player = w.add();</div>
+<div class="line">w.add(player, ecs::Pair(likes, apples));</div>
+<div class="line">{</div>
+<div class="line">  <span class="keyword">auto</span> pairSafe = ecs::SafeEntity(w, ecs::Pair(likes, apples));</div>
+<div class="line">  <span class="comment">// Deleting an endpoint waits for pairSafe, the same way deleting the pair would.</span></div>
+<div class="line">  w.del(likes);</div>
+<div class="line">  <span class="keywordtype">bool</span> isValid = w.valid(likes); <span class="comment">// true</span></div>
+<div class="line">  <span class="keywordtype">bool</span> hasPair = w.has(player, ecs::Pair(likes, apples)); <span class="comment">// true</span></div>
+<div class="line">}</div>
+<div class="line"><span class="comment">// pairSafe released its references. likes is deleted, and the pair with it.</span></div>
+<div class="line"><span class="keywordtype">bool</span> isValid = w.valid(likes); <span class="comment">// false</span></div>
+</div><!-- fragment --><p>A cleanup rule that deletes an endpoint deletes the pair as well, removing it from every entity that has it. As with an entity, the endpoint's and the pair's records stay reserved until the last <code>ecs::SafeEntity</code> goes out of scope, so no new entity reusing the endpoint's id can match the old pair.</p>
+<p>Just like an entity holding an <code>ecs::SafeEntity</code> on itself, an entity holding an <code>ecs::SafeEntity</code> on a pair that names it keeps itself alive against <code>del()</code>. Only a cleanup rule, or releasing the handle, deletes it.</p>
+<p><code>ecs::SafeEntity</code> can live inside a component. Cleaning up or destroying the world drops such references without deleting anything. When destroying such a component releases the last reference, for example because its entity is deleted or the component is removed, the entity it held is deleted once the operation that destroyed the component is done: right after the outermost <code>del()</code> returns, otherwise at the next <code>update()</code>. The same applies to a reference released inside query iteration.</p>
+<p>Saving a world does not save <code>ecs::SafeEntity</code> references. A handle stored in a component loads empty. After loading, an entity can be deleted normally whatever held it before, an entity whose deletion waited for handles loads as a live entity, and one a cleanup rule already deleted finishes deleting at the next <code>update()</code>. An <code>ecs::SafeEntity</code> held outside the world must go out of scope before the world is cleaned up or destroyed. Unlike <code>ecs::WeakEntity</code>, it is not tracked, so it cannot be reset and would release a reference on whatever entity later reuses its id, or on a world that no longer exists.</p>
+<p>ecs::SafeEntity is fully compatible with ecs::Entity and can be used just like it in all scenarios.</p>
 <div class="fragment"><div class="line">ecs::World w;</div>
 <div class="line">ecs::Entity player = w.add();</div>
 <div class="line"><span class="keyword">auto</span> playerSafe = ecs::SafeEntity(w, player);</div>
@@ -1051,6 +1107,8 @@ WeakEntity</h4>
 </div><!-- fragment --><p>Technically, <code>ecs::WeakEntity</code> is almost the same thing as <code>ecs::Entity</code> with one nuance difference. Because entity ids are recycled, in theory, <code>ecs::Entity</code> left lying around somewhere could end up being multiple different things over time. This is not an issue with <code>ecs::WeakEntity</code> because the moment the entity linked with it gets deleted, it is reset to <code>ecs::EntityBad</code>.</p>
 <p>This is an edge-case scenario, unlikely to happen even, but should you ever need it <code>ecs::WeakEntity</code> is there to help. If you decided to change the amount of bits allocated to <code>Entity::gen</code> to a lower number you will increase the likelihood of double-recycling happening and increase usefulness of <code>ecs::WeakEntity</code>.</p>
 <p>A more useful use case, however, would be if you need an entity identifier that gets automatically reset when the entity gets deleted without any setup necessary from your end. Certain situations can be complex and using <code>ecs::WeakEntity</code> just might be the one way for you to address them.</p>
+<p><code>ecs::WeakEntity</code> can live inside a component, including a component that references its own entity. Deleting that entity destroys the component and resets every other <code>ecs::WeakEntity</code> pointing at it in the same step.</p>
+<p>Cleaning up or destroying the world resets every <code>ecs::WeakEntity</code> that points into it, including ones held outside the world, so none of them can later match a recycled entity.</p>
 <h3><a class="anchor" id="archetype-lifespan"></a>
 Archetype lifespan</h3>
 <p>Once all entities of given archetype are deleted (and as a result all chunks in the archetypes are empty), the archetype stays alive for another 127 ticks of <code>ecs::World::update</code>. However, there might be cases where this behavior is insufficient. Maybe you want the archetype deleted faster, or you want to keep it around forever.</p>
@@ -1111,7 +1169,8 @@ Query</h3>
 <div class="line">    pos[i].z += vel[i].z * settings-&gt;dt;</div>
 <div class="line">  }</div>
 <div class="line">});</div>
-</div><!-- fragment --><p>Queries also expose scheduling access metadata. Positive query terms already describe component reads and writes (<code>all&lt;const T&gt;()</code>/<code>or_&lt;const T&gt;()</code> read, <code>all&lt;T&amp;&gt;()</code>/<code>or_&lt;T&amp;&gt;()</code> write). If the callback touches data outside the query shape, declare it explicitly with <code>reads(Entity)</code>, <code>writes(Entity)</code>, or the typed adapters <code>reads&lt;T&gt;()</code> / <code>writes&lt;T&gt;()</code>. Use <code>main_thread()</code> for callbacks that are not safe to run on worker threads even when component access would otherwise allow it. These declarations are metadata only: they do not change query matching, hashing, shared-cache identity, or cache invalidation.</p>
+</div><!-- fragment --><p><a class="anchor" id="query-access"></a></p>
+<p>Queries also expose scheduling access metadata. <code>all()</code>, <code>or_()</code>, and <code>any()</code> terms with payload infer read access from value or const types and write access from mutable references. Optional terms declare access even when no matching entity currently has the component. If the callback touches data outside the query shape, declare it explicitly with <code>reads(Entity)</code>, <code>writes(Entity)</code>, or the typed adapters <code>reads&lt;T&gt;()</code> / <code>writes&lt;T&gt;()</code>. Use <code>main_thread()</code> for callbacks that are not safe to run on worker threads even when component access would otherwise allow it. The <code>reads()</code>, <code>writes()</code>, and <code>main_thread()</code> declarations only affect scheduling metadata. They do not change query matching, hashing, shared-cache identity, or cache invalidation.</p>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> move = w.query()</div>
 <div class="line">  .all&lt;Position&amp;&gt;()</div>
 <div class="line">  .all&lt;const Velocity&gt;();</div>
@@ -1127,7 +1186,27 @@ Query</h3>
 <div class="line"><span class="keywordflow">if</span> (!move.can_run_parallel(bounds)) {</div>
 <div class="line">  <span class="comment">// Add a dependency or keep one of the jobs on the serial path.</span></div>
 <div class="line">}</div>
-</div><!-- fragment --><p>Two queries conflict when both access the same id and at least one side writes it. Pair query terms are treated as matching/filtering metadata and do not imply component data access; if a pair id is used as an external scheduling key, declare it explicitly with <code>reads(pairEntity)</code> or <code>writes(pairEntity)</code>.</p>
+</div><!-- fragment --><p>Two queries conflict when both access the same component or pair and at least one side writes it. Empty tags, entity IDs used as tags, and exact pairs without payload automatically use presence-only access. Pairs with payload infer read/write access like components. Wildcard and variable pairs keep their declared access because unresolved endpoints may carry data. Their scheduling conflicts include any overlapping pair access.</p>
+<p>Use <code>.no_access()</code> after an <code>all()</code>, <code>or_()</code>, or <code>any()</code> term to match a component without reading or writing its data. It sets only the preceding term's access to <code>QueryAccess::Match</code> and leaves matching unchanged. The term declares no data access, so it does not conflict with a writer of the component. System builders support the same modifier.</p>
+<div class="fragment"><div class="line"><span class="keyword">auto</span> move = w.query()</div>
+<div class="line">  .all&lt;Position&amp;&gt;() <span class="comment">// Read and write Position.</span></div>
+<div class="line">  .all&lt;const Acceleration&gt;().no_access() <span class="comment">// Require Acceleration without reading its data.</span></div>
+<div class="line">  .all&lt;<span class="keyword">const</span> Velocity&gt;(); <span class="comment">// Read Velocity.</span></div>
+<div class="line"> </div>
+<div class="line">move.each([](Position&amp; pos, <span class="keyword">const</span> Velocity&amp; vel) {</div>
+<div class="line">  pos.x += vel.x;</div>
+<div class="line">});</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">struct </span>Selected {};</div>
+<div class="line"><span class="keyword">struct </span>Highlighted {};</div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">auto</span> selectedOrHighlighted = w.query()</div>
+<div class="line">  .or_&lt;Selected&gt;() <span class="comment">// Empty tags automatically use presence-only access.</span></div>
+<div class="line">  .or_&lt;Highlighted&gt;();</div>
+</div><!-- fragment --><p>Apply the modifier while building the query, before calling <code>fetch()</code>, <code>count()</code>, <code>access()</code>, or any execution method. Calling it without a preceding term, after <code>no()</code>, or after compilation is invalid.</p>
+<p>You can also pass <code>QueryTermOptions{}.no_access()</code> to <code>all()</code>, <code>or_()</code>, or <code>any()</code>. This works with source and traversal settings on typed or entity-id terms. Using this option with <code>no()</code> is invalid.</p>
+<p>With <code>GAIA_ASSERT_ENABLED</code>, invalid modifier usage and attempts to access a presence-only term through callback arguments, iterator views, or <code>sort_by&lt;T&gt;()</code> trigger <code>GAIA_ASSERT</code>.</p>
+<p>The <a class="el" href="index.html#query-access">scheduling access declarations above</a> do not allow the query to expose a presence-only term's data. Direct <code>World</code> or <code>Chunk</code> access and structural changes remain the caller's responsibility and must follow the existing iteration and synchronization rules.</p>
 <p>Note, the first Query invocation of a cached query is always slower than the subsequent ones because internals of the Query need to be initialized.</p>
 <h3><a class="anchor" id="simple-query"></a>
 Simple query</h3>
@@ -1171,7 +1250,7 @@ Simple query</h3>
 <div class="line">q2.or_&lt;Something&gt;().or_&lt;SomethingElse&gt;();</div>
 <div class="line"><span class="comment">// ... and no Player component... (no access done for no())</span></div>
 <div class="line">q2.no&lt;Player&gt;();</div>
-</div><!-- fragment --><p>All Query operations can be chained and it is also possible to invoke various filters multiple times with unique components:</p>
+</div><!-- fragment --><p>All Query operations can be chained and it is also possible to invoke various filters multiple times with distinct terms:</p>
 <div class="fragment"><div class="line">ecs::Query q = w.query();</div>
 <div class="line">  <span class="comment">// Take into account everything with Position (mutable access)...</span></div>
 <div class="line">  .all&lt;Position&amp;&gt;()</div>
@@ -1250,9 +1329,28 @@ Simple query</h3>
 <div class="line"> </div>
 <div class="line">ecs::Query qBad = w.query().or_&lt;A&gt;();</div>
 <div class="line">qBad.count(); <span class="comment">// expected (Debug): assertion failure, use all&lt;A&gt;() or any&lt;A&gt;()</span></div>
+</div><!-- fragment --><p><code>empty()</code> returns true when no entities match the query. For an OR query, matching any OR term is enough, but <code>no(...)</code> exclusions and <a class="el" href="index.html#constraints">enabled-state constraints</a> still apply. Only enabled entities are considered by default.</p>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>Selected { GAIA_STORAGE(DontFragment); };</div>
+<div class="line"><span class="keyword">struct </span>Highlighted { GAIA_STORAGE(DontFragment); };</div>
+<div class="line"><span class="keyword">struct </span>Hidden {};</div>
+<div class="line"> </div>
+<div class="line">ecs::World w;</div>
+<div class="line"><span class="keyword">auto</span> q = w.query()</div>
+<div class="line">  .or_&lt;Selected&gt;()</div>
+<div class="line">  .or_&lt;Highlighted&gt;()</div>
+<div class="line">  .no&lt;Hidden&gt;();</div>
+<div class="line"> </div>
+<div class="line">GAIA_ASSERT(q.empty()); <span class="comment">// No matching entities yet.</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">const</span> <span class="keyword">auto</span> e = w.add();</div>
+<div class="line">w.add&lt;Highlighted&gt;(e);</div>
+<div class="line">GAIA_ASSERT(!q.empty()); <span class="comment">// One OR term is enough to match.</span></div>
+<div class="line"> </div>
+<div class="line">w.add&lt;Hidden&gt;(e);</div>
+<div class="line">GAIA_ASSERT(q.empty()); <span class="comment">// The matching entity is now excluded.</span></div>
 </div><!-- fragment --><h3><a class="anchor" id="query-traversal"></a>
 Query traversal</h3>
-<p>More advanced lookup settings are supported via <code>QueryTermOptions</code>. This includes source selection, traversal by relation (<code>ChildOf</code> by default), traversal filtering (<code>trav</code>, <code>trav_up</code>, <code>trav_parent</code>, <code>trav_self_parent</code>, <code>trav_down</code>, <code>trav_child</code>, <code>trav_self_down</code>, <code>trav_self_child</code>, <code>trav_depth</code>), and access type (read or write).</p>
+<p>More advanced lookup settings are supported via <code>QueryTermOptions</code>. This includes source selection, traversal by relation (<code>ChildOf</code> by default), traversal filtering (<code>trav</code>, <code>trav_up</code>, <code>trav_parent</code>, <code>trav_self_parent</code>, <code>trav_down</code>, <code>trav_child</code>, <code>trav_self_down</code>, <code>trav_self_child</code>, <code>trav_depth</code>), and access type (read, write, or presence-only).</p>
 <div class="fragment"><div class="line"><span class="keyword">struct </span>Position {};</div>
 <div class="line"><span class="keyword">struct </span>Level { <span class="keywordtype">int</span> value; };</div>
 <div class="line"> </div>
@@ -1648,6 +1746,8 @@ Uncached query</h3>
 <div class="line">q.each(...) { ... };</div>
 </div><!-- fragment --><h3><a class="anchor" id="query-remarks"></a>
 Query remarks</h3>
+<p><code>World::cleanup()</code> invalidates all previously authored queries, including uncached queries and pending builder commands. Retained query objects become empty builders and cannot alias queries created after cleanup. Their cache settings, user context and main-thread requirements are preserved. Terms, variable names and bindings, explicit access declarations and world-dependent caches are discarded because component and entity ids can be reassigned. Reauthor the terms using the new world's ids before using typed callbacks, or assign a new query from <code>World::query()</code> or <code>World::uquery()</code>. Queries must not outlive their owning <code>World</code>.</p>
+<p>Nested direct queries keep independent deduplication stamps and writable entity snapshots. Calling <code>count()</code>, <code>empty()</code>, <code>arr()</code>, or <code>each()</code> from a callback does not overwrite the outer query's scratch state, including when the nested query uses another world. Scratch storage is reused per thread and active nesting depth. A new depth allocates its slot and grows its buffers on demand.</p>
 <p>Building cache requires memory. Because of that, sometimes it comes handy having the ability to release this data. Calling <code>myQuery.reset()</code> will remove any data allocated by the query. The next time the query is used to fetch results the cache is rebuilt.</p>
 <div class="fragment"><div class="line">q.reset();</div>
 </div><!-- fragment --><p>If this is a cached query, even after resetting it the compiled query state still remains alive. For local queries, destroying that query object releases the private cached state. For shared queries, the shared cache entry stays alive until the last query with the matching signature is destroyed:</p>
@@ -1712,7 +1812,7 @@ Iterating over components not present in the query is not supported and results 
 <li><code>view_raw(termIdx)</code> - read-only raw payload rows for a directly chunk-backed term</li>
 <li><code>view_raw_mut(termIdx)</code> - mutable raw payload rows with normal post-callback set side effects</li>
 <li><code>sview_raw_mut(termIdx)</code> - silent mutable raw payload rows. Pair with <code>modify_raw(termIdx)</code> when set side effects should run.</li>
-<li><code>view_raw_field(termIdx, fieldIdx)</code> - one read-only contiguous field array for a directly stored generic table SoA term or exact pair</li>
+<li><code>view_raw_field(termIdx, fieldIdx)</code> - one read-only contiguous field array for a directly stored table SoA term or exact pair</li>
 <li><code>view_raw_field_mut(termIdx, fieldIdx)</code> - mutable contiguous SoA field values with normal post-callback set side effects</li>
 <li><code>sview_raw_field_mut(termIdx, fieldIdx)</code> - silent mutable SoA field values. Pair with <code>modify_raw(termIdx)</code> when set side effects should run.</li>
 </ul>
@@ -1793,7 +1893,43 @@ Iterating over components not present in the query is not supported and results 
 <div class="line">  ....</div>
 <div class="line">}, ecs::Constraints::AcceptAll);</div>
 </div><!-- fragment --><p>&gt;<b>NOTE:</b><br  />
-The functor accepting an iterator can be called any number of times per one <code>Query::each</code>. Currently, the functor is invoked once per archetype chunk that matches the query. In the future, this can change. Therefore, it is best to make no assumptions about it and simply expect that the functor might be triggered multiple times per call to <code>each</code>.</p>
+The functor accepting an iterator can be called any number of times per one <code>Query::each</code>. A matching chunk is the common case, but <code>DontFragment</code> / sparse entity-filter terms can split one chunk into several contiguous windows when membership is mixed. Therefore, it is best to make no assumptions about it and simply expect that the functor might be triggered multiple times per call to <code>each</code>.</p>
+<h3><a class="anchor" id="iterate-ids"></a>
+Iterate ids</h3>
+<p>To get a list of ids currently assigned to one entity, use <code>World::ids</code> or <code>World::ids_if</code>. It visits archetype ids, <code>DontFragment</code> components, and exclusive non-fragmenting pairs such as <code>Parent</code>.</p>
+<p>Pass <code>ecs::EntityIdOptions</code> to restrict storage or kind. Match helpers use the same names as query terms. <code>.in()</code> also visits ids supplied through <code>Is</code> inheritance.</p>
+<div class="fragment"><div class="line">w.ids(e, [&amp;](ecs::Entity <span class="keywordtype">id</span>) {</div>
+<div class="line">  <span class="keywordflow">if</span> (<span class="keywordtype">id</span>.pair()) {</div>
+<div class="line">    <span class="keyword">const</span> <span class="keyword">auto</span> rel = w.get(<span class="keywordtype">id</span>.<span class="keywordtype">id</span>());</div>
+<div class="line">    <span class="keyword">const</span> <span class="keyword">auto</span> tgt = w.get(<span class="keywordtype">id</span>.gen());</div>
+<div class="line">    <span class="comment">// ...</span></div>
+<div class="line">  } <span class="keywordflow">else</span> {</div>
+<div class="line">    <span class="keyword">const</span> <span class="keyword">auto</span> name = w.name(<span class="keywordtype">id</span>);</div>
+<div class="line">    <span class="comment">// ...</span></div>
+<div class="line">  }</div>
+<div class="line">});</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Archetype-resident ids only, same membership as Archetype::ids_view().</span></div>
+<div class="line">w.ids(e, [&amp;](ecs::Entity <span class="keywordtype">id</span>) {</div>
+<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">}, ecs::EntityIdOptions{}.archetype());</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Optional markers and exclusive non-fragmenting pairs only.</span></div>
+<div class="line">w.ids(e, [&amp;](ecs::Entity <span class="keywordtype">id</span>) {</div>
+<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">}, ecs::EntityIdOptions{}.dont_fragment().relation());</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Relationship pairs across every storage source.</span></div>
+<div class="line">w.ids(e, [&amp;](ecs::Entity <span class="keywordtype">id</span>) {</div>
+<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">}, ecs::EntityIdOptions{}.pairs());</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Direct ids plus ids supplied through Is inheritance.</span></div>
+<div class="line">w.ids(e, [&amp;](ecs::Entity <span class="keywordtype">id</span>) {</div>
+<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">}, ecs::EntityIdOptions{}.components().pairs().in());</div>
+</div><!-- fragment --><p>Archetype-resident ids are visited first, in the same order as <code>Archetype::ids_view()</code>. <code>DontFragment</code> components and exclusive non-fragmenting pairs follow, sorted by <code>Entity::value()</code>. Inherited ids from <code>.in()</code> are appended after that and also sorted by <code>Entity::value()</code>.</p>
+<p><code>ids_if</code> uses the same membership and order, and stops when the callback returns false. Membership is assembled by scanning matching non-fragmenting stores in addition to the archetype id list.</p>
 <h3><a class="anchor" id="constraints"></a>
 Constraints</h3>
 <p>By default, Gaia queries operate on enabled entities only. <code>Constraints</code> let you switch that row-selection behavior without changing archetypes:</p>
@@ -2069,7 +2205,8 @@ Relationships</h2>
 <h3><a class="anchor" id="relationship-basics"></a>
 Relationship basics</h3>
 <p>Entity relationship is a feature that allows users to model simple relations, hierarchies or graphs in an ergonomic, easy and safe way. Each relationship is expressed as following: "source, (relation, target)". All three elements of a relationship are entities. We call the "(relation, target)" part a relationship pair.</p>
-<p>Relationship pair is a special kind of entity where the id of the "relation" entity becomes the pair's id and the "target" entity's id becomes the pairs generation. The pair is created by calling <code>ecs::Pair(relation, target</code>) with two valid entities as its arguments.</p>
+<p>Relationship pair is a special kind of entity where the id of the "relation" entity becomes the pair's id and the "target" entity's id becomes the pairs generation. The pair is created by calling <code>ecs::Pair(relation, target</code>) with two valid entities as its arguments. Only each endpoint's <code>id()</code> is stored, so both endpoints must be ordinary entities. Nested pairs are rejected when the relationship is attached.</p>
+<p>Because a pair is itself an entity, components can live on the pair record, not only on its endpoints. Query callbacks yield <code>Entity</code>, so <code>enable</code>, <code>enabled</code>, <code>get_chunk</code>, <code>add_n</code>, <code>copy</code>, <code>instantiate</code>, <code>modify</code>, <code>get</code>, and accessors treat an Entity-typed exact pair as that pair rather than the relation endpoint. <code>copy</code>, <code>add_n</code>, and <code>instantiate</code> of a pair record still create ordinary entities. See <a class="el" href="index.html#copy-entity">Copy entity</a>, <a class="el" href="index.html#batched-creation">Batched creation</a>, and <a class="el" href="index.html#prefabs">Prefabs</a>.</p>
 <p>Adding a relationship to any entity is as simple as adding any other entity.</p>
 <div class="fragment"><div class="line">ecs::World w;</div>
 <div class="line">ecs::Entity rabbit = w.add();</div>
@@ -2244,7 +2381,7 @@ Exclusivity</h3>
 <div class="line">isSwitched = w.has(wallSwitch, ecs::Pair{toggled, on}); <span class="comment">// false</span></div>
 </div><!-- fragment --><h3><a class="anchor" id="entity-inheritance"></a>
 Entity inheritance</h3>
-<p>Entities can inherit from other entities by using the (Is, target) relationship. This is a powerful feature that helps you identify an entire group of entities using a single entity.</p>
+<p>Entities can inherit from other entities by using the (Is, target) relationship. This is a powerful feature that helps you identify an entire group of entities using a single entity. Pair records do not participate in inheritance.</p>
 <div class="fragment"><div class="line">ecs::World w;</div>
 <div class="line">ecs::Entity animal = w.add();</div>
 <div class="line">ecs::Entity rabbit = w.add();</div>
@@ -2357,6 +2494,13 @@ Prefabs</h3>
 </ul>
 <p>To find the instance entity that came from a prefab child, keep the spawned root and call <code>find_prefab_instance(rootInstance, prefabChild)</code>. Passing the root prefab returns the root instance. Passing a nested child prefab walks the instance's <code>Parent</code> and <code>ChildOf</code> subtree and returns the matching descendant. Missing prefab children return <code>EntityBad</code>.</p>
 <p>For bulk spawns, the <code>instantiate_n(...)</code> callback reports the spawned root instances. Call <code>find_prefab_instance(rootInstance, prefabChild)</code> for each root you keep. The lookup follows <code>Parent</code> and <code>ChildOf</code> descendants and matches the direct <code>Pair(ecs::Is, prefabChild)</code> edge created by instantiation, so it does not depend on copied names. If you need custom filtering or ordering, traverse with the relation-explicit <code>sources(...)</code> or <code>sources_bfs(...)</code> helpers directly.</p>
+<p>Locked queries and systems cannot call <code>World::instantiate</code> or <code>instantiate_n</code> because those are structural mutations. Queue the same spawn through a command buffer:</p>
+<div class="fragment"><div class="line">q.each([&amp;](ecs::Iter&amp; it) {</div>
+<div class="line">  ecs::CommandBufferST&amp; cb = it.cmd_buffer_st();</div>
+<div class="line">  <span class="keyword">auto</span> instance = cb.instantiate(prefab);</div>
+<div class="line">  cb.set&lt;Position&gt;(instance, {1, 2, 3});</div>
+<div class="line">});</div>
+</div><!-- fragment --><p><code>CommandBufferST</code> and <code>CommandBufferMT</code> expose <code>instantiate</code> and <code>instantiate_n</code> with the same Prefab, <code>Is</code>, name, OnInstantiate, and recursive child rules as the World API. <code>instantiate</code> returns a temporary entity handle, like <code>add</code> and <code>copy</code>. Per-instance writes are recorded against that handle. <code>instantiate_n</code> invokes its callback immediately while recording, with those temporary handles. <code>CopyIter</code> callbacks stay World-only. Prefab children are not exposed as temporaries; after commit, look them up with <code>find_prefab_instance(rootInstance, prefabChild)</code>.</p>
 <p>Instantiation keeps the prefab relationship but intentionally strips prefab-only identity details from the new entity:</p><ul>
 <li><code>ecs::Prefab</code> is not copied to the instance</li>
 <li><code>EntityDesc</code> is not copied, so prefab names stay unique</li>
@@ -2364,7 +2508,7 @@ Prefabs</h3>
 <li>parented overloads attach <code>Pair(ecs::Parent, parent)</code> to each new root instance</li>
 <li>prefab children attached through <code>ecs::Parent</code> or <code>ecs::ChildOf</code> are instantiated recursively under each new root instance with the same hierarchy relation</li>
 </ul>
-<p>If the source entity is not tagged with <code>ecs::Prefab</code>, <code>instantiate(...)</code> falls back to <code>copy(...)</code> and <code>instantiate_n(...)</code> falls back to <code>copy_n(...)</code>. The parented overloads still attach the requested <code>ecs::Parent</code> relationship in that fallback path.</p>
+<p>If the source entity is not tagged with <code>ecs::Prefab</code>, <code>instantiate(...)</code> falls back to <code>copy(...)</code> and <code>instantiate_n(...)</code> falls back to <code>copy_n(...)</code>. The parented overloads still attach the requested <code>ecs::Parent</code> relationship in that fallback path. Exact pair records are valid sources. A Prefab-tagged pair record still drops <code>ecs::Prefab</code> and copies data, but it does not receive <code>Pair(ecs::Is, pair)</code> because nested pairs are not representable.</p>
 <p>Only children that are themselves tagged with <code>ecs::Prefab</code> are instantiated recursively. Plain <code>Parent</code> children under a prefab are ignored.</p>
 <p>Inherited-id behavior for <code>Is</code>-based relationships is configured on the id itself with <code>Pair(ecs::OnInstantiate, policy)</code>. Prefab instantiation uses the same policy:</p>
 <div class="fragment"><div class="line">ecs::Entity position = w.add&lt;Position&gt;().entity;</div>
@@ -2431,7 +2575,8 @@ Cleanup rules</h3>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Deleting the bomb will take out all entities associated with it. Rabbit included.</span></div>
 <div class="line">w.del(bomb_exploding_on_del); </div>
-</div><!-- fragment --><h3><a class="anchor" id="hierarchies"></a>
+</div><!-- fragment --><p>An entity deleted by a cleanup rule is deleted the same way as one deleted on its own: its own cleanup rules apply to everything referencing it, its name and alias are released, and its id is recycled. Two exceptions: a rule deletes the entity's components even while an <a class="el" href="index.html#safeentity">ecs::SafeEntity</a> references it, and an entity marked (OnDelete, Error) or (OnDeleteTarget, Error) that a rule reaches is reported as an error and keeps its record.</p>
+<h3><a class="anchor" id="hierarchies"></a>
 Hierarchies</h3>
 <p>Two different hierarchy styles are supported: <code>ChildOf</code> and <code>Parent</code>. If you are not sure which one to use, start with <code>Parent</code>.</p>
 <p><code>ChildOf</code> entity can be used to express a physical hierarchy. It uses the (OnDeleteTarget, Delete) relationship so if the parent is deleted, all its children are deleted as well.</p>
@@ -2497,22 +2642,32 @@ Hierarchies</h3>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>Parent</code>   </td><td class="markdownTableBodyNone">Better default for logical hierarchies, lower fragmentation, better suited to deep hierarchies   </td><td class="markdownTableBodyNone">Less purely structural in query execution   </td><td class="markdownTableBodyNone">Logical/editor/prefab/UI hierarchy   </td></tr>
 </table>
-<h2><a class="anchor" id="unique-components"></a>
-Unique components</h2>
-<p>Unique component is a special kind of data that exists at most once per chunk. In other words, you attach data to one chunk specifically. It survives entity removals and unlike generic components, they do not transfer to a new chunk along with their entity.</p>
-<p>If you organize your data with care (which you should) this can save you some very precious memory or performance depending on your use case.</p>
-<p>For instance, imagine you have a grid with fields of 100 meters squared. If you create your entities carefully they get organized in grid fields implicitly on the data level already without you having to use any sort of spatial map container.</p>
-<div class="fragment"><div class="line">w.add&lt;Position&gt;(e1, {10,1});</div>
-<div class="line">w.add&lt;Position&gt;(e2, {19,1});</div>
-<div class="line"><span class="comment">// Make both e1 and e2 share a common grid position of {1,0}</span></div>
-<div class="line">w.add&lt;ecs::uni&lt;GridPosition&gt;&gt;(e1, {1, 0});</div>
-</div><!-- fragment --><h2><a class="anchor" id="delayed-execution"></a>
+<h2><a class="anchor" id="shared-data"></a>
+Shared data</h2>
+<p>Shared payload belongs on a group entity. Occupancy is a relation. That keeps one addressable owner for the data, so <code>GAIA_STORAGE(Sparse)</code> and ordinary component APIs apply to the group rather than to a chunk.</p>
+<p>Use a built-in hierarchy when the group is a parent:</p>
+<div class="fragment"><div class="line">ecs::Entity cell = w.add();</div>
+<div class="line">w.add&lt;GridPosition&gt;(cell, {1, 0});</div>
+<div class="line"> </div>
+<div class="line">w.add(e1, ecs::Pair(ecs::ChildOf, cell));</div>
+<div class="line">w.add(e2, ecs::Pair(ecs::ChildOf, cell));</div>
+</div><!-- fragment --><p><code>Parent</code> is the same idea when the grouping should stay out of archetype identity. For a partition key that is not a hierarchy, use an exclusive custom relation so each occupant has one group at a time:</p>
+<div class="fragment"><div class="line">ecs::Entity inCell = w.add();</div>
+<div class="line">w.add(inCell, ecs::Exclusive);</div>
+<div class="line"> </div>
+<div class="line">ecs::Entity cell = w.add();</div>
+<div class="line">w.add&lt;GridPosition&gt;(cell, {1, 0});</div>
+<div class="line"> </div>
+<div class="line">w.add(e1, ecs::Pair(inCell, cell));</div>
+<div class="line">w.add(e2, ecs::Pair(inCell, cell));</div>
+</div><!-- fragment --><p>See <a class="el" href="index.html#hierarchies">Hierarchies</a> and <a class="el" href="index.html#exclusivity">Exclusivity</a>.</p>
+<h2><a class="anchor" id="delayed-execution"></a>
 Delayed execution</h2>
 <p>Sometimes you need to delay executing a part of the code for later. This can be achieved via command buffers.</p>
-<p>Command buffer is a container used to record commands in the order in which they were requested at a later point in time.</p>
-<p>Typically you use them when there is a need to perform structural changes (adding or removing an entity or component) while iterating queries.</p>
+<p>A command buffer records requests for later execution. Optimizing buffers apply the merging rules below; plain buffers replay every request in recorded order.</p>
+<p>Typically you use them when there is a need to perform structural changes (adding or removing an entity or component, copying an entity, or instantiating a prefab) while iterating queries.</p>
 <p>Performing an unprotected structural change is undefined behavior and most likely crashes the program. However, using a command buffer you can collect all requests first and commit them when it is safe later.</p>
-<p>You can use either a command buffer provided by the iterator or one you created. There are two kinds of the command buffer - <code>ecs::CommandBufferST</code> that is not thread-safe and should only be used by one thread, and <code>ecs::CommandBufferMT</code> that is safe to access from multiple threads at once.</p>
+<p>You can use either a command buffer provided by the iterator or one you created. <code>ecs::CommandBufferST</code> and <code>ecs::CommandBufferMT</code> optimize recorded commands by merging and batching them. <code>ecs::CommandBufferPlainST</code> and <code>ecs::CommandBufferPlainMT</code> provide the same recording API and payload serialization, with no sorting, merging, cancellation or batching. ST buffers are for one thread; MT buffers serialize access with a spin lock. The choice is made by the buffer type, with no runtime mode switch. Iterator-provided buffers use the optimizing types.</p>
 <p>The command buffer provided by the iterator is committed in a safe manner when the world is not locked for structural changes, and is a recommended way for queuing commands.</p>
 <div class="fragment"><div class="line"><span class="comment">// Command buffer from the iterator. Commands are applied automatically when</span></div>
 <div class="line"><span class="comment">// the iteration is over in a safe manner (takes into account other threads</span></div>
@@ -2531,6 +2686,7 @@ Delayed execution</h2>
 <div class="line">  }</div>
 <div class="line">});</div>
 <div class="line"><span class="comment">// Once the world is ready, usually where iterations are finished, the changes are committed automatically.</span></div>
+<div class="line"><span class="comment">// This includes entity-seeded queries, not only chunk iteration.</span></div>
 </div><!-- fragment --><p>With custom command buffer you need to manage things yourself. However, if might come handy in situations where things are fully under your control.</p>
 <div class="fragment"><div class="line">ecs::World w;</div>
 <div class="line">...</div>
@@ -2544,14 +2700,23 @@ Delayed execution</h2>
 <div class="line">});</div>
 <div class="line"><span class="comment">// Make the queued command happen</span></div>
 <div class="line">cb.commit();</div>
-</div><!-- fragment --><p>If you try to make an unprotected structural change with GAIA_DEBUG enabled (set by default when Debug configuration is used) the framework will assert letting you know you are using it the wrong way.</p>
+</div><!-- fragment --><p>To replay every request, construct a plain buffer and commit it at a safe point:</p>
+<div class="fragment"><div class="line">ecs::CommandBufferPlainST cb(w);</div>
+<div class="line">cb.del&lt;Position&gt;(e);</div>
+<div class="line">cb.add&lt;Position&gt;(e, Position{1, 2, 3});</div>
+<div class="line">cb.commit();</div>
+</div><!-- fragment --><p>Plain commit preserves order across components and entities. A copy sees source mutations recorded before that copy; creation followed by deletion still creates and deletes the entity, including the intermediate notifications. Each instantiate record calls <code>World::instantiate</code> separately. Requests must form a valid sequence of <code>World</code> operations: a deleted entity cannot be used afterwards, and <code>set</code> requires the component to be present. Temporary handles may only be used in the buffer and batch that created them. MT recording order is lock acquisition order; competing threads have no predetermined order.</p>
+<p>Plain buffers avoid reduction overhead but perform every recorded mutation. Optimizing buffers can eliminate repeated writes and combine eligible table-component changes into one entity move. Measure recording plus commit for the actual workload when choosing between them; command count, storage, observers and recording order affect the tradeoff.</p>
+<p>If you try to make an unprotected structural change with GAIA_DEBUG enabled (set by default when Debug configuration is used) the framework will assert letting you know you are using it the wrong way.</p>
 <p>&gt;<b>NOTE:<br  />
-</b> There is one situation to be wary about with command buffers. Function <code>add</code> accepting a component as template argument needs to make sure that the component is registered in the component cache. If it is not, it will be inserted. Registering a component is a structural change, so it is not safe while the world is locked for query or system iteration. As a result, when used from multiple threads, both CommandBufferST and CommandBufferMT are also subject to race conditions. To avoid both cases, make sure that component T has been registered in the world already. If you already added the component to some entity before, everything is fine. If you did not, call this before you run your system or query: </p><div class="fragment"><div class="line"><span class="comment">// Register the component YourComponent in the world</span></div>
+</b> There is one situation to be wary about with command buffers. Function <code>add</code> accepting a component as template argument needs to make sure that the component is registered in the component cache. If it is not, it will be inserted. Registering a component is a structural change, so it is not safe while the world is locked for query or system iteration. As a result, component registration must be completed before recording from multiple threads, for both optimizing and plain buffers. To avoid both cases, make sure that component T has been registered in the world already. If you already added the component to some entity before, everything is fine. If you did not, call this before you run your system or query: </p><div class="fragment"><div class="line"><span class="comment">// Register the component YourComponent in the world</span></div>
 <div class="line">world.add&lt;YourComponent&gt;();</div>
 </div><!-- fragment --><p> &gt;Technically, template versions of functions <code>set</code> and <code>del</code> experience a similar issue. However, calling neither <code>set</code> nor <code>del</code> makes sense without a previous call to <code>add</code>. Such attempts are undefined behaviors (and reported by triggering an assertion).</p>
+<p>Relationship payloads use the same add/set data ops as components. <code>cb.add(entity, pair, value)</code> and <code>cb.set(entity, pair, value)</code> queue a write on the owner for that exact pair, matching <code>World::add(entity, pair, value)</code>. Structural <code>cb.add(entity, pair)</code> still attaches the pair without a payload. <code>cb.add&lt;T&gt;(pair, value)</code> writes component <code>T</code> on the pair record itself.</p>
+<p>Payload arguments are standalone C++ values, including types with a SoA layout. The command buffer serializes those values when recording and restores them into the component's storage layout at commit. Sparse payload construction remains in the sparse store; chunk transitions do not construct sparse data in table storage.</p>
 <h3><a class="anchor" id="command-merging-rules"></a>
 Command Merging rules</h3>
-<p>Before applying any operations to the world, the command buffer performs operation merging and cancellation to remove redundant or meaningless actions.</p>
+<p>The following rules apply to <code>CommandBufferST</code> and <code>CommandBufferMT</code>. Plain buffers do not merge or cancel requests.</p>
 <h4><a class="anchor" id="entity-merging"></a>
 Entity Merging</h4>
 <table class="markdownTable">
@@ -2562,27 +2727,42 @@ Entity Merging</h4>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>copy(src)</code> + <code>del(copy)</code>   </td><td class="markdownTableBodyNone">No effect — copy canceled    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>add(e)</code> + component ops + <code>del(e)</code>   </td><td class="markdownTableBodyNone">No effect — full chain canceled    </td></tr>
+<td class="markdownTableBodyNone"><code>instantiate(prefab)</code> + <code>del(instance)</code>   </td><td class="markdownTableBodyNone">No effect — instance never spawned    </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>add(e)</code> + component ops + <code>del(e)</code>   </td><td class="markdownTableBodyNone">No effect — full chain canceled    </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>del(e)</code> on an existing entity   </td><td class="markdownTableBodyNone">Entity removed normally   </td></tr>
 </table>
 <h4><a class="anchor" id="component-merging"></a>
 Component Merging</h4>
+<p>For each entity and component, a group containing a delete is reduced <b>in recorded order</b>, starting from membership at commit time. A delete ends the preceding component lifetime and discards its payload; a later add starts a new lifetime. Add/set-only groups still merge using the last recorded payload. Redundant deletes of an absent component within a merged group are skipped.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
-<th class="markdownTableHeadNone">Sequence   </th><th class="markdownTableHeadNone">Result    </th></tr>
+<th class="markdownTableHeadNone">Sequence   </th><th class="markdownTableHeadNone">Result (when removal is allowed)    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>add&lt;T&gt;(e)</code> + <code>set&lt;T&gt;(e, value)</code>   </td><td class="markdownTableBodyNone">Collapsed into <code>add&lt;T&gt;(e, value)</code>    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><code>add&lt;T&gt;(e, value1)</code> + <code>set&lt;T&gt;(e, value2)</code>   </td><td class="markdownTableBodyNone">Only the last value is used    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>add&lt;T&gt;(e)</code> + <code>del&lt;T&gt;(e)</code>   </td><td class="markdownTableBodyNone">No effect — component never added    </td></tr>
+<td class="markdownTableBodyNone"><code>add&lt;T&gt;(e)</code> + <code>del&lt;T&gt;(e)</code>   </td><td class="markdownTableBodyNone">Component absent, whether initially present or absent    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>add&lt;T&gt;(e, value)</code> + <code>del&lt;T&gt;(e)</code>   </td><td class="markdownTableBodyNone">No effect — component never added    </td></tr>
+<td class="markdownTableBodyNone"><code>add&lt;T&gt;(e, value)</code> + <code>del&lt;T&gt;(e)</code>   </td><td class="markdownTableBodyNone">Component absent, the discarded payload need not be written    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>set&lt;T&gt;(e, value1)</code> + <code>set&lt;T&gt;(e, value2)</code>   </td><td class="markdownTableBodyNone">Only the last value is used   </td></tr>
+<td class="markdownTableBodyNone"><code>del&lt;T&gt;(e)</code> + <code>add&lt;T&gt;(e, value)</code>   </td><td class="markdownTableBodyNone">Component present with the new value    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>del&lt;T&gt;(e)</code> + <code>add&lt;T&gt;(e)</code>   </td><td class="markdownTableBodyNone">Component present with normal fresh initialization    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>set&lt;T&gt;(e, value1)</code> + <code>set&lt;T&gt;(e, value2)</code>   </td><td class="markdownTableBodyNone">Only the last value is used    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>set&lt;T&gt;(e, value)</code> + <code>del&lt;T&gt;(e)</code>   </td><td class="markdownTableBodyNone">Component absent; observers/hooks retain preceding write visibility   </td></tr>
 </table>
-<p>Only the final state after all recorded operations is applied on commit. This means you can record commands freely, and the command buffer will merge your requests in such a way that the world update is always minimal and correct.</p>
+<p>For example, if <code>T</code> already holds <code>1</code>, <code>cb.del&lt;T&gt;(e); cb.add&lt;T&gt;(e, T{2}); cb.commit();</code> produces <code>2</code>, matching direct <code>World::del</code> followed by <code>World::add</code>. A bare re-add after an accepted deletion does not reuse an earlier payload. As with <code>World::set</code>, <code>set</code> requires a present component: after a successful removal, record an add before setting it again.</p>
+<p>Ordinary unobserved components apply only the surviving change: absent-to-absent groups do nothing, present-to-absent groups remove once, and present-to-present groups with a surviving payload reinitialize and write in place. A bare re-add also initializes in place when eligible; trivially default-constructed types receive no writes, as with normal default initialization. Intermediate writes and constructor calls may be omitted by reduction.</p>
+<p>A leading sequence of independent table-component groups on the same entity can share one <code>World::EntityBuilder</code> commit. The buffer checks that prefix before applying its final structural changes, moves the entity at most once for the prefix, then restores surviving payloads and reinitializes existing delete/re-add lifetimes. This reduces relocation of retained components as well as intermediate structural changes. The batch uses fixed inline storage up to the archetype component limit. The first group beyond that limit or with unsupported storage or behavior starts a suffix that uses the existing per-component path. Sparse or non-fragmenting storage, pairs, core ids, hooks, applicable observers, nontrivial destruction, and empty tags with custom constructors end the eligible prefix. World-wide dependency/combination policies or structural observers disable batching.</p>
+<p>Pairs, core ids, active hooks, and policy-sensitive groups retain ordered World replay. Components with nontrivial destruction and empty tags with custom constructors also retain replay. Worlds with <code>Requires</code> dependency or <code>CantCombine</code> policies, or any structural observers, conservatively use that replay path; an applicable <code>OnSet</code> observer also requires replay. This preserves required-component side effects, removal restrictions and observer/hook payload visibility, at the cost of the actual intermediate mutations. Entity creation/deletion cancellation remains as described above.</p>
+<p>These rules apply to both ST and MT buffers. In an MT buffer, recording order is the order in which calls acquire the buffer lock; competing threads do not have a predetermined order.</p>
+<p>Relationship operations retain their recorded order within each entity. Only consecutive requests for the same exact pair in that relationship sequence are merged; a request for another pair (including a wildcard) separates the groups.</p>
+<p>Commit still allocates surviving entity creations/copies/instances first, applies reduced component groups, then deletes entities. Reduction may omit intermediate writes, initialization and structural changes when they do not affect the retained ECS state or registered observers/hooks. Commit does not promise global replay of every <code>World</code> call across entities and components.</p>
 <h2><a class="anchor" id="systems"></a>
 Systems</h2>
 <h3><a class="anchor" id="system-basics"></a>
@@ -2631,6 +2811,12 @@ System basics</h3>
 <div class="line">w.update();</div>
 </div><!-- fragment --><p> Letting systems run via <b>World::update</b> automatically is the preferred path. Gaia-ECS can resolve system order, phase boundaries, and safe parallel work for you.</p>
 <p>If an external engine loop calls <code>w.systems_run()</code> directly, call <code>w.frame_cleanup()</code> and then <code>w.frame_end()</code> once per frame. <code>frame_cleanup()</code> finalizes deferred deletion and garbage collection without running systems again. <code>frame_end()</code> flushes logs and emits the profiler frame marker.</p>
+<p>A fixed-step loop can run one phase at a time without collecting every enabled system and without adding or removing a tick component to gate work:</p>
+<div class="fragment"><div class="line">w.systems_run(phaseSim);</div>
+<div class="line">w.systems_run(phaseView);</div>
+<div class="line">w.frame_cleanup();</div>
+<div class="line">w.frame_end();</div>
+</div><!-- fragment --><p><code>World::systems_run(phase)</code> runs only systems assigned to that phase with <code>SystemBuilder::phase(phase)</code>. It does not run other phases, descendant phases, or unphased systems. Intra-phase <code>DependsOn</code> order matches that phase's slice of a full <code>systems_run()</code> pass.</p>
 <h3><a class="anchor" id="system-dependencies"></a>
 System dependencies</h3>
 <p><code>World::update()</code> uses a clear rule for system <code>DependsOn</code>:</p>
@@ -2729,7 +2915,7 @@ System jobs</h3>
 </div><!-- fragment --><p><code>SchedJob::wait()</code> does not submit work. Submit explicitly before waiting.</p>
 <h3><a class="anchor" id="system-callbacks-and-command-buffers"></a>
 System callbacks and command buffers</h3>
-<p>System callbacks can queue structural changes with <code>Iter::cmd_buffer_st()</code>. This includes adding or removing already-registered components on the entities matched by the current query. Gaia-ECS commits that command buffer after the system query finishes and the world is unlocked.</p>
+<p>System callbacks can queue structural changes with <code>Iter::cmd_buffer_st()</code>. This includes adding or removing already-registered components on the entities matched by the current query, and instantiating prefabs. Gaia-ECS commits that command buffer after the system query finishes and the world is unlocked.</p>
 <p>A later system in the same <code>World::update()</code> or <code>systems_run()</code> call can see those changes if it runs after the producer. This works across phase boundaries too. A phase boundary is a scheduler barrier, so commands from the earlier phase are committed before the later phase runs.</p>
 <div class="fragment"><div class="line"><span class="keyword">struct </span>NeedsAgent {};</div>
 <div class="line"><span class="keyword">struct </span>TransportAgent {};</div>
@@ -3108,7 +3294,7 @@ World serialization</h3>
 </div><!-- fragment --><p><code>parsed</code> reports JSON shape/parse success. Semantic warnings/errors are carried in <code>diagnostics</code>.</p>
 <p><code>load_json</code> first consumes the embedded <code>"binary"</code> snapshot payload when present. If <code>"binary"</code> is omitted, it falls back to semantic JSON loading from <code>"archetypes"</code> / <code>"entities"</code> / <code>"components"</code> data.</p>
 <p>Semantic JSON loading is best-effort: components should already be registered, and unknown or unsupported content is skipped and reported through <code>JsonDiagnostics</code>.</p>
-<p>Binary snapshot loading stores <code>Component</code> ids using the component entity id path. This applies to <code>World::save</code> / <code>World::load</code> and to <code>load_json</code> when it consumes the embedded <code>"binary"</code> payload. For those binary snapshot paths, <code>World::load</code> remaps loaded ids when the target world has a different core-component layout, including component ids stored in <code>Component</code> values, and component registration order does not need to match exactly between the saving and loading worlds.</p>
+<p>Binary <code>World::save</code> / <code>World::load</code> (and the <code>"binary"</code> payload inside JSON) is an exact copy of a saved world. Register the same user components, in the same order, with the same names and the same storage, then call <code>load()</code>. If you added, removed, renamed, reordered, or resized a component, <code>load()</code> returns false and does not change the target world. That check exists so two components of the same size cannot silently swap their data. Gaia's built-in components can still differ: extra built-in ids in this build are remapped, including ids stored in <code>Component</code> values. To load data after your component list has changed, use semantic JSON. It skips unknown or unsupported content and reports it through <code>JsonDiagnostics</code>.</p>
 <div class="fragment"><div class="line">ecs::World world0;</div>
 <div class="line"><span class="comment">// Register components</span></div>
 <div class="line">(void)world0.add&lt;Position&gt;();</div>
@@ -3431,7 +3617,7 @@ Raw access and cursors</h3>
 <div class="line">  }</div>
 <div class="line">}</div>
 </div><!-- fragment --><p><code>get_raw(...)</code> and <code>mut_raw(...)</code> access a complete AoS runtime component as bytes. They work with components in table or sparse storage. <code>mut_raw(...)</code> does not emit write notifications. Call <code>modify_raw(...)</code> afterwards when set hooks or <code>OnSet</code> observers must run. <code>set_raw(...)</code> copies the complete value and emits the notification for you.</p>
-<p>Runtime SoA components store each field separately. Use <code>get_raw_field(entity, component, fieldIndex)</code> to read one field and <code>mut_raw_field(...)</code> to edit one. Iterator callbacks can use <code>view_raw_field(termIdx, fieldIdx)</code> and <code>view_raw_field_mut(...)</code> for the current contiguous field range without resolving each entity separately. <code>sview_raw_field_mut(...)</code> stays silent until paired with <code>modify_raw(termIdx)</code>. The field index follows the field order used when the component was registered. Entity-scoped field access supports generic components and exact relationship pairs in table storage, but not sparse components. Iterator field views support directly stored generic table components and exact relationship pair terms with table SoA payloads. Call <code>modify_raw(...)</code> after editing through <code>mut_raw_field(...)</code> when write notifications are required.</p>
+<p>Runtime SoA components store each field separately. Use <code>get_raw_field(entity, component, fieldIndex)</code> to read one field and <code>mut_raw_field(...)</code> to edit one. Iterator callbacks can use <code>view_raw_field(termIdx, fieldIdx)</code> and <code>view_raw_field_mut(...)</code> for the current contiguous field range without resolving each entity separately. <code>sview_raw_field_mut(...)</code> stays silent until paired with <code>modify_raw(termIdx)</code>. The field index follows the field order used when the component was registered. Entity-scoped field access supports components and exact relationship pairs in table storage, but not sparse components. Iterator field views support directly stored table components and exact relationship pair terms with table SoA payloads. Call <code>modify_raw(...)</code> after editing through <code>mut_raw_field(...)</code> when write notifications are required.</p>
 <p><code>ComponentCursor</code> selects reflected fields for both AoS and SoA components. Primitive setters such as <code>f32(...)</code> emit the component write notification automatically. Fixed arrays and adapted dynamic vectors use <code>count()</code> and <code>elem(index)</code> before reading or writing an element.</p>
 <p>The entity-scoped forms are <code>acc(entity).get_raw_field(...)</code> and <code>acc_mut(entity).mut_raw_field(...)</code>.</p>
 <h3><a class="anchor" id="data-on-runtime-relationships"></a>
@@ -3473,11 +3659,12 @@ Data on runtime relationships</h3>
 <div class="line">  }</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>The relation defines the stored data. The target identifies which relationship the value belongs to.</p>
+<p>Compile-time relationship payloads use the same ownership: <code>World::add(entity, pair, value)</code> attaches the pair on the owner and writes its payload. Command buffers queue that owner-side write with <code>cb.add(entity, pair, value)</code> and <code>cb.set(entity, pair, value)</code>. <code>cb.add&lt;T&gt;(pair, value)</code> writes component <code>T</code> on the pair record itself, not on the owner.</p>
 <p>Queries can match one exact relationship or every target of the same relation:</p>
 <div class="fragment"><div class="line"><span class="keyword">auto</span> affinityForBob = w.query().all(affinityToBob);</div>
 <div class="line"><span class="keyword">auto</span> affinityForAnyone = w.query().all(ecs::Pair(affinity.entity, ecs::All));</div>
 </div><!-- fragment --><p>Use an exact pair when reading or writing its value because a wildcard query can match several targets. Adding, removing, and changing relationship data triggers the same lifecycle hooks and <code>OnSet</code> notifications as component data.</p>
-<p>Semantic JSON writes the relationship as <code>(Relation,Target)</code>, such as <code>(Affinity,Bob)</code>. Register the relation before loading and give each target a stable name before saving. Runtime relationship data currently works with AoS and SoA payloads in table storage, not sparse storage.</p>
+<p>Semantic JSON writes the relationship as <code>(Relation,Target)</code>, such as <code>(Affinity,Bob)</code>. Register the relation before loading and give each target a stable name before saving. Relationship payloads inherit the same layout and storage rules as ordinary components: table storage supports AoS and SoA payloads, while sparse storage supports AoS payloads only.</p>
 <h3><a class="anchor" id="querying-runtime-components"></a>
 Querying runtime components</h3>
 <p>Runtime component entities can be used directly in queries. Read payload bytes through raw views when iterating matching entities.</p>
@@ -3488,9 +3675,20 @@ Querying runtime components</h3>
 <div class="line">    <span class="comment">// raw.data points at the component bytes for this entity.</span></div>
 <div class="line">  }</div>
 <div class="line">});</div>
-</div><!-- fragment --><p>Iterator callbacks can use <code>view_raw(termIdx)</code> for directly chunk-backed AoS payloads. Use <code>view_raw_any(component)</code> when sparse or inherited runtime payloads must be resolved separately for each entity. Each indexed access performs a world lookup, and the returned entity-resolved view is valid only during the callback. The mutable <code>view_raw_any_mut(component)</code> path emits normal write notifications after the callback. <code>sview_raw_any_mut(component)</code> stays silent until <code>modify_raw(component)</code> returns true. Both mutable paths require every iterated entity to own the component directly. A callback can track up to 32 distinct sparse components. A later mutable view is invalid, and <code>modify_raw(component)</code> returns false when that limit or the ownership requirement is not satisfied. Directly stored generic table runtime SoA component and exact-pair terms use <code>view_raw_field(termIdx, fieldIdx)</code> for a contiguous read-only field array. See <a class="el" href="index.html#iteration">Iteration</a> for the supported storage and ownership contracts.</p>
+</div><!-- fragment --><p>Iterator callbacks can use <code>view_raw(termIdx)</code> for directly chunk-backed AoS payloads. Use <code>view_raw_any(component)</code> when sparse or inherited runtime payloads must be resolved separately for each entity. Each indexed access performs a world lookup, and the returned entity-resolved view is valid only during the callback. The mutable <code>view_raw_any_mut(component)</code> path emits normal write notifications after the callback. <code>sview_raw_any_mut(component)</code> stays silent until <code>modify_raw(component)</code> returns true. Both mutable paths require every iterated entity to own the component directly. A callback can track up to 32 distinct sparse components. A later mutable view is invalid, and <code>modify_raw(component)</code> returns false when that limit or the ownership requirement is not satisfied. Directly stored table runtime SoA component and exact-pair terms use <code>view_raw_field(termIdx, fieldIdx)</code> for a contiguous read-only field array. See <a class="el" href="index.html#iteration">Iteration</a> for the supported storage and ownership contracts.</p>
+<h2><a class="anchor" id="containers"></a>
+Containers</h2>
+<p>Gaia dynamic arrays (<code>cnt::darray</code> and <code>cnt::darray_ext</code>) keep only <code>size()</code> live elements. <code>reserve()</code> allocates capacity without default-constructing spare values. Growth relocates live values and releases their old storage. <code>retain()</code> preserves survivor order, keeps assignment destinations alive during compaction, then destroys the removed tail. It scans once, moves each displaced survivor once, and updates the size directly without entering the capacity-growth path. Range erasure supports overlapping suffix shifts. Append, emplacement, insertion, and fill-resize may use values from the same array. Those inputs are consumed before relocation or shifting invalidates them. <code>shrink_to_fit()</code> releases unused heap capacity. Extended arrays return to inline storage when <code>size()</code> fits, including empty arrays.</p>
+<p>The AoS and SoA variants of <code>cnt::darray</code>, <code>cnt::darray_ext</code>, and <code>cnt::sarray_ext</code> share the retention scan in <code>cnt::detail::retain_array</code>. AoS compacts live objects by assignment and destroys the discarded tail. SoA compacts fields through Gaia's layout views. A predicate may modify its current element but must not change the array's size or storage.</p>
+<p>Relocation into raw AoS storage uses <code>mem::move_ctor_elements</code>, which constructs the destination and leaves source destruction to the caller. <code>mem::move_element</code> and <code>mem::move_elements</code> require live AoS destinations. SoA range moves use source and destination capacities to calculate field strides. Storage ownership and sanitizer annotations stay in the individual containers.</p>
 <h2><a class="anchor" id="multithreading"></a>
 Multithreading</h2>
+<h3><a class="anchor" id="worlds-threads-and-allocation-arenas"></a>
+Worlds, threads, and allocation arenas</h3>
+<p>Do not mutate the same World from two threads at once. Running queries and systems in parallel inside one World is fine.</p>
+<p><code>mem::SmallBlockAllocator</code>, <code>ecs::ChunkAllocator</code>, and <code>mem::PagedAllocator</code> are shared by every World in the process and are not locked by default.</p>
+<p>To run several Worlds at once, set <code>GAIA_ALLOC_ARENA_LOCK</code> to <code>1</code> before including gaia.h, or pass <code>-DGAIA_ALLOC_ARENA_LOCK=1</code>. The allocators then take a spinlock on <code>alloc</code> / <code>free</code> / <code>flush</code>. That does not make one World safe to mutate from two threads. The default is <code>0</code>. With the lock off, assert builds abort if two threads enter an allocator together.</p>
+<p>The job system (<code>mt::ThreadPool</code>) has its own synchronization and is not affected by this flag.</p>
 <h3><a class="anchor" id="jobs"></a>
 Jobs</h3>
 <p>To fully utilize your system's potential <b>Gaia-ECS</b> allows you to spread your tasks into multiple threads. This can be achieved in multiple ways.</p>
@@ -3686,7 +3884,7 @@ Threads</h3>
 <h3><a class="anchor" id="scheduler-adapters"></a>
 Scheduler adapters</h3>
 <p>If you already have your own task scheduler or are integrating Gaia-ECS into a larger engine, ECS parallel execution can be routed through a custom scheduler instead of the built-in Gaia thread pool.</p>
-<p>Scheduler task descriptors carry <code>SchedFlags</code>. When <code>SchedFlags::Background</code> is present, the adapter should route the task to a scheduler lane that is allowed to outlive the current frame. The default Gaia-ECS scheduler maps this flag to <code>ThreadPool::sched_background</code>; external adapters need to preserve it for both <code>SchedTaskDesc</code> and <code>SchedParDesc</code> so background work does not silently fall back to a frame-bound queue.</p>
+<p>Scheduler task descriptors carry <code>SchedFlags</code>. When <code>SchedFlags::Background</code> is present, the adapter should route the task to a scheduler lane that is allowed to outlive the current frame. The default Gaia-ECS scheduler maps this flag to <code>ThreadPool::sched_background</code>. External adapters need to preserve it for both <code>SchedTaskDesc</code> and <code>SchedParDesc</code> so background work does not silently fall back to a frame-bound queue.</p>
 <div class="fragment"><div class="line"><span class="keyword">struct </span>MySchedCtx {</div>
 <div class="line">  MyEngine::Scheduler* scheduler;</div>
 <div class="line">};</div>
@@ -3749,25 +3947,25 @@ Scheduler adapters</h3>
 <div class="line"> </div>
 <div class="line">ecs::World w;</div>
 <div class="line">w.set_sched(sched);</div>
-</div><!-- fragment --><p>After installing the scheduler, ECS paths that use <code>QueryExecType::Parallel</code>, <code>QueryExecType::ParallelPerf</code>, or <code>QueryExecType::ParallelEff</code> route their multithreaded workload through it:</p>
+</div><!-- fragment --><p>After installing the scheduler via <code>World::set_sched</code>, ECS paths that use <code>QueryExecType::Parallel</code>, <code>QueryExecType::ParallelPerf</code>, or <code>QueryExecType::ParallelEff</code> route their multithreaded workload through it:</p>
 <div class="fragment"><div class="line">ecs::Query q = w.query().all&lt;Position&gt;();</div>
 <div class="line">q.each([](<span class="keyword">const</span> Position&amp;) {</div>
-<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">  <span class="comment">// ... runs through your custom scheduler</span></div>
 <div class="line">}, ecs::QueryExecType::Parallel);</div>
 <div class="line"> </div>
 <div class="line">w.system().all&lt;Velocity&gt;().mode(ecs::QueryExecType::Parallel).on_each([](Velocity&amp;) {</div>
-<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">  <span class="comment">// ... runs through your custom scheduler</span></div>
 <div class="line">});</div>
 </div><!-- fragment --><p>Queries and systems can also be added as scheduler-owned work without submitting immediately. This is useful when an engine wants to wire dependencies in its own job graph and wait once at the end of a phase:</p>
 <div class="fragment"><div class="line">ecs::Query moveQuery = w.query().all&lt;Position&gt;().all&lt;Velocity&gt;();</div>
 <div class="line">ecs::Query boundsQuery = w.query().all&lt;Position&gt;();</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">auto</span> moveJob = moveQuery.job([](ecs::Iter&amp; it) {</div>
-<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">  <span class="comment">// ... some work</span></div>
 <div class="line">}, ecs::QueryExecType::Parallel);</div>
 <div class="line"> </div>
 <div class="line"><span class="keyword">auto</span> boundsJob = boundsQuery.job([](ecs::Iter&amp; it) {</div>
-<div class="line">  <span class="comment">// ...</span></div>
+<div class="line">  <span class="comment">// ... some work</span></div>
 <div class="line">}, ecs::QueryExecType::Parallel);</div>
 <div class="line"> </div>
 <div class="line">boundsJob.dep(moveJob);</div>
@@ -3844,6 +4042,7 @@ Compiler</h2>
 Dependencies</h2>
 <p><a href="https://cmake.org">CMake</a> 3.14 or later is required to prepare the build. Other tools are officially not supported at the moment. However, nothing stops you from placing <a class="el" href="index.html#single-header">gaia.h</a> into your project.</p>
 <p>Unit testing is handled via <a href="https://github.com/onqtam/doctest.git">doctest</a>. It can be controlled via -DGAIA_BUILD_UNITTEST=ON/OFF when configuring the project (OFF by default).</p>
+<p>macOS Apple Clang does not compile Linux-only code such as POSIX semaphores. It also does not emit some Clang 18 diagnostics that GitHub coverage treats as errors. Run <code>make test-linux-clang</code> to compile the unit tests with Ubuntu Clang inside Docker.</p>
 <h1><a class="anchor" id="installation"></a>
 Installation</h1>
 <h2><a class="anchor" id="cmake"></a>
@@ -3895,25 +4094,41 @@ Project settings</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>GAIA_BUILD_EXAMPLES</b>   </td><td class="markdownTableBodyNone">Builds <a class="el" href="index.html#examples">example projects</a>    </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>BUILD_TESTING</b>   </td><td class="markdownTableBodyNone">Registers available example smoke tests with CTest when examples are built (ON by default)    </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>GAIA_GENERATE_CC</b>   </td><td class="markdownTableBodyNone">Exports <code>compile_commands.json</code> and copies it to <code>ninja/compile_commands.json</code> for tooling when the active generator supports it    </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>GAIA_GENERATE_DOCS</b>   </td><td class="markdownTableBodyNone">Builds the <a class="el" href="index.html#documentation">documentation</a>    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>GAIA_GENERATE_SINGLE_HEADER</b>   </td><td class="markdownTableBodyNone">Generates a <a class="el" href="index.html#single-header">single-header</a> version of the framework    </td></tr>
 <tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>GAIA_GENERATE_SINGLE_HEADER</b>   </td><td class="markdownTableBodyNone">Generates a <a class="el" href="index.html#single-header">single-header</a> version of the framework (<code>ON</code> by default when Gaia is the top-level project)    </td></tr>
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>GAIA_FORMAT_SINGLE_HEADER</b>   </td><td class="markdownTableBodyNone">Formats the generated single header with <code>clang-format</code> when available (<code>ON</code> by default)    </td></tr>
-<tr class="markdownTableRowEven">
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><b>GAIA_PROFILER_CPU</b>   </td><td class="markdownTableBodyNone">Enables CPU <a class="el" href="index.html#profiling">profiling</a> features    </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>GAIA_PROFILER_MEM</b>   </td><td class="markdownTableBodyNone">Enabled memory <a class="el" href="index.html#profiling">profiling</a> features    </td></tr>
-<tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>GAIA_PROFILER_BUILD</b>   </td><td class="markdownTableBodyNone">Builds the <a class="el" href="index.html#profiling">profiler</a> (<a href="https://github.com/wolfpld/tracy">Tracy</a> by default)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>GAIA_USE_SANITIZER</b>   </td><td class="markdownTableBodyNone">Applies the specified set of <a class="el" href="index.html#sanitizers">sanitizers</a>    </td></tr>
+<td class="markdownTableBodyNone"><b>GAIA_PROFILER_BUILD</b>   </td><td class="markdownTableBodyNone">Builds the <a class="el" href="index.html#profiling">profiler</a> (<a href="https://github.com/wolfpld/tracy">Tracy</a> by default)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>GAIA_FUNC_WRAPPER_SMALLBLOCK</b>   </td><td class="markdownTableBodyNone">Uses <code>SmallBlockAllocator</code> for <code>SmallFunc</code> and <code>MoveFunc</code> callables that are too large for their inline buffer. Enabled by default. Set to <code>0</code> to allocate those larger callables with the platform heap instead.   </td></tr>
+<td class="markdownTableBodyNone"><b>GAIA_USE_SANITIZER</b>   </td><td class="markdownTableBodyNone">Applies the specified set of <a class="el" href="index.html#sanitizers">sanitizers</a>    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>GAIA_FUNC_WRAPPER_SMALLBLOCK</b>   </td><td class="markdownTableBodyNone">Uses <code>SmallBlockAllocator</code> for <code>SmallFunc</code> and <code>MoveFunc</code> callables that are too large for their inline buffer. Enabled by default. Set to <code>0</code> to allocate those larger callables with the platform heap instead.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>GAIA_ALLOC_ARENA_LOCK</b>   </td><td class="markdownTableBodyNone">Process-wide spinlock on alloc/free/flush of <code>mem::SmallBlockAllocator</code>, <code>ecs::ChunkAllocator</code>, and <code>mem::PagedAllocator</code>. Off by default (<code>0</code>). Set to <code>1</code> to allow independent Worlds to mutate concurrently. With the lock off, assert builds abort if two threads enter an allocator at once. See <a class="el" href="index.html#worlds-threads-and-allocation-arenas">Worlds, threads, and allocation arenas</a>.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><b>GAIA_FORCE_DEBUG</b>   </td><td class="markdownTableBodyNone">Forces <code>GAIA_DEBUG</code> and Gaia asserts on even in optimized configurations    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><b>GAIA_DISABLE_ASSERTS</b>   </td><td class="markdownTableBodyNone">Disables all Gaia asserts even in Debug builds   </td></tr>
 </table>
-<h3><a class="anchor" id="sanitizers"></a>
+<h3><a class="anchor" id="asserts"></a>
+Asserts</h3>
+<p>Gaia asserts when asserts are enabled. Debug builds enable them by default. Optimized builds strip them unless you set <code>GAIA_FORCE_DEBUG</code>. Keep asserts enabled while developing. Do not treat stripped asserts as missing bounds checks.</p>
+<p>Asserts catch contract misuse. They are not a Release error-handling path. Guarding every possible bad input on every call would be too expensive in hot paths. The better design is a contract of valid input. Gaia trusts that contract in optimized builds.</p>
+<h3><a class="anchor" id="debug-builds"></a>
+Debug builds</h3>
+<p>Build Debug configurations with <code>-Og</code> instead of the default <code>-O0</code> on GCC and Clang. Gaia is a header-only template library. At <code>-O0</code> none of its small accessors are inlined, so every <code>has</code>, <code>get</code>, <code>set</code> and view pays several layers of function calls. Asserts and <code>GAIA_DEBUG</code> follow <code>NDEBUG</code>, not the optimization level, so they stay enabled at <code>-Og</code>. Debug info is kept too; a debugger may show some locals as optimized out.</p>
+<div class="fragment"><div class="line">cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG=&quot;-g -Og&quot; -S . -B &quot;build&quot;</div>
+</div><!-- fragment --><h3><a class="anchor" id="sanitizers"></a>
 Sanitizers</h3>
 <p>Possible options are listed in <a href="https://github.com/richardbiely/gaia-ecs/blob/main/cmake/sanitizers.cmake">cmake/sanitizers.cmake</a>.<br  />
  Note, that some options don't work together or might not be supported by all compilers. </p><div class="fragment"><div class="line">cmake -DCMAKE_BUILD_TYPE=Release -DGAIA_USE_SANITIZER=address -S . -B &quot;build&quot;</div>
@@ -3923,7 +4138,7 @@ Single-header</h3>
 <p>To generate the amalgamated header use the following command inside your root directory on Unix: </p><div class="fragment"><div class="line">./make_single_header.sh [--format|--no-format] [clang-format-executable]</div>
 </div><!-- fragment --><p>On Windows you can call: </p><div class="fragment"><div class="line">./make_single_header.bat [--format|--no-format] [clang-format-executable]</div>
 </div><!-- fragment --><p>Default behavior is to format the generated header when <code>clang-format</code> is available. Use <code>--no-format</code> to skip the formatting pass.</p>
-<p>Creation of the single header can be automated via <code>-DGAIA_GENERATE_SINGLE_HEADER=ON</code> (ON by default).</p>
+<p>Creation of the single header can be automated via <code>-DGAIA_GENERATE_SINGLE_HEADER=ON</code> (ON by default when Gaia is the top-level project). Projects that add Gaia with FetchContent or <code>add_subdirectory</code> compile the committed header unless they turn the option on. The generator reads and writes inside the Gaia source tree (<code>PROJECT_SOURCE_DIR</code>), so regenerating leaves their checkout of Gaia modified, and FetchContent then fails to update it once the header changes upstream.</p>
 <p>Formatting is controlled by <code>-DGAIA_FORMAT_SINGLE_HEADER=ON/OFF</code> and defaults to <code>ON</code>. If formatting is enabled but <code>clang-format</code> is not available the header is still generated, it just skips the formatting pass.</p>
 <h2><a class="anchor" id="conan"></a>
 Conan</h2>
@@ -3947,7 +4162,7 @@ Examples</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><a href="https://github.com/richardbiely/gaia-ecs/tree/main/src/examples/example2">Basic</a>   </td><td class="markdownTableBodyNone">Simple example using some basic features of the framework.    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><a href="https://github.com/richardbiely/gaia-ecs/tree/main/src/examples/example_roguelike">Roguelike</a>   </td><td class="markdownTableBodyNone">Roguelike game putting all parts of the framework to use and represents a complex example of how it is used in practice. It is work-in-progress and changes and evolves with the project.    </td></tr>
+<td class="markdownTableBodyNone"><a href="https://github.com/richardbiely/gaia-ecs/tree/main/src/examples/example_roguelike">Roguelike</a>   </td><td class="markdownTableBodyNone">Playable five-floor dungeon demonstrating application architecture, systems, phases, prefabs, relationships, change detection, command buffers, and deterministic collision. See the <a href="https://github.com/richardbiely/gaia-ecs/blob/main/src/examples/example_roguelike/README.md">example README</a>.    </td></tr>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><a href="https://github.com/richardbiely/gaia-ecs/tree/main/src/examples/example_wasm">WASM</a>   </td><td class="markdownTableBodyNone">WebAssembly example that runs in the browser and now includes a lightweight Explorer-style UI for inspecting entities/components in real time.   </td></tr>
 </table>

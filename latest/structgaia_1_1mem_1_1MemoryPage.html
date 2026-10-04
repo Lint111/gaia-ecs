@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -198,7 +198,7 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memdesc:afde2105f20f56c379d60e9e2c8193914"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rounds a size up to MemoryBlockAlignment.  <br /></td></tr>
 <tr class="separator:afde2105f20f56c379d60e9e2c8193914"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cf44d53519725365bcaa273c828342a" id="r_a2cf44d53519725365bcaa273c828342a"><td class="memItemLeft" align="right" valign="top">static constexpr uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1mem_1_1MemoryPage.html#a2cf44d53519725365bcaa273c828342a">calculate_block_size</a> ()</td></tr>
-<tr class="memdesc:a2cf44d53519725365bcaa273c828342a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects and aligns the configured block size.  <br /></td></tr>
+<tr class="memdesc:a2cf44d53519725365bcaa273c828342a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Selects and aligns the configured block size, including its header.  <br /></td></tr>
 <tr class="separator:a2cf44d53519725365bcaa273c828342a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -360,8 +360,8 @@ template&lt;typename T , uint32_t RequestedBlockSize&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Selects and aligns the configured block size. </p>
-<dl class="section return"><dt>Returns</dt><dd>Block size in bytes. </dd></dl>
+<p>Selects and aligns the configured block size, including its header. </p>
+<dl class="section return"><dt>Returns</dt><dd>Total block size in bytes. </dd></dl>
 
 </div>
 </div>

@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -229,7 +229,7 @@ $(document).ready(function(){initNavTree('futex_8h_source.html',''); initResizab
 </div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>  } <span class="comment">// namespace mt</span></div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>} <span class="comment">// namespace gaia</span></div>
-<div class="ttc" id="astructgaia_1_1core_1_1lock__scope_html"><div class="ttname"><a href="structgaia_1_1core_1_1lock__scope.html">gaia::core::lock_scope</a></div><div class="ttdoc">RAII helper that calls lock() on construction and unlock() on destruction.</div><div class="ttdef"><b>Definition</b> utility.h:188</div></div>
+<div class="ttc" id="astructgaia_1_1core_1_1lock__scope_html"><div class="ttname"><a href="structgaia_1_1core_1_1lock__scope.html">gaia::core::lock_scope</a></div><div class="ttdoc">RAII helper that calls lock() on construction and unlock() on destruction.</div><div class="ttdef"><b>Definition</b> utility.h:180</div></div>
 <div class="ttc" id="astructgaia_1_1mt_1_1Futex_html"><div class="ttname"><a href="structgaia_1_1mt_1_1Futex.html">gaia::mt::Futex</a></div><div class="ttdoc">An implementation of a simple futex (fast userspace mutex). Only wait and wake are implemented.</div><div class="ttdef"><b>Definition</b> futex.h:57</div></div>
 <div class="ttc" id="astructgaia_1_1mt_1_1Futex_html_a78f4fc3a334eb188546376e35d0f6dbe"><div class="ttname"><a href="structgaia_1_1mt_1_1Futex.html#a78f4fc3a334eb188546376e35d0f6dbe">gaia::mt::Futex::wait</a></div><div class="ttdeci">static Result wait(const std::atomic_uint32_t *pFutexValue, uint32_t expected, uint32_t waitMask)</div><div class="ttdoc">Suspends the caller on the futex while its value remains expected.</div><div class="ttdef"><b>Definition</b> futex.h:73</div></div>
 <div class="ttc" id="astructgaia_1_1mt_1_1Futex_html_a84edabe1e9ed58c2507e0409f518b185"><div class="ttname"><a href="structgaia_1_1mt_1_1Futex.html#a84edabe1e9ed58c2507e0409f518b185">gaia::mt::Futex::wake</a></div><div class="ttdeci">static uint32_t wake(const std::atomic_uint32_t *pFutexValue, uint32_t wakeCount, uint32_t wakeMask=detail::WaitMaskAny)</div><div class="ttdoc">Wakes up to wakeCount waiters whose waitMask matches wakeMask.</div><div class="ttdef"><b>Definition</b> futex.h:106</div></div>

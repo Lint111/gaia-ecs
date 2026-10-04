@@ -4,6 +4,8 @@ var classgaia_1_1ecs_1_1detail_1_1QueryImpl =
     [ "IterModeDisabledOnly", "structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeDisabledOnly.html", null ],
     [ "IterModeEnabled", "structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeEnabled.html", null ],
     [ "OrderByTravView", "classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1OrderByTravView.html", "classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1OrderByTravView" ],
+    [ "ParallelScope", "classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1ParallelScope.html", null ],
+    [ "ParallelSlot", "classgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1ParallelSlot.html", null ],
     [ "QueryCacheRange", "structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryCacheRange.html", "structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryCacheRange" ],
     [ "QueryPlan", "structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryPlan.html", "structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryPlan" ],
     [ "ExecPayloadKind", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a41a7406850a2bb116013e94605a78fbd", [
@@ -118,6 +120,7 @@ var classgaia_1_1ecs_1_1detail_1_1QueryImpl =
     [ "no", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ab46d739b1ffa87544e639b6cb082956d", null ],
     [ "no", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a3900e05f81281435fb5e2540ef1358e5", null ],
     [ "no", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ad479b5b13fa2b01e5e554f2057263a74", null ],
+    [ "no_access", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a7bb625f42bd06424b135c925f974212b", null ],
     [ "or_", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a0f7f8dac68bd251feb3181fae8690acd", null ],
     [ "or_", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ad8c5ff246a2ac13c4d3fea9bde17595f", null ],
     [ "or_", "classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#af587670473ff20e394de4c70f931ad42", null ],

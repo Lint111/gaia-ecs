@@ -73,6 +73,7 @@ var NAVTREE =
           [ "Query cache behavior", "index.html#query-cache-behavior", null ]
         ] ],
         [ "Iteration", "index.html#iteration", null ],
+        [ "Iterate ids", "index.html#iterate-ids", null ],
         [ "Constraints", "index.html#constraints", null ],
         [ "Change detection", "index.html#change-detection", null ],
         [ "Grouping", "index.html#grouping", null ],
@@ -91,7 +92,7 @@ var NAVTREE =
         [ "Cleanup rules", "index.html#cleanup-rules", null ],
         [ "Hierarchies", "index.html#hierarchies", null ]
       ] ],
-      [ "Unique components", "index.html#unique-components", null ],
+      [ "Shared data", "index.html#shared-data", null ],
       [ "Delayed execution", "index.html#delayed-execution", [
         [ "Command Merging rules", "index.html#command-merging-rules", [
           [ "Entity Merging", "index.html#entity-merging", null ],
@@ -125,7 +126,9 @@ var NAVTREE =
         [ "Data on runtime relationships", "index.html#data-on-runtime-relationships", null ],
         [ "Querying runtime components", "index.html#querying-runtime-components", null ]
       ] ],
+      [ "Containers", "index.html#containers", null ],
       [ "Multithreading", "index.html#multithreading", [
+        [ "Worlds, threads, and allocation arenas", "index.html#worlds-threads-and-allocation-arenas", null ],
         [ "Jobs", "index.html#jobs", null ],
         [ "Job dependencies", "index.html#job-dependencies", null ],
         [ "Priorities", "index.html#priorities", null ],
@@ -145,6 +148,8 @@ var NAVTREE =
     [ "Installation", "index.html#installation", [
       [ "CMake", "index.html#cmake", [
         [ "Project settings", "index.html#project-settings", null ],
+        [ "Asserts", "index.html#asserts", null ],
+        [ "Debug builds", "index.html#debug-builds", null ],
         [ "Sanitizers", "index.html#sanitizers", null ],
         [ "Single-header", "index.html#single-header", null ]
       ] ],
@@ -183,19 +188,20 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classgaia_1_1cnt_1_1darr__ext__soa.html#ae453cadf9f7867af6c5f14e01ededa28",
-"classgaia_1_1cnt_1_1sarr__ext.html#a60dde08a63bac6447929630d6f176d94",
-"classgaia_1_1cnt_1_1sringbuffer.html#a70dfca04bc4e14f188fd7df582a17f81",
-"classgaia_1_1ecs_1_1QueryInfo.html#a2f647000eb0c8465cbd28a6f04e54590",
-"classgaia_1_1ecs_1_1World.html#aa1b43fe3cceb52592d06d0cd22f45aed",
-"classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#afe68a00ee539daa387d6a8d748af62e6",
-"functions_type_d.html",
-"structgaia_1_1cnt_1_1const__page__iterator__soa.html#a4accbc8c4faf4b713edfeb31bfe4018b",
-"structgaia_1_1cnt_1_1sparse__iterator.html#a4302c7886b67dc12edef5df1cae14f61",
-"structgaia_1_1ecs_1_1ComponentGetter.html#ad3c8ea4e7549ce2c1bad1d3f578b943f",
-"structgaia_1_1ecs_1_1QueryHandleLookupKey.html#a111c7fe32696ca9d51a8e630ff0f7510",
-"structgaia_1_1ecs_1_1detail_1_1NonFragmentingRelationStore.html#ab16c37d50fa1afb05e7ae46206ae7978",
-"structgaia_1_1mem_1_1data__view__policy__soa.html#a747e64f07a538b5774038ad0af5d7b56"
+"classgaia_1_1cnt_1_1darr__ext__soa.html#ada3d0dbce534c0bf54d4a328cf282ffa",
+"classgaia_1_1cnt_1_1sarr__ext.html#a263de1fd2e6a28c0c7291ef35b701770",
+"classgaia_1_1cnt_1_1sringbuffer.html#a0cabb22652f0a7af690a331ba8e35938",
+"classgaia_1_1ecs_1_1Chunk.html#a86b5f4873ef794bfcd92a557292f82fc",
+"classgaia_1_1ecs_1_1World.html#a1b798a953338422626ceb9c31fc64803",
+"classgaia_1_1ecs_1_1World.html#aff0c1e47e21ba37d948d3f06467d5085",
+"classgaia_1_1mt_1_1ThreadPool.html#abae2dc1ab79367b708af43dfa2cae810",
+"index.html#constraints",
+"structgaia_1_1cnt_1_1darray__ilist__storage.html#ad436ec5b52d262ae1500c1f76a8800f4",
+"structgaia_1_1cnt_1_1sringbuffer__iterator.html#a94e36c8c2d7b41824c73717ca3072b07",
+"structgaia_1_1ecs_1_1CursorResult.html#ab58acb7e521355c7da0ab55890973cad",
+"structgaia_1_1ecs_1_1QueryHandleLookupKey.html#a2934576035e5f3ad00447ec092f26386",
+"structgaia_1_1ecs_1_1detail_1_1NonFragmentingRelationStore.html#aa9accc5309adbb4e25638b7dd020d49a",
+"structgaia_1_1mem_1_1data__view__policy__soa.html#a83ea68b9f1bee961dfd1b3715e8697d7"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

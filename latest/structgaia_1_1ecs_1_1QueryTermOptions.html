@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -156,6 +156,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a2038dde541e2c209dfaa975301feb133" id="r_a2038dde541e2c209dfaa975301feb133"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html#a2038dde541e2c209dfaa975301feb133">trav_depth</a> (uint8_t maxDepth)</td></tr>
 <tr class="memdesc:a2038dde541e2c209dfaa975301feb133"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the maximum traversal distance.  <br /></td></tr>
 <tr class="separator:a2038dde541e2c209dfaa975301feb133"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30c25b3dfb1050ba5720e87b7fca14ba" id="r_a30c25b3dfb1050ba5720e87b7fca14ba"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html#a30c25b3dfb1050ba5720e87b7fca14ba">no_access</a> ()</td></tr>
+<tr class="memdesc:a30c25b3dfb1050ba5720e87b7fca14ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matches an all(), or_(), or any() term without accessing its payload.  <br /></td></tr>
+<tr class="separator:a30c25b3dfb1050ba5720e87b7fca14ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c480d82230004e1c0c7ec38ec36084f" id="r_a7c480d82230004e1c0c7ec38ec36084f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html#a7c480d82230004e1c0c7ec38ec36084f">read</a> ()</td></tr>
 <tr class="memdesc:a7c480d82230004e1c0c7ec38ec36084f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Requests read-only access to the term.  <br /></td></tr>
 <tr class="separator:a7c480d82230004e1c0c7ec38ec36084f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -163,10 +166,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a14acd7b6d93934363f25ef0008b94eca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Requests mutable access to the term.  <br /></td></tr>
 <tr class="separator:a14acd7b6d93934363f25ef0008b94eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92d933e0e4fbb4d3aaee4a411ea2f681" id="r_a92d933e0e4fbb4d3aaee4a411ea2f681"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html#a92d933e0e4fbb4d3aaee4a411ea2f681">direct</a> ()</td></tr>
-<tr class="memdesc:a92d933e0e4fbb4d3aaee4a411ea2f681"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restricts the term to direct storage matches.  <br /></td></tr>
+<tr class="memdesc:a92d933e0e4fbb4d3aaee4a411ea2f681"><td class="mdescLeft">&#160;</td><td class="mdescRight">Restricts the term to direct storage matches. Same helper name as <code><a class="el" href="structgaia_1_1ecs_1_1EntityIdOptions.html#a9e586b59bcf578ded21449ae08496457" title="Restricts visitation to ids stored on the entity.">EntityIdOptions::direct()</a></code>.  <br /></td></tr>
 <tr class="separator:a92d933e0e4fbb4d3aaee4a411ea2f681"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a648c32377fb1cca03ddc139f7a52f71b" id="r_a648c32377fb1cca03ddc139f7a52f71b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html#a648c32377fb1cca03ddc139f7a52f71b">in</a> ()</td></tr>
-<tr class="memdesc:a648c32377fb1cca03ddc139f7a52f71b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows direct and inherited matches for the term.  <br /></td></tr>
+<tr class="memdesc:a648c32377fb1cca03ddc139f7a52f71b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows direct and inherited matches for the term. Same helper name as <code><a class="el" href="structgaia_1_1ecs_1_1EntityIdOptions.html#a095618650902151d83c375e6d5578185" title="Allows direct and inherited matches. After the direct type, appends OnInstantiate(Inherit) ids from I...">EntityIdOptions::in()</a></code>.  <br /></td></tr>
 <tr class="separator:a648c32377fb1cca03ddc139f7a52f71b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
@@ -229,7 +232,7 @@ static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>T
 </table>
 </div><div class="memdoc">
 
-<p>Restricts the term to direct storage matches. </p>
+<p>Restricts the term to direct storage matches. Same helper name as <code><a class="el" href="structgaia_1_1ecs_1_1EntityIdOptions.html#a9e586b59bcf578ded21449ae08496457" title="Restricts visitation to ids stored on the entity.">EntityIdOptions::direct()</a></code>. </p>
 <dl class="section return"><dt>Returns</dt><dd>This options object. </dd></dl>
 
 </div>
@@ -257,7 +260,35 @@ static constexpr uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>T
 </table>
 </div><div class="memdoc">
 
-<p>Allows direct and inherited matches for the term. </p>
+<p>Allows direct and inherited matches for the term. Same helper name as <code><a class="el" href="structgaia_1_1ecs_1_1EntityIdOptions.html#a095618650902151d83c375e6d5578185" title="Allows direct and inherited matches. After the direct type, appends OnInstantiate(Inherit) ids from I...">EntityIdOptions::in()</a></code>. </p>
+<dl class="section return"><dt>Returns</dt><dd>This options object. </dd></dl>
+
+</div>
+</div>
+<a id="a30c25b3dfb1050ba5720e87b7fca14ba" name="a30c25b3dfb1050ba5720e87b7fca14ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a30c25b3dfb1050ba5720e87b7fca14ba">&#9670;&#160;</a></span>no_access()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structgaia_1_1ecs_1_1QueryTermOptions.html">QueryTermOptions</a> &amp; gaia::ecs::QueryTermOptions::no_access </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Matches an all(), or_(), or any() term without accessing its payload. </p>
 <dl class="section return"><dt>Returns</dt><dd>This options object. </dd></dl>
 
 </div>

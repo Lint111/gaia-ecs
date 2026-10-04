@@ -22,7 +22,7 @@
 <link href="gaia-version-selector.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript">
 window.GAIA_VERSION_SELECTOR_DATA = {
-  latest: { label: "0.9.3 (local build)", path: "./", version_path: "./" },
+  latest: { label: "1.0.0 (local build)", path: "./", version_path: "./" },
   versions: []
 };
 </script>
@@ -42,7 +42,7 @@ window.addEventListener("load", function() {
  <tr id="projectrow">
   <td id="projectlogo"><img alt="Logo" src="logo_small.png"$logosize/></td>
   <td id="projectalign">
-   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v0.9.3</span>
+   <div id="projectname">Gaia-ECS<span id="projectnumber">&#160;v1.0.0</span>
    </div>
    <div id="projectbrief">A simple and powerful entity component system</div>
   </td>
@@ -122,6 +122,7 @@ $(document).ready(function(){initNavTree('functions_m.html',''); initResizable()
 <li>m_from&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1CopyIter.html#a037b0bc5b109c53461db551d3ac34a93">gaia::ecs::CopyIter</a></li>
 <li>m_idx&#160;:&#160;<a class="el" href="structgaia_1_1mem_1_1data__view__policy__soa__set_1_1accessor.html#adb8c320779d9b0589e896ab811fcaa6f">gaia::mem::data_view_policy_soa_set&lt; TDataLayout, ValueType &gt;::accessor</a></li>
 <li>m_items&#160;:&#160;<a class="el" href="structgaia_1_1cnt_1_1ilist.html#adedcbff15f9c6bfa8b3695628376364f">gaia::cnt::ilist&lt; TListItem, TItemHandle, TInternalStorage &gt;</a></li>
+<li>m_lock&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1AccessContextMT.html#a83ff6cea13b35929088415e661224379">gaia::ecs::AccessContextMT</a></li>
 <li>m_nextFreeBlock&#160;:&#160;<a class="el" href="structgaia_1_1mem_1_1MemoryPage.html#a416a68101bcbb9ce631dbe94e338fe40">gaia::mem::MemoryPage&lt; T, RequestedBlockSize &gt;</a></li>
 <li>m_nextFreeIdx&#160;:&#160;<a class="el" href="structgaia_1_1cnt_1_1ilist.html#a355e3416bd97d2c07effb126c8535e27">gaia::cnt::ilist&lt; TListItem, TItemHandle, TInternalStorage &gt;</a>, <a class="el" href="structgaia_1_1cnt_1_1paged__ilist.html#a736a31c887b39a95d94271fea75e1253">gaia::cnt::paged_ilist&lt; TListItem, TItemHandle, MaxPages &gt;</a></li>
 <li>m_pArchetype&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1CopyIter.html#ac082368f6ff104038a7fff0cd4e31aa3">gaia::ecs::CopyIter</a>, <a class="el" href="structgaia_1_1ecs_1_1World_1_1EntityBuilder.html#a3a0bcb6694ed6859706e8f3f68f2a0c8">gaia::ecs::World::EntityBuilder</a></li>
@@ -162,6 +163,10 @@ $(document).ready(function(){initNavTree('functions_m.html',''); initResizable()
 <li>MAX_ARCHETYPE_LIFESPAN&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1Archetype.html#ad9559fef1b896b56a9933c897d239ae6">gaia::ecs::Archetype</a></li>
 <li>max_lifespan()&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1Archetype.html#af79924a02cce5881068dda184e129076">gaia::ecs::Archetype</a></li>
 <li>max_size()&#160;:&#160;<a class="el" href="classgaia_1_1cnt_1_1darr.html#af5046ef3e7bf51406b687dab60a9e525">gaia::cnt::darr&lt; T, Allocator &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1darr__ext.html#a18b90e0cc4b4e23c4abb3587c04187cc">gaia::cnt::darr_ext&lt; T, N, Allocator &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1darr__ext__soa.html#a0b1c5af0f6b62291076cc394a630e79a">gaia::cnt::darr_ext_soa&lt; T, N, Allocator &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1darr__soa.html#adf36c2f84995049c43c16dda3a546076">gaia::cnt::darr_soa&lt; T, Allocator &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1sarr.html#adb544b24b2c26121801eff1ca1da4b3d">gaia::cnt::sarr&lt; T, N &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1sarr__ext.html#acb3a28c5f3fd212880dd57d91e8e164f">gaia::cnt::sarr_ext&lt; T, N &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1sarr__ext__soa.html#a8c046f39dad99aa1a11600c5186c7d56">gaia::cnt::sarr_ext_soa&lt; T, N &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1sarr__soa.html#ad0f20efd8234bc60d52163093996f254">gaia::cnt::sarr_soa&lt; T, N &gt;</a>, <a class="el" href="classgaia_1_1cnt_1_1sringbuffer.html#a954c8e6fc0f87b8fb8c0d1e7ec3508de">gaia::cnt::sringbuffer&lt; T, N &gt;</a></li>
+<li>MaxAlignment&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1Component.html#a197d65e8fbb8934970978bebbec4294c">gaia::ecs::Component</a></li>
+<li>MaxAlignment_Bits&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1Component.html#aa31d5b563d0efc9ed531aecbe145a44a">gaia::ecs::Component</a></li>
+<li>MaxComponentSize_Bits&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1Component.html#a5841c97f7fdf1dd79f3be2dfac8a1839">gaia::ecs::Component</a></li>
+<li>MaxComponentSizeInBytes&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1Component.html#add15e418bfe0a78f118cfe12133adc67">gaia::ecs::Component</a></li>
 <li>MaxDepth&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1ComponentCursor.html#ab6359fc348e29a6b9484deeaa6a20e6d">gaia::ecs::ComponentCursor</a></li>
 <li>maximum&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1RuntimeFieldMeta.html#a29a49a65aa4905c072486927345dd3bf">gaia::ecs::RuntimeFieldMeta&lt; StringType &gt;</a></li>
 <li>MaxUnitLength&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1RuntimeFieldMeta.html#a55d30c514444c0b027a8e0f10571aa4c">gaia::ecs::RuntimeFieldMeta&lt; StringType &gt;</a></li>
@@ -177,13 +182,13 @@ $(document).ready(function(){initNavTree('functions_m.html',''); initResizable()
 <li>MemoryPageHeader()&#160;:&#160;<a class="el" href="structgaia_1_1mem_1_1MemoryPageHeader.html#ace8ad21d1dd9d3f4260d3339b4d31fed">gaia::mem::MemoryPageHeader</a></li>
 <li>minimum&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1RuntimeFieldMeta.html#aefdbe88c7c0122c94c869d3e8360389c">gaia::ecs::RuntimeFieldMeta&lt; StringType &gt;</a></li>
 <li>mode&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1QueryPlan.html#a3f80b57a83c1923c9f6062f9d7a6a953">gaia::ecs::detail::QueryImpl::QueryPlan</a></li>
-<li>modify()&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1Chunk.html#afff622cc9aeffbf952549b676593547c">gaia::ecs::Chunk</a>, <a class="el" href="classgaia_1_1ecs_1_1CopyIter.html#ab914c77d52d647a738b71c547685ef31">gaia::ecs::CopyIter</a>, <a class="el" href="classgaia_1_1ecs_1_1World.html#a862f63bf6f1d02dd12097766f49c3a2c">gaia::ecs::World</a></li>
+<li>modify()&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1Chunk.html#afff622cc9aeffbf952549b676593547c">gaia::ecs::Chunk</a>, <a class="el" href="classgaia_1_1ecs_1_1CopyIter.html#ab914c77d52d647a738b71c547685ef31">gaia::ecs::CopyIter</a>, <a class="el" href="classgaia_1_1ecs_1_1World.html#a52c22a2481cc0139287fadd2b9baa57e">gaia::ecs::World</a></li>
 <li>modify_raw()&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1ComponentSetter.html#a646565eeaa4b8301b0eb231d5262a296">gaia::ecs::ComponentSetter</a>, <a class="el" href="classgaia_1_1ecs_1_1World.html#ae60547230db361cd1ea1540c0fce6e63">gaia::ecs::World</a></li>
 <li>module()&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1World.html#a8b6d609ef440f7ecc84be6c92358e8de">gaia::ecs::World</a></li>
 <li>move_entity_data()&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1Chunk.html#a77bded20a2e6d485b80e390dc5a174c3">gaia::ecs::Chunk</a></li>
 <li>move_foreign_entity_data()&#160;:&#160;<a class="el" href="classgaia_1_1ecs_1_1Chunk.html#aae015999228e5fac59a2c27a17e87b15">gaia::ecs::Chunk</a></li>
 <li>move_from()&#160;:&#160;<a class="el" href="classgaia_1_1util_1_1sink_3_01Ret_07Args_8_8_8_08_4.html#a341ed946fddee8fe7d7214f4fbf8ee24">gaia::util::sink&lt; Ret(Args...)&gt;</a></li>
-<li>MoveFunc()&#160;:&#160;<a class="el" href="classgaia_1_1util_1_1MoveFunc_3_01R_07Args_8_8_8_08_4.html#a15c57035542cf56c49652c30fb986f37">gaia::util::MoveFunc&lt; R(Args...)&gt;</a></li>
+<li>MoveFunc()&#160;:&#160;<a class="el" href="classgaia_1_1util_1_1MoveFunc_3_01R_07Args_8_8_8_08_4.html#ae1ff6c8ea12ef3a2f7b5ec63695ac624">gaia::util::MoveFunc&lt; R(Args...)&gt;</a></li>
 <li>mut()&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1ComponentSetter.html#a1067a5493d60d91fd1df03acad388103">gaia::ecs::ComponentSetter</a>, <a class="el" href="classgaia_1_1ecs_1_1World.html#aa8a839d62e12467eead0df4d0ceb1a0c">gaia::ecs::World</a></li>
 <li>mut_ptr()&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1ComponentCursor.html#a172398e9dce973ec7c5bdfa397a6b90d">gaia::ecs::ComponentCursor</a></li>
 <li>mut_raw()&#160;:&#160;<a class="el" href="structgaia_1_1ecs_1_1ComponentSetter.html#a298ca25d1075f22d7abf6c1e65077778">gaia::ecs::ComponentSetter</a>, <a class="el" href="classgaia_1_1ecs_1_1World.html#ad5846aed1543b377ffba04f97d546055">gaia::ecs::World</a></li>
