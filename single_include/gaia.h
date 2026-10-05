@@ -38997,7 +38997,7 @@ namespace gaia {
 			//! \return True when the stored chunk version is newer.
 			GAIA_NODISCARD bool changed(uint32_t requiredVersion) const {
 				const auto* versions = m_records.pVersions;
-				const auto changeVersion = versions[0];
+				const auto changeVersion = ::gaia::ecs::load_version(versions[0]);
 				return ::gaia::ecs::version_changed(changeVersion, requiredVersion);
 			}
 
@@ -39008,7 +39008,7 @@ namespace gaia {
 			GAIA_NODISCARD bool changed(uint32_t requiredVersion, uint32_t compIdx) const {
 				const auto* versions = m_records.pVersions;
 				// Do +1 because index 0 is reserved for the entity version number.
-				const auto changeVersion = versions[compIdx + 1];
+				const auto changeVersion = ::gaia::ecs::load_version(versions[compIdx + 1]);
 				return ::gaia::ecs::version_changed(changeVersion, requiredVersion);
 			}
 
@@ -39023,10 +39023,11 @@ namespace gaia {
 			//! Update the version of a component at the index \param compIdx
 			GAIA_FORCEINLINE void update_world_version(uint32_t compIdx) {
 				auto versions = comp_version_view_mut();
+				const auto worldVersion = m_header.worldVersion;
 				// Automatically treat the entity as changed.
-				versions[0] = m_header.worldVersion;
+				std::atomic_ref<uint32_t>(versions[0]).store(worldVersion, std::memory_order_release);
 				// Do +1 because index 0 is reserved for the entity version number.
-				versions[compIdx + 1] = m_header.worldVersion;
+				std::atomic_ref<uint32_t>(versions[compIdx + 1]).store(worldVersion, std::memory_order_release);
 				// Sorted queries keyed by this component can invalidate their cached order immediately.
 				world_invalidate_sorted_queries_for_entity(
 						*const_cast<World*>(m_header.world), m_records.pCompEntities[compIdx]);
@@ -39046,7 +39047,7 @@ namespace gaia {
 				auto* versions = m_records.pVersions;
 				// We update the version of the entity only. If this one changes,
 				// all other components are considered changed as well.
-				versions[0] = m_header.worldVersion;
+				std::atomic_ref<uint32_t>(versions[0]).store(m_header.worldVersion, std::memory_order_release);
 			}
 
 			//! Update the version of all components on chunk init
