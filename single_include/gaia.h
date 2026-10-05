@@ -77745,16 +77745,25 @@ namespace gaia {
 			//! While locked, no new entities or components can be added or removed.
 			//! While locked, no entities can be enabled or disabled.
 			void lock() {
-				GAIA_ASSERT(m_structuralChangesLocked != (uint32_t)-1);
-				++m_structuralChangesLocked;
+				// Independent query jobs can acquire and release the world's shared lock concurrently.
+				auto lockCount = std::atomic_ref<uint32_t>(m_structuralChangesLocked);
+				auto current = lockCount.load(std::memory_order_relaxed);
+				do {
+					GAIA_ASSERT(current != (uint32_t)-1);
+				} while (!lockCount.compare_exchange_weak(
+						current, current + 1U, std::memory_order_acq_rel, std::memory_order_relaxed));
 			}
 
 			//! Unlocks the chunk for structural changes.
 			//! While locked, no new entities or components can be added or removed.
 			//! While locked, no entities can be enabled or disabled.
 			void unlock() {
-				GAIA_ASSERT(m_structuralChangesLocked > 0);
-				--m_structuralChangesLocked;
+				auto lockCount = std::atomic_ref<uint32_t>(m_structuralChangesLocked);
+				auto current = lockCount.load(std::memory_order_relaxed);
+				do {
+					GAIA_ASSERT(current > 0);
+				} while (!lockCount.compare_exchange_weak(
+						current, current - 1U, std::memory_order_acq_rel, std::memory_order_relaxed));
 			}
 
 #if GAIA_SYSTEMS_ENABLED
@@ -77766,7 +77775,7 @@ namespace gaia {
 			//! Checks if the chunk is locked for structural changes.
 			//! \return True while at least one structural-change lock is held. False otherwise.
 			GAIA_NODISCARD bool locked() const {
-				return m_structuralChangesLocked != 0;
+				return std::atomic_ref<const uint32_t>(m_structuralChangesLocked).load(std::memory_order_acquire) != 0;
 			}
 
 			//! Returns true while the world is draining teardown work and normal runtime callbacks
