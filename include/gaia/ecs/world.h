@@ -10247,7 +10247,7 @@ namespace gaia {
 				m_pCompArchetype = nullptr;
 				m_nextArchetypeId = 0;
 				m_defragLastArchetypeIdx = 0;
-				m_worldVersion = 0;
+				std::atomic_ref<uint32_t>(m_worldVersion).store(0, std::memory_order_release);
 				m_enabledHierarchyVersion = 0;
 				m_archetypeDeleteVersion = 0;
 				init();
@@ -10843,7 +10843,8 @@ namespace gaia {
 						pArchetype->save(s);
 					}
 
-					s.save(m_worldVersion);
+					const auto worldVersion = ::gaia::ecs::load_version(m_worldVersion);
+					s.save(worldVersion);
 				}
 
 				// Sparse payloads live outside chunk columns and need their own snapshot section.
@@ -11200,7 +11201,9 @@ namespace gaia {
 						pArchetype->load(s);
 					}
 
-					s.load(m_worldVersion);
+					auto worldVersion = ::gaia::ecs::load_version(m_worldVersion);
+					s.load(worldVersion);
+					std::atomic_ref<uint32_t>(m_worldVersion).store(worldVersion, std::memory_order_release);
 				}
 
 				if (version >= 5 && !load_sparse_component_stores(s))

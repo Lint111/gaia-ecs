@@ -1814,7 +1814,7 @@ namespace gaia {
 			//! Update the version of a component at the index \param compIdx
 			GAIA_FORCEINLINE void update_world_version(uint32_t compIdx) {
 				auto versions = comp_version_view_mut();
-				const auto worldVersion = m_header.worldVersion;
+				const auto worldVersion = ::gaia::ecs::load_version(m_header.worldVersion);
 				// Automatically treat the entity as changed.
 				std::atomic_ref<uint32_t>(versions[0]).store(worldVersion, std::memory_order_release);
 				// Do +1 because index 0 is reserved for the entity version number.
@@ -1826,7 +1826,7 @@ namespace gaia {
 
 			//! Updates the entity-order version after rows were added, removed, or reordered.
 			GAIA_FORCEINLINE void update_entity_order_version() {
-				m_header.entityOrderVersion = m_header.worldVersion;
+				m_header.entityOrderVersion = ::gaia::ecs::load_version(m_header.worldVersion);
 				// Row-order changes invalidate cached sorted slices regardless of sort key.
 				world_invalidate_sorted_queries(*const_cast<World*>(m_header.world));
 			}
@@ -1838,16 +1838,19 @@ namespace gaia {
 				auto* versions = m_records.pVersions;
 				// We update the version of the entity only. If this one changes,
 				// all other components are considered changed as well.
-				std::atomic_ref<uint32_t>(versions[0]).store(m_header.worldVersion, std::memory_order_release);
+				const auto worldVersion = ::gaia::ecs::load_version(m_header.worldVersion);
+				std::atomic_ref<uint32_t>(versions[0]).store(worldVersion, std::memory_order_release);
 			}
 
 			//! Update the version of all components on chunk init
 			GAIA_FORCEINLINE void update_world_version_init() {
 				auto* versions = m_records.pVersions;
 				// We update the version of the entity and all components to match the world version.
-				versions[0] = m_header.worldVersion;
-				GAIA_FOR(m_header.cntEntities) versions[1 + i] = m_header.worldVersion;
-				m_header.entityOrderVersion = m_header.worldVersion;
+				const auto worldVersion = ::gaia::ecs::load_version(m_header.worldVersion);
+				std::atomic_ref<uint32_t>(versions[0]).store(worldVersion, std::memory_order_release);
+				GAIA_FOR(m_header.cntEntities)
+				std::atomic_ref<uint32_t>(versions[1 + i]).store(worldVersion, std::memory_order_release);
+				m_header.entityOrderVersion = worldVersion;
 			}
 
 			//! Logs a diagnostic line describing the chunk capacity and lifespan state.

@@ -1453,7 +1453,7 @@ namespace gaia {
 			writer.key("format");
 			writer.value_int(WorldSerializerJSONVersion);
 			writer.key("worldVersion");
-			writer.value_int(m_worldVersion);
+			writer.value_int(::gaia::ecs::load_version(m_worldVersion));
 			if (includeBinarySnapshot) {
 				writer.key("binary");
 				writer.begin_array();

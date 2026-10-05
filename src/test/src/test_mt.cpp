@@ -254,6 +254,55 @@ TEST_CASE("ECS - Concurrent parallel root queries share one world safely") {
 	CHECK(ecs::world_version(wld) != 0);
 }
 
+TEST_CASE("ECS - Chunk version reads synchronize with world version updates") {
+	TestWorld twld;
+	wld.set_sched(InlineConcurrentRootScheduler::sched());
+
+	constexpr uint32_t EntityCount = 8192;
+	GAIA_FOR(EntityCount) {
+		auto e = wld.add();
+		wld.add<ConcurrentRootQueryA>(e);
+	}
+
+	std::atomic<bool> queryStarted = false;
+	std::atomic<bool> counterRunning = false;
+	std::atomic<bool> queryFinished = false;
+	std::thread counterUpdater([&]() {
+		while (!queryStarted.load(std::memory_order_acquire))
+			std::this_thread::yield();
+		counterRunning.store(true, std::memory_order_release);
+		while (!queryFinished.load(std::memory_order_acquire)) {
+			::gaia::ecs::update_version(wld.world_version());
+			std::this_thread::yield();
+		}
+	});
+
+	auto query = wld.query().all<ConcurrentRootQueryA&>();
+	auto job = query.job(
+			[&](ConcurrentRootQueryA& value) {
+				if (!queryStarted.exchange(true, std::memory_order_acq_rel)) {
+					while (!counterRunning.load(std::memory_order_acquire))
+						std::this_thread::yield();
+				}
+				++value.value;
+			},
+			ecs::QueryExecType::Parallel);
+	job.submit();
+	job.wait();
+	queryFinished.store(true, std::memory_order_release);
+	counterUpdater.join();
+	job.del();
+
+	uint32_t rows = 0;
+	uint32_t changedRows = 0;
+	wld.query().all<const ConcurrentRootQueryA>().each([&](const ConcurrentRootQueryA& value) {
+		++rows;
+		changedRows += value.value;
+	});
+	CHECK(rows == EntityCount);
+	CHECK(changedRows == EntityCount);
+}
+
 TEST_CASE("ECS - Concurrent version updates preserve zero wrap rule") {
 	uint32_t version = std::numeric_limits<uint32_t>::max();
 	ecs::update_version(version);
