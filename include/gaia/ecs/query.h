@@ -1,6 +1,7 @@
 #pragma once
 #include "gaia/config/config.h"
 
+#include <atomic>
 #include <cstdarg>
 #include <cstdint>
 #include <type_traits>
@@ -311,12 +312,19 @@ namespace gaia {
 				//! World query-state lifetime captured at initialization.
 				uint64_t m_epoch = 0;
 				//! Hot cached query pointer. Validated against m_identity.handle before use.
-				QueryInfo* m_pInfo = nullptr;
+				mutable QueryInfo* m_pInfo = nullptr;
 				//! Locally-owned query plan used when the query does not use cache-backed storage.
 				QueryInfo* m_pOwnedInfo = nullptr;
 				//! Query identity
 				QueryIdentity m_identity{};
 				bool m_destroyed = false;
+
+				GAIA_NODISCARD QueryInfo* cached_query_info() const {
+					return std::atomic_ref<QueryInfo*>(m_pInfo).load(std::memory_order_relaxed);
+				}
+				void set_cached_query_info(QueryInfo* queryInfo) {
+					std::atomic_ref<QueryInfo*>(m_pInfo).store(queryInfo, std::memory_order_relaxed);
+				}
 
 			public:
 				QueryImplStorage() = default;
@@ -329,13 +337,13 @@ namespace gaia {
 					m_world = other.m_world;
 					m_pCache = other.m_pCache;
 					m_epoch = other.m_epoch;
-					m_pInfo = other.m_pInfo;
+					set_cached_query_info(other.cached_query_info());
 					m_pOwnedInfo = other.m_pOwnedInfo;
 					m_identity = other.m_identity;
 					m_destroyed = other.m_destroyed;
 
 					// Make sure old instance is invalidated
-					other.m_pInfo = nullptr;
+					other.set_cached_query_info(nullptr);
 					other.m_pOwnedInfo = nullptr;
 					other.m_identity = {};
 					other.m_destroyed = false;
@@ -349,13 +357,13 @@ namespace gaia {
 					m_world = other.m_world;
 					m_pCache = other.m_pCache;
 					m_epoch = other.m_epoch;
-					m_pInfo = other.m_pInfo;
+					set_cached_query_info(other.cached_query_info());
 					m_pOwnedInfo = other.m_pOwnedInfo;
 					m_identity = other.m_identity;
 					m_destroyed = other.m_destroyed;
 
 					// Make sure old instance is invalidated
-					other.m_pInfo = nullptr;
+					other.set_cached_query_info(nullptr);
 					other.m_pOwnedInfo = nullptr;
 					other.m_identity = {};
 					other.m_destroyed = false;
@@ -367,7 +375,7 @@ namespace gaia {
 					m_world = other.m_world;
 					m_pCache = other.m_pCache;
 					m_epoch = other.m_epoch;
-					m_pInfo = other.m_pInfo;
+					set_cached_query_info(other.cached_query_info());
 					if (other.m_pOwnedInfo != nullptr && other.is_current())
 						m_pOwnedInfo = new QueryInfo(*other.m_pOwnedInfo);
 					m_identity = other.m_identity;
@@ -393,7 +401,7 @@ namespace gaia {
 					m_world = other.m_world;
 					m_pCache = other.m_pCache;
 					m_epoch = other.m_epoch;
-					m_pInfo = other.m_pInfo;
+					set_cached_query_info(other.cached_query_info());
 					if (other.m_pOwnedInfo != nullptr && other.is_current())
 						m_pOwnedInfo = new QueryInfo(*other.m_pOwnedInfo);
 					m_identity = other.m_identity;
@@ -436,7 +444,7 @@ namespace gaia {
 					m_world = world;
 					m_pCache = queryCache;
 					m_epoch = queryCache->epoch();
-					m_pInfo = nullptr;
+					set_cached_query_info(nullptr);
 				}
 
 				//! Returns whether this storage belongs to the world's current query lifetime.
@@ -466,14 +474,14 @@ namespace gaia {
 
 					// Don't allow multiple calls to destroy to break the reference counter.
 					// One object is only allowed to destroy once.
-					m_pInfo = nullptr;
+					set_cached_query_info(nullptr);
 					m_destroyed = true;
 					return false;
 				}
 
 				//! Invalidates the query handle.
 				void invalidate() {
-					m_pInfo = nullptr;
+					set_cached_query_info(nullptr);
 					m_identity.handle = {};
 					delete m_pOwnedInfo;
 					m_pOwnedInfo = nullptr;
@@ -482,17 +490,18 @@ namespace gaia {
 				//! Returns the cached QueryInfo pointer when the fast-path cache is still valid.
 				//! \return Cached QueryInfo pointer or nullptr.
 				GAIA_NODISCARD QueryInfo* try_query_info_fast() const {
-					if (m_pInfo == nullptr || m_identity.handle.id() == QueryIdBad || !is_current())
+					auto* cachedInfo = cached_query_info();
+					if (cachedInfo == nullptr || m_identity.handle.id() == QueryIdBad || !is_current())
 						return nullptr;
 
 					auto* pInfo = m_pCache->try_get(m_identity.handle);
-					return pInfo == m_pInfo ? pInfo : nullptr;
+					return pInfo == cachedInfo ? pInfo : nullptr;
 				}
 
 				//! Caches the hot QueryInfo pointer locally.
 				//! \param queryInfo Query info
 				void cache_query_info(QueryInfo& queryInfo) {
-					m_pInfo = &queryInfo;
+					set_cached_query_info(&queryInfo);
 				}
 
 				//! Returns whether storage owns a local QueryInfo instance.
