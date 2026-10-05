@@ -111,7 +111,16 @@ if(TARGET single_header)
 	add_dependencies(${PROJ_NAME_NO_JSON_SINGLE_HEADER} single_header)
 endif()
 
-add_test(NAME ${PROJ_NAME} COMMAND $<TARGET_FILE:${PROJ_NAME}>)
+# The same-world concurrent query case enters process-wide allocators from both
+# worker threads. Keep it out of the default, intentionally unsynchronized suite.
+if(GAIA_ALLOC_ARENA_LOCK)
+	add_test(NAME ${PROJ_NAME} COMMAND $<TARGET_FILE:${PROJ_NAME}>)
+else()
+	add_test(
+		NAME ${PROJ_NAME}
+		COMMAND $<TARGET_FILE:${PROJ_NAME}>
+			"--test-case-exclude=ECS - Concurrent parallel root queries share one world safely")
+endif()
 add_test(
 	NAME ${PROJ_NAME_NO_AUTOREG}
 	COMMAND $<TARGET_FILE:${PROJ_NAME_NO_AUTOREG}> "--test-case=*component registration*")

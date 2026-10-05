@@ -109,8 +109,13 @@ option(GAIA_PROFILER_BUILD "Build profiler if possible." OFF)
 # Library configuration
 option(GAIA_DEVMODE "Enables various verification checks. Only useful for library maintainers." OFF)
 option(GAIA_ECS_CHUNK_ALLOCATOR "If enabled, custom allocator is used for allocating archetype chunks." ON)
+option(GAIA_ALLOC_ARENA_LOCK "Enable synchronization for process-wide Gaia allocators." OFF)
 option(GAIA_FORCE_DEBUG "If enabled, GAIA_DEBUG will be defined despite using the optimized build configuration." OFF)
 option(GAIA_DISABLE_ASSERTS "If enabled, no asserts will be thrown even in debug builds." OFF)
+
+if(GAIA_ALLOC_ARENA_LOCK)
+    add_compile_definitions(GAIA_ALLOC_ARENA_LOCK=1)
+endif()
 
 # Special
 option(GAIA_MACOS_BUILD_HACK "If enabled, a special way to link executables is used to address linker issues. MacOS-specific. Ignored on other platform." OFF)
