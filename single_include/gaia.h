@@ -77046,8 +77046,13 @@ namespace gaia {
 			//! Called by the coordinator before a region whose writes may run on worker threads.
 			//! \param slotCount Number of work items that can record concurrently.
 			void defer_sort_inv_begin(uint32_t slotCount) {
-				GAIA_ASSERT(m_deferSortInvDepth != (uint32_t)-1);
-				if (m_deferSortInvDepth++ != 0)
+				auto deferDepth = std::atomic_ref<uint32_t>(m_deferSortInvDepth);
+				auto current = deferDepth.load(std::memory_order_relaxed);
+				do {
+					GAIA_ASSERT(current != (uint32_t)-1);
+				} while (!deferDepth.compare_exchange_weak(
+						current, current + 1U, std::memory_order_acq_rel, std::memory_order_relaxed));
+				if (current != 0)
 					return;
 
 				// One queue per work item. Items are distributed to threads in disjoint ranges, so a
@@ -77062,8 +77067,13 @@ namespace gaia {
 			//! matching defer_sort_inv_begin(). Invalidation runs on the calling thread, which is the
 			//! coordinator once the parallel region joins.
 			void defer_sort_inv_end() {
-				GAIA_ASSERT(m_deferSortInvDepth > 0);
-				if (--m_deferSortInvDepth != 0)
+				auto deferDepth = std::atomic_ref<uint32_t>(m_deferSortInvDepth);
+				auto current = deferDepth.load(std::memory_order_relaxed);
+				do {
+					GAIA_ASSERT(current > 0);
+				} while (!deferDepth.compare_exchange_weak(
+						current, current - 1U, std::memory_order_acq_rel, std::memory_order_relaxed));
+				if (current != 1)
 					return;
 
 				// The coordinator may itself write during apply (e.g. through nested queries), so move
@@ -77079,7 +77089,7 @@ namespace gaia {
 			//! Returns whether sorted-query invalidations are currently being recorded.
 			//! \return True while deferred sorted-query invalidation is active.
 			GAIA_NODISCARD bool defer_sort_inv_active() const {
-				return m_deferSortInvDepth != 0;
+				return std::atomic_ref<const uint32_t>(m_deferSortInvDepth).load(std::memory_order_acquire) != 0;
 			}
 
 			//! Records a sorted-query invalidation for later application.
