@@ -443,7 +443,8 @@ namespace gaia {
 
 			//! Changes the number of elements.
 			//! \param count Number of elements.
-			void resize(size_type count) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count == m_cnt)
 					return;
 
@@ -468,30 +469,32 @@ namespace gaia {
 
 				// Resizing to a bigger size but still within allocated capacity
 				if (count <= m_cap) {
-					view_policy::mem_pop_block(m_pData, m_cap, m_cnt, count - m_cnt);
+					view_policy::mem_push_block(m_pData, m_cap, m_cnt, count - m_cnt);
 
 					m_cnt = count;
 					return;
 				}
 
+				const auto cap = detail::resize_capacity(policy, m_cap, count);
 				auto* pDataOld = m_pData;
-				m_pData = view_policy::template alloc<Allocator>(count);
-				view_policy::mem_add_block(m_pData, count, count);
+				m_pData = view_policy::template alloc<Allocator>(cap);
+				view_policy::mem_add_block(m_pData, cap, count);
 				// Move old data to the new location
-				mem::move_elements<T, true>(m_pData, pDataOld, m_cnt, 0, count, m_cap);
+				mem::move_elements<T, true>(m_pData, pDataOld, m_cnt, 0, cap, m_cap);
 				// Release old memory
 				view_policy::template free<Allocator>(pDataOld, m_cap, m_cnt);
 
-				m_cap = count;
+				m_cap = cap;
 				m_cnt = count;
 			}
 
 			//! Changes the size and initializes new elements from a value.
 			//! \param count Number of elements.
 			//! \param value Value assigned to each new element.
-			void resize(size_type count, const_reference value) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, const_reference value, ResizePolicy policy = ResizePolicy::Exact) {
 				const auto oldCount = m_cnt;
-				resize(count);
+				resize(count, policy);
 
 				if constexpr (std::is_copy_constructible_v<value_type>) {
 					const value_type valueCopy = value;

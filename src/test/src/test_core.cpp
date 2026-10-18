@@ -974,6 +974,61 @@ void lvalue_insert_test(const T& first, const T& insertedValue, const T& third, 
 	CHECK(arr[3] == fourth);
 }
 
+//! Grows a container one element at a time with resize: an exact resize keeps capacity at the
+//! size, a scaled one reallocates only a logarithmic number of times. Every element keeps its value.
+//! \tparam Container Dynamic array type under test.
+//! \tparam Make Callable type producing a value from an index.
+//! \param make Produces the value stored at each index.
+template <typename Container, typename Make>
+void resize_policy_test(Make&& make) {
+	constexpr uint32_t Count = 10000;
+	for (const auto policy: {cnt::ResizePolicy::Exact, cnt::ResizePolicy::Scale}) {
+		Container arr;
+		uint32_t reallocations = 0;
+		auto capacity = arr.capacity();
+		for (uint32_t i = 0; i < Count; ++i) {
+			arr.resize(i + 1, policy);
+			arr[i] = make(i);
+			if (arr.capacity() != capacity) {
+				++reallocations;
+				capacity = arr.capacity();
+			}
+		}
+		CHECK(arr.size() == Count);
+		if (policy == cnt::ResizePolicy::Exact)
+			CHECK(arr.capacity() == Count);
+		else
+			CHECK(reallocations <= 32);
+		bool same = true;
+		GAIA_FOR(Count) same = same && arr[i] == make(i);
+		CHECK(same);
+	}
+	Container filled;
+	filled.resize(3, make(7), cnt::ResizePolicy::Scale);
+	filled.resize(5, make(8), cnt::ResizePolicy::Scale);
+	CHECK(filled.size() == 5);
+	CHECK(filled[2] == make(7));
+	CHECK(filled[4] == make(8));
+}
+
+//! Inserts at end() into an empty and a non-empty container, by copy and by move: each value lands
+//! last and insert returns an iterator to it.
+//! \tparam Container Array type under test, holding uint32_t values.
+template <typename Container>
+void end_insert_test() {
+	Container arr;
+	auto it = arr.insert(arr.end(), 1U);
+	CHECK(it == arr.begin());
+	arr.push_back(2U);
+	const uint32_t third = 3U;
+	it = arr.insert(arr.end(), third);
+	CHECK(it == arr.begin() + 2);
+	it = arr.insert(arr.end(), 4U);
+	CHECK(it == arr.begin() + 3);
+	CHECK(arr.size() == 4);
+	GAIA_FOR(4) CHECK(arr[i] == i + 1U);
+}
+
 template <typename Container>
 void soa_mutation_test() {
 	using T = typename Container::value_type;
@@ -1166,6 +1221,16 @@ TEST_CASE("Containers - SoA resize fill") {
 	resizable_arr_soa_resize_fill_test<cnt::sarr_ext_soa<PositionSoA, 16>>(16);
 }
 
+TEST_CASE("Containers - SoA resize within capacity") {
+	cnt::darr_soa<PositionSoA> arr;
+	arr.reserve(16);
+	arr.resize(4, PositionSoA{1, 2, 3});
+	arr.resize(12, PositionSoA{4, 5, 6});
+	CHECK(arr.size() == 12);
+	GAIA_FOR(4) CHECK(arr[i] == PositionSoA{1, 2, 3});
+	GAIA_FOR2(4, 12) CHECK(arr[i] == PositionSoA{4, 5, 6});
+}
+
 TEST_CASE("Containers - SoA iterator subtraction") {
 	cnt::sarr_soa<PositionSoA, 4> fixed;
 	GAIA_EACH(fixed) fixed[i] = {(float)i + 1.0f, (float)i + 2.0f, (float)i + 3.0f};
@@ -1205,6 +1270,26 @@ TEST_CASE("Containers - forward iterator range construction") {
 TEST_CASE("Containers - dynamic lvalue insertion") {
 	lvalue_insert_test<cnt::darr<uint32_t>>(1U, 2U, 3U, 4U);
 	lvalue_insert_test<cnt::darr_ext<uint32_t, 4>>(1U, 2U, 3U, 4U);
+}
+
+TEST_CASE("Containers - resize policy") {
+	const auto number = [](uint32_t i) {
+		return i * 3U + 1U;
+	};
+	resize_policy_test<cnt::darr<uint32_t>>(number);
+	resize_policy_test<cnt::darr_ext<uint32_t, 4>>(number);
+	const auto position = [](uint32_t i) {
+		return PositionSoA{(float)i, (float)(i + 1), (float)(i + 2)};
+	};
+	resize_policy_test<cnt::darr_soa<PositionSoA>>(position);
+	resize_policy_test<cnt::darr_ext_soa<PositionSoA, 4>>(position);
+}
+
+TEST_CASE("Containers - insertion at the end") {
+	end_insert_test<cnt::darr<uint32_t>>();
+	end_insert_test<cnt::darr_ext<uint32_t, 2>>();
+	end_insert_test<cnt::darr_ext<uint32_t, 8>>();
+	end_insert_test<cnt::sarr_ext<uint32_t, 8>>();
 }
 
 TEST_CASE("Containers - SoA mutation iterators") {

@@ -4495,7 +4495,7 @@ namespace tracy {
 		static constexpr ___tracy_source_location_data TracyConcat(__tracy_source_location, __LINE__) {                    \
 			name "", function, __FILE__, uint32_t(__LINE__), 0,                                                              \
 		}
-	#define TRACY_ZoneEnd() tracy::ZoneEnd
+	#define TRACY_ZoneEnd() tracy::ZoneEnd()
 
 	#define GAIA_PROF_START_IMPL(name, function)                                                                         \
 		TRACY_ZoneBegin(name, function);                                                                                   \
@@ -8638,8 +8638,31 @@ namespace gaia {
 
 namespace gaia {
 	namespace cnt {
+		//! How a dynamic array's resize() grows its capacity once the new size outgrows it.
+		enum class ResizePolicy : uint8_t {
+			//! Allocate exactly the new size.
+			Exact,
+			//! Grow capacity by half again, as appending does, or to the new size when that is larger,
+			//! so growing an array a few elements at a time relocates it only a logarithmic number of
+			//! times.
+			Scale,
+		};
+
 		//! \cond INTERNAL
 		namespace detail {
+			//! Capacity a dynamic array's resize() allocates for \a count values once they outgrow
+			//! \a cap.
+			//! \tparam SizeType Size type of the array.
+			//! \param policy How capacity grows: exactly to \a count, or by half again.
+			//! \param cap Current capacity, smaller than \a count.
+			//! \param count Number of values the array holds after the resize.
+			//! \return \a count for ResizePolicy::Exact; the larger of \a count and one and a half
+			//! times \a cap for ResizePolicy::Scale.
+			template <typename SizeType>
+			GAIA_NODISCARD constexpr SizeType resize_capacity(ResizePolicy policy, SizeType cap, SizeType count) noexcept {
+				return policy == ResizePolicy::Scale ? core::get_max(count, (SizeType)((cap * 3 + 1) / 2)) : count;
+			}
+
 			//! Stably compacts an array using assignment, then destroys the discarded AoS tail.
 			//! SoA moves fields through the existing memory helper without destroying AoS objects.
 			//! The caller adjusts sanitizer annotations after this function returns.
@@ -8955,7 +8978,8 @@ namespace gaia {
 
 			//! Changes the number of elements.
 			//! \param count Number of elements.
-			void resize(size_type count) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count == m_cnt)
 					return;
 
@@ -8979,9 +9003,10 @@ namespace gaia {
 					return;
 				}
 
+				const auto cap = detail::resize_capacity(policy, m_cap, count);
 				auto* pDataOld = m_pDataHeap;
-				m_pDataHeap = view_policy::template alloc<Allocator>(count);
-				GAIA_MEM_SANI_ADD_BLOCK(value_size, m_pDataHeap, count, count);
+				m_pDataHeap = view_policy::template alloc<Allocator>(cap);
+				GAIA_MEM_SANI_ADD_BLOCK(value_size, m_pDataHeap, cap, count);
 				auto* pDataNew = reinterpret_cast<pointer>(m_pDataHeap);
 				if (pDataOld != nullptr) {
 					mem::move_ctor_elements<T>(m_pDataHeap, pDataOld, m_cnt);
@@ -8994,7 +9019,7 @@ namespace gaia {
 
 				core::call_ctor_n(&pDataNew[m_cnt], count - m_cnt);
 
-				m_cap = count;
+				m_cap = cap;
 				m_cnt = count;
 				m_pData = m_pDataHeap;
 			}
@@ -9002,21 +9027,22 @@ namespace gaia {
 			//! Changes the size and initializes new elements from a value.
 			//! \param count Number of elements.
 			//! \param value Value assigned to each new element.
-			void resize(size_type count, const_reference value) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, const_reference value, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count <= m_cnt) {
-					resize(count);
+					resize(count, policy);
 					return;
 				}
 				const auto oldCount = m_cnt;
 				if constexpr (std::is_copy_constructible_v<value_type>) {
 					const value_type valueCopy = value;
-					resize(count);
+					resize(count, policy);
 					for (size_type i = oldCount; i < m_cnt; ++i)
 						operator[](i) = valueCopy;
 				} else {
 					value_type valueCopy;
 					valueCopy = value;
-					resize(count);
+					resize(count, policy);
 					for (size_type i = oldCount; i < m_cnt; ++i)
 						operator[](i) = valueCopy;
 				}
@@ -9080,7 +9106,7 @@ namespace gaia {
 			//! \param arg Data to insert
 			iterator insert(iterator pos, const T& arg) {
 				GAIA_ASSERT(pos >= data());
-				GAIA_ASSERT(empty() || (pos < iterator(data() + size())));
+				GAIA_ASSERT(pos <= iterator(data() + size()));
 
 				T value(arg);
 				const auto idxSrc = (size_type)core::distance(begin(), pos);
@@ -9108,7 +9134,7 @@ namespace gaia {
 			//! \param arg Data to insert
 			iterator insert(iterator pos, T&& arg) {
 				GAIA_ASSERT(pos >= data());
-				GAIA_ASSERT(empty() || (pos < iterator(data() + size())));
+				GAIA_ASSERT(pos <= iterator(data() + size()));
 
 				T value(GAIA_MOV(arg));
 				const auto idxSrc = (size_type)core::distance(begin(), pos);
@@ -11336,7 +11362,8 @@ namespace gaia {
 
 			//! Changes the number of elements.
 			//! \param count Number of elements.
-			void resize(size_type count) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count == m_cnt)
 					return;
 
@@ -11372,9 +11399,10 @@ namespace gaia {
 					return;
 				}
 
+				const auto cap = detail::resize_capacity(policy, m_cap, count);
 				auto* pDataOld = m_pData;
-				m_pData = view_policy::template alloc<Allocator>(count);
-				GAIA_MEM_SANI_ADD_BLOCK(value_size, m_pData, count, count);
+				m_pData = view_policy::template alloc<Allocator>(cap);
+				GAIA_MEM_SANI_ADD_BLOCK(value_size, m_pData, cap, count);
 				// Move old data to the new location
 				mem::move_ctor_elements<T>(m_pData, pDataOld, m_cnt);
 				// Default-construct new items
@@ -11382,28 +11410,29 @@ namespace gaia {
 				// Release old memory
 				view_policy::template free<Allocator>(pDataOld, m_cap, m_cnt);
 
-				m_cap = count;
+				m_cap = cap;
 				m_cnt = count;
 			}
 
 			//! Changes the size and initializes new elements from a value.
 			//! \param count Number of elements.
 			//! \param value Value assigned to each new element.
-			void resize(size_type count, const_reference value) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, const_reference value, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count <= m_cnt) {
-					resize(count);
+					resize(count, policy);
 					return;
 				}
 				const auto oldCount = m_cnt;
 				if constexpr (std::is_copy_constructible_v<value_type>) {
 					const value_type valueCopy = value;
-					resize(count);
+					resize(count, policy);
 					for (size_type i = oldCount; i < m_cnt; ++i)
 						operator[](i) = valueCopy;
 				} else {
 					value_type valueCopy;
 					valueCopy = value;
-					resize(count);
+					resize(count, policy);
 					for (size_type i = oldCount; i < m_cnt; ++i)
 						operator[](i) = valueCopy;
 				}
@@ -11461,7 +11490,7 @@ namespace gaia {
 			//! \param arg Data to insert
 			iterator insert(iterator pos, const T& arg) {
 				GAIA_ASSERT(pos >= data());
-				GAIA_ASSERT(empty() || (pos < iterator(data() + size())));
+				GAIA_ASSERT(pos <= iterator(data() + size()));
 
 				T value(arg);
 				const auto idxSrc = (size_type)core::distance(begin(), pos);
@@ -11489,7 +11518,7 @@ namespace gaia {
 			//! \param arg Data to insert
 			iterator insert(iterator pos, T&& arg) {
 				GAIA_ASSERT(pos >= data());
-				GAIA_ASSERT(empty() || (pos < iterator(data() + size())));
+				GAIA_ASSERT(pos <= iterator(data() + size()));
 
 				T value(GAIA_MOV(arg));
 				const auto idxSrc = (size_type)core::distance(begin(), pos);
@@ -12244,7 +12273,8 @@ namespace gaia {
 
 			//! Changes the number of elements.
 			//! \param count Number of elements.
-			void resize(size_type count) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count == m_cnt)
 					return;
 
@@ -12264,18 +12294,19 @@ namespace gaia {
 					return;
 				}
 
+				const auto cap = detail::resize_capacity(policy, m_cap, count);
 				auto* pDataOld = m_pDataHeap;
-				m_pDataHeap = view_policy::template alloc<Allocator>(count);
-				view_policy::mem_add_block(m_pDataHeap, count, count);
+				m_pDataHeap = view_policy::template alloc<Allocator>(cap);
+				view_policy::mem_add_block(m_pDataHeap, cap, count);
 				if (pDataOld != nullptr) {
-					mem::move_elements<T, true>(m_pDataHeap, pDataOld, m_cnt, 0, count, m_cap);
+					mem::move_elements<T, true>(m_pDataHeap, pDataOld, m_cnt, 0, cap, m_cap);
 					view_policy::template free<Allocator>(pDataOld, m_cap, m_cnt);
 				} else {
-					mem::move_elements<T, true>(m_pDataHeap, m_data, m_cnt, 0, count, m_cap);
+					mem::move_elements<T, true>(m_pDataHeap, m_data, m_cnt, 0, cap, m_cap);
 					view_policy::mem_del_block(m_data, m_cap, m_cnt);
 				}
 
-				m_cap = count;
+				m_cap = cap;
 				m_cnt = count;
 				m_pData = m_pDataHeap;
 			}
@@ -12283,9 +12314,10 @@ namespace gaia {
 			//! Changes the size and initializes new elements from a value.
 			//! \param count Number of elements.
 			//! \param value Value assigned to each new element.
-			void resize(size_type count, const_reference value) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, const_reference value, ResizePolicy policy = ResizePolicy::Exact) {
 				const auto oldCount = m_cnt;
-				resize(count);
+				resize(count, policy);
 
 				if constexpr (std::is_copy_constructible_v<value_type>) {
 					const value_type valueCopy = value;
@@ -13098,7 +13130,8 @@ namespace gaia {
 
 			//! Changes the number of elements.
 			//! \param count Number of elements.
-			void resize(size_type count) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, ResizePolicy policy = ResizePolicy::Exact) {
 				if (count == m_cnt)
 					return;
 
@@ -13123,30 +13156,32 @@ namespace gaia {
 
 				// Resizing to a bigger size but still within allocated capacity
 				if (count <= m_cap) {
-					view_policy::mem_pop_block(m_pData, m_cap, m_cnt, count - m_cnt);
+					view_policy::mem_push_block(m_pData, m_cap, m_cnt, count - m_cnt);
 
 					m_cnt = count;
 					return;
 				}
 
+				const auto cap = detail::resize_capacity(policy, m_cap, count);
 				auto* pDataOld = m_pData;
-				m_pData = view_policy::template alloc<Allocator>(count);
-				view_policy::mem_add_block(m_pData, count, count);
+				m_pData = view_policy::template alloc<Allocator>(cap);
+				view_policy::mem_add_block(m_pData, cap, count);
 				// Move old data to the new location
-				mem::move_elements<T, true>(m_pData, pDataOld, m_cnt, 0, count, m_cap);
+				mem::move_elements<T, true>(m_pData, pDataOld, m_cnt, 0, cap, m_cap);
 				// Release old memory
 				view_policy::template free<Allocator>(pDataOld, m_cap, m_cnt);
 
-				m_cap = count;
+				m_cap = cap;
 				m_cnt = count;
 			}
 
 			//! Changes the size and initializes new elements from a value.
 			//! \param count Number of elements.
 			//! \param value Value assigned to each new element.
-			void resize(size_type count, const_reference value) {
+			//! \param policy How capacity grows when \a count exceeds it.
+			void resize(size_type count, const_reference value, ResizePolicy policy = ResizePolicy::Exact) {
 				const auto oldCount = m_cnt;
-				resize(count);
+				resize(count, policy);
 
 				if constexpr (std::is_copy_constructible_v<value_type>) {
 					const value_type valueCopy = value;
@@ -20492,7 +20527,7 @@ namespace gaia {
 			iterator insert(iterator pos, const T& arg) noexcept {
 				GAIA_ASSERT(size() < N);
 				GAIA_ASSERT(pos >= data());
-				GAIA_ASSERT(empty() || (pos < iterator(data() + size())));
+				GAIA_ASSERT(pos <= iterator(data() + size()));
 
 				const auto idxSrc = (size_type)core::distance(begin(), pos);
 				const auto idxDst = (size_type)core::distance(begin(), end());
@@ -20519,7 +20554,7 @@ namespace gaia {
 			iterator insert(iterator pos, T&& arg) noexcept {
 				GAIA_ASSERT(size() < N);
 				GAIA_ASSERT(pos >= data());
-				GAIA_ASSERT(empty() || (pos < iterator(data() + size())));
+				GAIA_ASSERT(pos <= iterator(data() + size()));
 
 				const auto idxSrc = (size_type)core::distance(begin(), pos);
 				const auto idxDst = (size_type)core::distance(begin(), end());
