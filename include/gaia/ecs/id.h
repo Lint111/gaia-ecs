@@ -66,8 +66,6 @@ namespace gaia {
 				IdentifierData storage : 1;
 				//! Component is SoA
 				IdentifierData soa : meta::StructToTupleMaxTypes_Bits;
-				//! Unused part
-				IdentifierData unused : 1;
 			};
 			static_assert(sizeof(InternalData) == sizeof(Identifier));
 
@@ -86,7 +84,6 @@ namespace gaia {
 				data.size = size;
 				data.alig = alig;
 				data.storage = (IdentifierData)storage;
-				data.unused = 0;
 			}
 
 			//! Component id.
