@@ -591,7 +591,9 @@ namespace gaia {
 						Raw tmp{};
 						const auto* pBase = reinterpret_cast<const uint8_t*>(&tmp);
 						static constexpr const char* FieldNames[meta::StructToTupleMaxTypes] = {
-								"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14"};
+								"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14",
+								"f15", "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", "f24", "f25", "f26", "f27", "f28", "f29",
+								"f30"};
 						uint32_t fieldCount = 0;
 						meta::each_member(tmp, [&](auto&... members) {
 							auto add_field = [&](auto& member) {

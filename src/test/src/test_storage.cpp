@@ -2745,3 +2745,157 @@ TEST_CASE("World ids enumeration") {
 		CHECK_FALSE(wld.has_direct(instance, position));
 	}
 }
+
+namespace {
+struct WideSoA16 {
+	GAIA_LAYOUT(SoA);
+	float m0;
+	uint8_t m1;
+	uint16_t m2;
+	double m3;
+	uint32_t m4;
+	int64_t m5;
+	int8_t m6;
+	uint64_t m7;
+	float m8;
+	uint8_t m9;
+	uint16_t m10;
+	double m11;
+	uint32_t m12;
+	int64_t m13;
+	int8_t m14;
+	uint64_t m15;
+};
+struct WideSoA31 {
+	GAIA_LAYOUT(SoA);
+	float m0;
+	uint8_t m1;
+	uint16_t m2;
+	double m3;
+	uint32_t m4;
+	int64_t m5;
+	int8_t m6;
+	uint64_t m7;
+	float m8;
+	uint8_t m9;
+	uint16_t m10;
+	double m11;
+	uint32_t m12;
+	int64_t m13;
+	int8_t m14;
+	uint64_t m15;
+	float m16;
+	uint8_t m17;
+	uint16_t m18;
+	double m19;
+	uint32_t m20;
+	int64_t m21;
+	int8_t m22;
+	uint64_t m23;
+	float m24;
+	uint8_t m25;
+	uint16_t m26;
+	double m27;
+	uint32_t m28;
+	int64_t m29;
+	int8_t m30;
+};
+
+	template <typename S>
+	S wide_soa_row(uint32_t seed) {
+		S row{};
+		meta::each_member(row, [&](auto&... members) {
+			uint32_t k = 0;
+			((members = (core::raw_t<decltype(members)>)(seed * 3 + (k++) + 1)), ...);
+		});
+		return row;
+	}
+
+	template <typename S>
+	bool wide_soa_equal(const S& left, const S& right) {
+		return meta::struct_to_tuple(left) == meta::struct_to_tuple(right);
+	}
+
+	template <typename S, uint32_t Members>
+	void wide_soa_roundtrip() {
+		static_assert(std::tuple_size_v<decltype(meta::struct_to_tuple(std::declval<S>()))> == Members);
+		CHECK(meta::struct_member_count<S>() == Members);
+
+		TestWorld twld;
+
+		const auto& item = wld.add<S>();
+		CHECK(item.comp.soa() == Members);
+
+		constexpr uint32_t N = 100;
+		cnt::darray<ecs::Entity> entities;
+		GAIA_FOR(N) {
+			const auto e = wld.add();
+			wld.add<S>(e, wide_soa_row<S>(i));
+			entities.push_back(e);
+		}
+
+		// Read back whole rows by entity.
+		GAIA_FOR(N) {
+			CHECK(wide_soa_equal(wld.get<S>(entities[i]), wide_soa_row<S>(i)));
+		}
+
+		// Iterate through the SoA views: verify the first and last member columns and whole rows.
+		auto q = wld.query().template all<S>();
+		uint32_t seen = 0;
+		q.each([&](ecs::Iter& it) {
+			auto view = it.template view<S>();
+			auto first = view.template get<0>();
+			auto last = view.template get<Members - 1>();
+			GAIA_EACH(it) {
+				const auto row = (S)view[i];
+				const auto seed = (uint32_t)(((uint32_t)first[i]) - 1) / 3;
+				CHECK(wide_soa_equal(row, wide_soa_row<S>(seed)));
+				CHECK(last[i] == std::get<Members - 1>(meta::struct_to_tuple(wide_soa_row<S>(seed))));
+				++seen;
+			}
+		});
+		CHECK(seen == N);
+
+		// Write through the mutable SoA views: one column, then a whole row.
+		auto qMut = wld.query().template all<S&>();
+		qMut.each([&](ecs::Iter& it) {
+			auto view = it.template view_mut<S>();
+			auto last = view.template set<Members - 1>();
+			GAIA_EACH(it) {
+				last[i] = (core::raw_t<decltype(last[i])>)100;
+			}
+			auto first = view.template get<0>();
+			GAIA_EACH(it) {
+				if (((uint32_t)first[i] - 1) / 3 == 7)
+					view[i] = wide_soa_row<S>(1000);
+			}
+		});
+
+		uint32_t sevens = 0;
+		GAIA_FOR(N) {
+			const auto expected = i == 7 ? wide_soa_row<S>(1000) : wide_soa_row<S>(i);
+			const auto actual = wld.get<S>(entities[i]);
+			if (i == 7) {
+				CHECK(wide_soa_equal(actual, expected));
+				++sevens;
+			} else {
+				// Every member except the last still matches; the last was overwritten with 100.
+				const auto a = meta::struct_to_tuple(actual);
+				const auto e = meta::struct_to_tuple(expected);
+				CHECK(std::get<0>(a) == std::get<0>(e));
+				CHECK(std::get<Members / 2>(a) == std::get<Members / 2>(e));
+				CHECK(std::get<Members - 2>(a) == std::get<Members - 2>(e));
+				CHECK((double)std::get<Members - 1>(a) == 100.0);
+			}
+		}
+		CHECK(sevens == 1);
+	}
+} // namespace
+
+TEST_CASE("SoA component reflects 16 members") {
+	wide_soa_roundtrip<WideSoA16, 16>();
+}
+
+TEST_CASE("SoA component reflects 31 members") {
+	wide_soa_roundtrip<WideSoA31, 31>();
+}
