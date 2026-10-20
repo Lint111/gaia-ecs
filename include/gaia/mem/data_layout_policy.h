@@ -357,7 +357,7 @@ namespace gaia {
 			//! \param capacity Number of values reserved in every field array.
 			//! \return Pointer to the selected field value.
 			GAIA_NODISCARD static const uint8_t*
-			get(const void* pData, uint32_t alignment, std::span<const uint8_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
+			get(const void* pData, uint32_t alignment, std::span<const uint16_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
 					uint32_t capacity) noexcept {
 				GAIA_ASSERT(pData != nullptr);
 				GAIA_ASSERT(alignment != 0 && fieldIdx < fieldSizes.size() && row < capacity);
@@ -379,7 +379,7 @@ namespace gaia {
 			//! \param capacity Number of values reserved in every field array.
 			//! \return Pointer to the selected field value.
 			GAIA_NODISCARD static uint8_t*
-			set(void* pData, uint32_t alignment, std::span<const uint8_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
+			set(void* pData, uint32_t alignment, std::span<const uint16_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
 					uint32_t capacity) noexcept {
 				return const_cast<uint8_t*>(get(pData, alignment, fieldSizes, fieldIdx, row, capacity));
 			}

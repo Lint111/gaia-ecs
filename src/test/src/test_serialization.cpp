@@ -3695,7 +3695,7 @@ TEST_CASE("Serialization - validated runtime component patch") {
 TEST_CASE("Serialization - validated runtime patch storage paths") {
 	SUBCASE("SoA field") {
 		TestWorld twld;
-		constexpr uint8_t soaSizes[] = {sizeof(uint32_t), sizeof(double)};
+		constexpr uint16_t soaSizes[] = {sizeof(uint32_t), sizeof(double)};
 		const ecs::RuntimeFieldInit fields[] = {
 				{util::str_view("health"), ecs::U32, 0, 0}, {util::str_view("score"), ecs::F64, 8, 0}};
 		ecs::ComponentDesc desc{};

@@ -1543,7 +1543,7 @@ namespace gaia {
 
 					const auto recs = m_pChunk->comp_rec_view();
 					const auto& rec = recs[compIdx];
-					const std::span<const uint8_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
+					const std::span<const uint16_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
 					const auto* pData = mem::data_view_policy_soa_erased::get(
 							m_pChunk->comp_ptr(compIdx), rec.comp.alig(), fieldSizes, fieldIdx, from(), m_pChunk->capacity());
 					return {pData, pItem->soaSizes[fieldIdx], size(), ComponentRawViewFlag_Valid};
@@ -1568,7 +1568,7 @@ namespace gaia {
 
 					const auto recs = m_pChunk->comp_rec_view();
 					const auto& rec = recs[compIdx];
-					const std::span<const uint8_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
+					const std::span<const uint16_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
 					auto* pData = mem::data_view_policy_soa_erased::set(
 							m_pChunk->comp_ptr_mut(compIdx), rec.comp.alig(), fieldSizes, fieldIdx, from(), m_pChunk->capacity());
 					return {pData, pItem->soaSizes[fieldIdx], size(), ComponentRawViewFlag_Valid};

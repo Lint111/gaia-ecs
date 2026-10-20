@@ -292,7 +292,7 @@ namespace gaia {
 			uint32_t soa = 0;
 			//! Per-element SoA sizes when \a soa is non-zero. The array must contain \a soa non-zero entries and
 			//! their sum must not exceed \a size.
-			const uint8_t* pSoaSizes = nullptr;
+			const uint16_t* pSoaSizes = nullptr;
 			//! Optional explicit lookup hash. When empty, the symbol hash is used.
 			ComponentLookupHash hashLookup{};
 			//! Runtime reflection metadata copied during registration.
@@ -363,7 +363,7 @@ namespace gaia {
 				//! Populates SoA element sizes for SoA payloads.
 				//! \param soaSizes Scratch/output storage for per-element byte sizes.
 				//! \return Number of SoA elements, or 0 for AoS payloads.
-				static uint32_t soa(std::span<uint8_t, meta::StructToTupleMaxTypes> soaSizes) {
+				static uint32_t soa(std::span<uint16_t, meta::StructToTupleMaxTypes> soaSizes) {
 					if constexpr (mem::is_soa_layout_v<U>) {
 						uint32_t i = 0;
 						using TTuple = decltype(meta::struct_to_tuple(std::declval<U>()));
@@ -372,8 +372,8 @@ namespace gaia {
 						static_assert(TTupleSize > 0);
 						static_assert(TTupleSize <= meta::StructToTupleMaxTypes);
 						core::each_tuple<TTuple>([&](auto&& item) {
-							static_assert(sizeof(item) <= 255, "Each member of a SoA component can be at most 255 B long!");
-							soaSizes[i] = (uint8_t)sizeof(item);
+							static_assert(sizeof(item) <= UINT16_MAX, "Each member of a SoA component can be at most 65535 B long!");
+							soaSizes[i] = (uint16_t)sizeof(item);
 							++i;
 						});
 						GAIA_ASSERT(i <= meta::StructToTupleMaxTypes);
@@ -623,7 +623,7 @@ namespace gaia {
 				//! non-owning pointer to this buffer and must be consumed before the buffer expires.
 				//! \return Component descriptor for the current component type.
 				static ecs::ComponentDesc
-				make(util::str_view descName, std::span<uint8_t, meta::StructToTupleMaxTypes> soaSizes) {
+				make(util::str_view descName, std::span<uint16_t, meta::StructToTupleMaxTypes> soaSizes) {
 					ecs::ComponentDesc desc{};
 					desc.name = descName;
 					desc.size = size();

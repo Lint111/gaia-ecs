@@ -79,7 +79,7 @@ inline util::str_view runtime_component_name_view(const char* name) {
 
 inline ecs::ComponentDesc runtime_component_desc(
 		const char* name, uint32_t size, ecs::DataStorageType storageType, uint32_t alig = 1, uint32_t soa = 0,
-		const uint8_t* pSoaSizes = nullptr, ecs::ComponentLookupHash hashLookup = {},
+		const uint16_t* pSoaSizes = nullptr, ecs::ComponentLookupHash hashLookup = {},
 		const ecs::RuntimeFieldInit* fields = nullptr, uint32_t fieldCount = 0) {
 	auto desc = ecs::ComponentDesc{};
 	desc.name = runtime_component_name_view(name);
@@ -96,7 +96,7 @@ inline ecs::ComponentDesc runtime_component_desc(
 
 inline ecs::ComponentCacheItem& add_runtime_component(
 		ecs::World& world, const char* name, uint32_t size, ecs::DataStorageType storageType, uint32_t alig = 1,
-		uint32_t soa = 0, const uint8_t* pSoaSizes = nullptr, ecs::ComponentLookupHash hashLookup = {},
+		uint32_t soa = 0, const uint16_t* pSoaSizes = nullptr, ecs::ComponentLookupHash hashLookup = {},
 		const ecs::RuntimeFieldInit* fields = nullptr, uint32_t fieldCount = 0) {
 	return world.add(
 			runtime_component_desc(name, size, storageType, alig, soa, pSoaSizes, hashLookup, fields, fieldCount));
@@ -104,7 +104,7 @@ inline ecs::ComponentCacheItem& add_runtime_component(
 
 inline ecs::ComponentCacheItem& add_runtime_component(
 		ecs::ComponentCache& cc, ecs::Entity entity, const char* name, uint32_t size, ecs::DataStorageType storageType,
-		uint32_t alig = 1, uint32_t soa = 0, const uint8_t* pSoaSizes = nullptr, ecs::ComponentLookupHash hashLookup = {},
+		uint32_t alig = 1, uint32_t soa = 0, const uint16_t* pSoaSizes = nullptr, ecs::ComponentLookupHash hashLookup = {},
 		util::str_view scopePath = {}, const ecs::RuntimeFieldInit* fields = nullptr, uint32_t fieldCount = 0) {
 	return const_cast<ecs::ComponentCacheItem&>(cc.add(
 			entity, runtime_component_desc(name, size, storageType, alig, soa, pSoaSizes, hashLookup, fields, fieldCount),

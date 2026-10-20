@@ -2899,3 +2899,243 @@ TEST_CASE("SoA component reflects 16 members") {
 TEST_CASE("SoA component reflects 31 members") {
 	wide_soa_roundtrip<WideSoA31, 31>();
 }
+
+namespace {
+template <uint32_t N>
+struct SoABlob {
+	char bytes[N];
+};
+static_assert(sizeof(SoABlob<256>) == 256);
+
+template <uint32_t N>
+SoABlob<N> soa_blob(uint32_t seed) {
+	SoABlob<N> b{};
+	GAIA_FOR(N) b.bytes[i] = (char)((seed * 31 + i * 7) & 0x7F);
+	return b;
+}
+
+template <uint32_t N>
+bool soa_blob_equal(const SoABlob<N>& l, const SoABlob<N>& r) {
+	return memcmp(l.bytes, r.bytes, N) == 0;
+}
+
+struct LargeMemberSoA256 {
+	GAIA_LAYOUT(SoA);
+	uint32_t id;
+	SoABlob<256> text;
+	uint16_t len;
+};
+struct LargeMemberSoA4096 {
+	GAIA_LAYOUT(SoA);
+	uint32_t id;
+	SoABlob<4096> text;
+	uint16_t len;
+};
+struct LargeMemberSoA20000 {
+	GAIA_LAYOUT(SoA);
+	uint32_t id;
+	SoABlob<20000> text;
+	uint16_t len;
+};
+struct LargeMemberSoA60000 {
+	GAIA_LAYOUT(SoA);
+	uint32_t id;
+	SoABlob<60000> text;
+	uint16_t len;
+};
+//! 31 members mixing large (256, 300, 1024, 4096 B) and small members.
+struct LargeMixedSoA31 {
+	GAIA_LAYOUT(SoA);
+	uint32_t m0;
+	SoABlob<256> m1;
+	uint8_t m2;
+	SoABlob<300> m3;
+	uint16_t m4;
+	double m5;
+	SoABlob<1024> m6;
+	uint8_t m7;
+	uint32_t m8;
+	SoABlob<4096> m9;
+	float m10;
+	uint16_t m11;
+	SoABlob<256> m12;
+	uint64_t m13;
+	uint8_t m14;
+	SoABlob<300> m15;
+	uint32_t m16;
+	uint16_t m17;
+	double m18;
+	SoABlob<1024> m19;
+	uint8_t m20;
+	float m21;
+	uint64_t m22;
+	SoABlob<256> m23;
+	uint8_t m24;
+	uint16_t m25;
+	uint32_t m26;
+	double m27;
+	uint8_t m28;
+	SoABlob<300> m29;
+	uint32_t m30;
+};
+
+template <typename S, uint32_t N, uint32_t Rows>
+void large_member_roundtrip() {
+	static_assert(sizeof(S::text) == N);
+	TestWorld twld;
+	const auto& item = wld.add<S>();
+	CHECK(item.comp.soa() == 3);
+	CHECK(item.soaSizes[1] == N);
+	CHECK(item.comp.size() == sizeof(S));
+
+	cnt::darray<ecs::Entity> entities;
+	GAIA_FOR(Rows) {
+		const auto e = wld.add();
+		S row{};
+		row.id = i;
+		row.text = soa_blob<N>(i);
+		row.len = (uint16_t)(i + 1);
+		wld.add<S>(e, row);
+		entities.push_back(e);
+	}
+
+	GAIA_FOR(Rows) {
+		const auto row = wld.get<S>(entities[i]);
+		CHECK(row.id == i);
+		CHECK(soa_blob_equal(row.text, soa_blob<N>(i)));
+		CHECK(row.len == i + 1);
+	}
+
+	// Read through view.
+	uint32_t seen = 0;
+	wld.query().template all<S>().each([&](ecs::Iter& it) {
+		auto view = it.template view<S>();
+		auto ids = view.template get<0>();
+		auto text = view.template get<1>();
+		auto len = view.template get<2>();
+		GAIA_EACH(it) {
+			const auto seed = (uint32_t)ids[i];
+			CHECK(soa_blob_equal(text[i], soa_blob<N>(seed)));
+			CHECK(len[i] == seed + 1);
+			++seen;
+		}
+	});
+	CHECK(seen == Rows);
+
+	// Write through view_mut: the large column and a whole row.
+	wld.query().template all<S&>().each([&](ecs::Iter& it) {
+		auto view = it.template view_mut<S>();
+		auto ids = view.template get<0>();
+		auto text = view.template set<1>();
+		GAIA_EACH(it) {
+			text[i] = soa_blob<N>((uint32_t)ids[i] + 500);
+		}
+	});
+	GAIA_FOR(Rows) {
+		const auto row = wld.get<S>(entities[i]);
+		CHECK(row.id == i);
+		CHECK(soa_blob_equal(row.text, soa_blob<N>(i + 500)));
+		CHECK(row.len == i + 1);
+	}
+}
+} // namespace
+
+TEST_CASE("SoA component with a 256 byte member") {
+	large_member_roundtrip<LargeMemberSoA256, 256, 200>();
+}
+
+TEST_CASE("SoA component with a 4096 byte member") {
+	large_member_roundtrip<LargeMemberSoA4096, 4096, 50>();
+}
+
+TEST_CASE("SoA component with a 20000 byte member") {
+	large_member_roundtrip<LargeMemberSoA20000, 20000, 5>();
+}
+
+TEST_CASE("SoA component with a 60000 byte member") {
+	large_member_roundtrip<LargeMemberSoA60000, 60000, 3>();
+}
+
+TEST_CASE("SoA component with 31 mixed large and small members") {
+	using S = LargeMixedSoA31;
+	static_assert(std::tuple_size_v<decltype(meta::struct_to_tuple(std::declval<S>()))> == 31);
+	TestWorld twld;
+	const auto& item = wld.add<S>();
+	CHECK(item.comp.soa() == 31);
+	CHECK(item.soaSizes[9] == 4096);
+	CHECK(item.soaSizes[1] == 256);
+	CHECK(item.soaSizes[2] == 1);
+
+	constexpr uint32_t N = 40;
+	auto make = [](uint32_t seed) {
+		S r{};
+		r.m0 = seed;
+		r.m1 = soa_blob<256>(seed);
+		r.m2 = (uint8_t)(seed + 2);
+		r.m3 = soa_blob<300>(seed + 3);
+		r.m4 = (uint16_t)(seed + 4);
+		r.m5 = seed + 5.0;
+		r.m6 = soa_blob<1024>(seed + 6);
+		r.m9 = soa_blob<4096>(seed + 9);
+		r.m10 = (float)seed + 10.0f;
+		r.m12 = soa_blob<256>(seed + 12);
+		r.m13 = seed + 13ULL;
+		r.m15 = soa_blob<300>(seed + 15);
+		r.m19 = soa_blob<1024>(seed + 19);
+		r.m23 = soa_blob<256>(seed + 23);
+		r.m29 = soa_blob<300>(seed + 29);
+		r.m30 = seed + 30;
+		return r;
+	};
+	auto equal = [](const S& a, const S& b) {
+		return a.m0 == b.m0 && soa_blob_equal(a.m1, b.m1) && a.m2 == b.m2 && soa_blob_equal(a.m3, b.m3) && a.m4 == b.m4 &&
+					 a.m5 == b.m5 && soa_blob_equal(a.m6, b.m6) && soa_blob_equal(a.m9, b.m9) && a.m10 == b.m10 &&
+					 soa_blob_equal(a.m12, b.m12) && a.m13 == b.m13 && soa_blob_equal(a.m15, b.m15) &&
+					 soa_blob_equal(a.m19, b.m19) && soa_blob_equal(a.m23, b.m23) && soa_blob_equal(a.m29, b.m29) &&
+					 a.m30 == b.m30;
+	};
+
+	cnt::darray<ecs::Entity> entities;
+	GAIA_FOR(N) {
+		const auto e = wld.add();
+		wld.add<S>(e, make(i));
+		entities.push_back(e);
+	}
+	GAIA_FOR(N) {
+		CHECK(equal(wld.get<S>(entities[i]), make(i)));
+	}
+
+	uint32_t seen = 0;
+	wld.query().all<S>().each([&](ecs::Iter& it) {
+		auto view = it.view<S>();
+		auto m0 = view.get<0>();
+		auto m9 = view.get<9>();
+		auto m30 = view.get<30>();
+		GAIA_EACH(it) {
+			const auto seed = (uint32_t)m0[i];
+			CHECK(soa_blob_equal(m9[i], soa_blob<4096>(seed + 9)));
+			CHECK(m30[i] == seed + 30);
+			CHECK(equal((S)view[i], make(seed)));
+			++seen;
+		}
+	});
+	CHECK(seen == N);
+
+	wld.query().all<S&>().each([&](ecs::Iter& it) {
+		auto view = it.view_mut<S>();
+		auto m0 = view.get<0>();
+		auto m9 = view.set<9>();
+		auto m2 = view.set<2>();
+		GAIA_EACH(it) {
+			m9[i] = soa_blob<4096>((uint32_t)m0[i] + 900);
+			m2[i] = 77;
+		}
+	});
+	GAIA_FOR(N) {
+		const auto row = wld.get<S>(entities[i]);
+		CHECK(soa_blob_equal(row.m9, soa_blob<4096>(i + 900)));
+		CHECK(row.m2 == 77);
+		CHECK(soa_blob_equal(row.m1, soa_blob<256>(i)));
+		CHECK(row.m30 == i + 30);
+	}
+}

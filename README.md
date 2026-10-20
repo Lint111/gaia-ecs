@@ -627,7 +627,7 @@ w.del(e, velocity);
 When adding components following restrictions apply:
 * There can be at most 32 ids in an entity's archetype (components, tags and relationships stored in archetype chunks). Components marked with `ecs::DontFragment` and stored outside archetypes do not consume these slots. If you need more archetype-resident ids you can merge some of your components, or rethink the strategy because too many fragmenting ids usually implies design issues (e.g. object-oriented thinking or mirroring real-life abstractions too directly in ECS).
 * Maximum size of a registered component type is currently 4095 bytes. This limit comes from the component metadata and chunk layout used internally. If this is not enough for you, store a pointer or handle to data that lives outside ECS. Note, this limit is still enforced today even for components that use sparse storage.
-* [SoA](#data-layouts) components can have at most 4 members and each of them can be at most 255 bytes long.
+* [SoA](#data-layouts) components can have at most 31 members and each of them can be at most 65535 bytes long (the whole component must still fit into a chunk).
 * Components must be default-constructible (either the default constructor is present or you provide one yourself). If your component contains members that are not default-constructible (e.g. from a 3rd party library that is beyond your control), you need to work this around. You will need to store a pointer, or come up with different means of accessing this data.
 * Implicit registration only creates the default component form. If a component needs non-default traits such as `ecs::Sparse`
 or `ecs::DontFragment`, register it explicitly first and then apply the trait to the component entity. Implicit registration

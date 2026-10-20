@@ -7191,7 +7191,7 @@ namespace gaia {
 			//! \param capacity Number of values reserved in every field array.
 			//! \return Pointer to the selected field value.
 			GAIA_NODISCARD static const uint8_t*
-			get(const void* pData, uint32_t alignment, std::span<const uint8_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
+			get(const void* pData, uint32_t alignment, std::span<const uint16_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
 					uint32_t capacity) noexcept {
 				GAIA_ASSERT(pData != nullptr);
 				GAIA_ASSERT(alignment != 0 && fieldIdx < fieldSizes.size() && row < capacity);
@@ -7213,7 +7213,7 @@ namespace gaia {
 			//! \param capacity Number of values reserved in every field array.
 			//! \return Pointer to the selected field value.
 			GAIA_NODISCARD static uint8_t*
-			set(void* pData, uint32_t alignment, std::span<const uint8_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
+			set(void* pData, uint32_t alignment, std::span<const uint16_t> fieldSizes, uint32_t fieldIdx, uint32_t row,
 					uint32_t capacity) noexcept {
 				return const_cast<uint8_t*>(get(pData, alignment, fieldSizes, fieldIdx, row, capacity));
 			}
@@ -32254,13 +32254,14 @@ namespace gaia {
 			//! Bit mask covering all valid component ids.
 			static constexpr uint32_t IdMask = IdentifierIdBad;
 			//! Number of bits used to store the component size.
-			static constexpr uint32_t MaxComponentSize_Bits = 13;
+			static constexpr uint32_t MaxComponentSize_Bits = 16;
 			//! Largest component size storable, in bytes.
 			static constexpr uint32_t MaxComponentSizeInBytes = (1 << MaxComponentSize_Bits) - 1;
-			//! Number of bits used to store the component alignment.
-			static constexpr uint32_t MaxAlignment_Bits = MaxComponentSize_Bits;
+			//! Number of bits used to store the component alignment. The alignment is a power of two and is stored as
+			//! log2(alig) + 1, with 0 meaning no alignment (tags).
+			static constexpr uint32_t MaxAlignment_Bits = 5;
 			//! Largest component alignment storable.
-			static constexpr uint32_t MaxAlignment = MaxComponentSizeInBytes;
+			static constexpr uint32_t MaxAlignment = (1U << 13) - 1;
 
 			//! Bit-packed storage layout of a component id.
 			struct InternalData {
@@ -32268,12 +32269,14 @@ namespace gaia {
 				uint32_t id;
 				//! Component size
 				IdentifierData size : MaxComponentSize_Bits;
-				//! Component alignment
+				//! Component alignment as log2(alig) + 1, or 0 for no alignment
 				IdentifierData alig : MaxAlignment_Bits;
 				//! Component storage kind. 0 = table, 1 = sparse.
 				IdentifierData storage : 1;
 				//! Component is SoA
 				IdentifierData soa : meta::StructToTupleMaxTypes_Bits;
+				//! Unused bits
+				IdentifierData unused : 64 - 32 - MaxComponentSize_Bits - MaxAlignment_Bits - 1 - meta::StructToTupleMaxTypes_Bits;
 			};
 			static_assert(sizeof(InternalData) == sizeof(Identifier));
 
@@ -32290,7 +32293,9 @@ namespace gaia {
 				data.id = id;
 				data.soa = soa;
 				data.size = size;
-				data.alig = alig;
+				GAIA_ASSERT(alig == 0 || core::is_pow2(alig));
+				data.alig = core::count_bits(alig);
+				data.unused = 0;
 				data.storage = (IdentifierData)storage;
 			}
 
@@ -32315,7 +32320,7 @@ namespace gaia {
 			//! Component alignment in bytes.
 			//! \return Component alignment in bytes.
 			GAIA_NODISCARD constexpr auto alig() const noexcept {
-				return (uint32_t)data.alig;
+				return data.alig == 0 ? 0U : 1U << (data.alig - 1);
 			}
 
 			//! Storage mode of the component.
@@ -34785,7 +34790,7 @@ namespace gaia {
 			uint32_t soa = 0;
 			//! Per-element SoA sizes when \a soa is non-zero. The array must contain \a soa non-zero entries and
 			//! their sum must not exceed \a size.
-			const uint8_t* pSoaSizes = nullptr;
+			const uint16_t* pSoaSizes = nullptr;
 			//! Optional explicit lookup hash. When empty, the symbol hash is used.
 			ComponentLookupHash hashLookup{};
 			//! Runtime reflection metadata copied during registration.
@@ -34856,7 +34861,7 @@ namespace gaia {
 				//! Populates SoA element sizes for SoA payloads.
 				//! \param soaSizes Scratch/output storage for per-element byte sizes.
 				//! \return Number of SoA elements, or 0 for AoS payloads.
-				static uint32_t soa(std::span<uint8_t, meta::StructToTupleMaxTypes> soaSizes) {
+				static uint32_t soa(std::span<uint16_t, meta::StructToTupleMaxTypes> soaSizes) {
 					if constexpr (mem::is_soa_layout_v<U>) {
 						uint32_t i = 0;
 						using TTuple = decltype(meta::struct_to_tuple(std::declval<U>()));
@@ -34865,8 +34870,8 @@ namespace gaia {
 						static_assert(TTupleSize > 0);
 						static_assert(TTupleSize <= meta::StructToTupleMaxTypes);
 						core::each_tuple<TTuple>([&](auto&& item) {
-							static_assert(sizeof(item) <= 255, "Each member of a SoA component can be at most 255 B long!");
-							soaSizes[i] = (uint8_t)sizeof(item);
+							static_assert(sizeof(item) <= UINT16_MAX, "Each member of a SoA component can be at most 65535 B long!");
+							soaSizes[i] = (uint16_t)sizeof(item);
 							++i;
 						});
 						GAIA_ASSERT(i <= meta::StructToTupleMaxTypes);
@@ -35115,7 +35120,7 @@ namespace gaia {
 				//! non-owning pointer to this buffer and must be consumed before the buffer expires.
 				//! \return Component descriptor for the current component type.
 				static ecs::ComponentDesc
-				make(util::str_view descName, std::span<uint8_t, meta::StructToTupleMaxTypes> soaSizes) {
+				make(util::str_view descName, std::span<uint16_t, meta::StructToTupleMaxTypes> soaSizes) {
 					ecs::ComponentDesc desc{};
 					desc.name = descName;
 					desc.size = size();
@@ -35261,7 +35266,7 @@ namespace gaia {
 			//! Hash used for component lookup by registered symbol.
 			ComponentLookupHash hashLookup;
 			//! Per-element byte sizes for SoA components. Unused for AoS components.
-			uint8_t soaSizes[meta::StructToTupleMaxTypes];
+			uint16_t soaSizes[meta::StructToTupleMaxTypes];
 
 			//! Interned registered component symbol.
 			SymbolId name;
@@ -35354,7 +35359,7 @@ namespace gaia {
 			void move_soa_element(
 					void* pDst, const void* pSrc, uint32_t idxDst, uint32_t idxSrc, uint32_t capDst,
 					uint32_t capSrc) const noexcept {
-				const std::span<const uint8_t> fieldSizes{soaSizes, comp.soa()};
+				const std::span<const uint16_t> fieldSizes{soaSizes, comp.soa()};
 				GAIA_FOR(comp.soa()) {
 					auto* pD = mem::data_view_policy_soa_erased::set(pDst, comp.alig(), fieldSizes, i, idxDst, capDst);
 					const auto* pS = mem::data_view_policy_soa_erased::get(pSrc, comp.alig(), fieldSizes, i, idxSrc, capSrc);
@@ -35372,7 +35377,7 @@ namespace gaia {
 			void swap_soa_elements(
 					void* pLeft, void* pRight, uint32_t idxLeft, uint32_t idxRight, uint32_t capLeft,
 					uint32_t capRight) const noexcept {
-				const std::span<const uint8_t> fieldSizes{soaSizes, comp.soa()};
+				const std::span<const uint16_t> fieldSizes{soaSizes, comp.soa()};
 				GAIA_FOR(comp.soa()) {
 					auto* pL = mem::data_view_policy_soa_erased::set(pLeft, comp.alig(), fieldSizes, i, idxLeft, capLeft);
 					auto* pR = mem::data_view_policy_soa_erased::set(pRight, comp.alig(), fieldSizes, i, idxRight, capRight);
@@ -35932,9 +35937,9 @@ namespace gaia {
 				char nameTmp[MaxNameLength];
 				const auto nameTmpLen = init_type_name<T>(nameTmp);
 
-				uint8_t soaSizes[meta::StructToTupleMaxTypes]{};
+				uint16_t soaSizes[meta::StructToTupleMaxTypes]{};
 				auto desc = detail::ComponentDesc<T>::make(
-						util::str_view(nameTmp, nameTmpLen), std::span<uint8_t, meta::StructToTupleMaxTypes>{soaSizes});
+						util::str_view(nameTmp, nameTmpLen), std::span<uint16_t, meta::StructToTupleMaxTypes>{soaSizes});
 				if (pRuntimeType != nullptr) {
 					desc.runtimeType = *pRuntimeType;
 				}
@@ -45708,7 +45713,7 @@ namespace gaia {
 
 					const auto recs = m_pChunk->comp_rec_view();
 					const auto& rec = recs[compIdx];
-					const std::span<const uint8_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
+					const std::span<const uint16_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
 					const auto* pData = mem::data_view_policy_soa_erased::get(
 							m_pChunk->comp_ptr(compIdx), rec.comp.alig(), fieldSizes, fieldIdx, from(), m_pChunk->capacity());
 					return {pData, pItem->soaSizes[fieldIdx], size(), ComponentRawViewFlag_Valid};
@@ -45733,7 +45738,7 @@ namespace gaia {
 
 					const auto recs = m_pChunk->comp_rec_view();
 					const auto& rec = recs[compIdx];
-					const std::span<const uint8_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
+					const std::span<const uint16_t> fieldSizes{pItem->soaSizes, rec.comp.soa()};
 					auto* pData = mem::data_view_policy_soa_erased::set(
 							m_pChunk->comp_ptr_mut(compIdx), rec.comp.alig(), fieldSizes, fieldIdx, from(), m_pChunk->capacity());
 					return {pData, pItem->soaSizes[fieldIdx], size(), ComponentRawViewFlag_Valid};
@@ -74846,7 +74851,7 @@ namespace gaia {
 
 				const auto row = uint32_t(ec.row);
 				const auto capacity = ec.pChunk->capacity();
-				const std::span<const uint8_t> fieldSizes{pItem->soaSizes, pItem->comp.soa()};
+				const std::span<const uint16_t> fieldSizes{pItem->soaSizes, pItem->comp.soa()};
 				const auto* pData = mem::data_view_policy_soa_erased::get(
 						ec.pChunk->comp_ptr(compIdx), pItem->comp.alig(), fieldSizes, fieldIdx, row, capacity);
 				return {pData, pItem->soaSizes[fieldIdx], ComponentRawViewFlag_Valid};
@@ -74879,7 +74884,7 @@ namespace gaia {
 
 				const auto row = uint32_t(ec.row);
 				const auto capacity = ec.pChunk->capacity();
-				const std::span<const uint8_t> fieldSizes{pItem->soaSizes, pItem->comp.soa()};
+				const std::span<const uint16_t> fieldSizes{pItem->soaSizes, pItem->comp.soa()};
 				auto* pData = mem::data_view_policy_soa_erased::set(
 						ec.pChunk->comp_ptr_mut(compIdx), pItem->comp.alig(), fieldSizes, fieldIdx, row, capacity);
 				return {pData, pItem->soaSizes[fieldIdx], ComponentRawViewFlag_Valid};

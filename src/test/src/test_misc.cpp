@@ -146,9 +146,9 @@ TEST_CASE("Component cache") {
 		CHECK(sparse.comp.storage_type() == ecs::DataStorageType::Sparse);
 	}
 	{
-		uint8_t soaSizes[meta::StructToTupleMaxTypes]{};
+		uint16_t soaSizes[meta::StructToTupleMaxTypes]{};
 		const auto desc = ecs::detail::ComponentDesc<Position>::make(
-				util::str_view("Position"), std::span<uint8_t, meta::StructToTupleMaxTypes>{soaSizes});
+				util::str_view("Position"), std::span<uint16_t, meta::StructToTupleMaxTypes>{soaSizes});
 
 		CHECK(desc.name == util::str_view("Position"));
 		CHECK(desc.size == (uint32_t)sizeof(Position));
@@ -1034,7 +1034,7 @@ TEST_CASE("Component cache - runtime registration") {
 		const auto& original = add_runtime_component(cc, entityA, RuntimeCompName, 16, ecs::DataStorageType::Table, 4);
 		const auto originalHash = original.hashLookup.hash;
 
-		constexpr uint8_t SoaSizes[] = {1, 2, 4};
+		constexpr uint16_t SoaSizes[] = {1, 2, 4};
 		const ecs::ComponentLookupHash customHash{0x123456789abcdef0ull};
 		const auto entityB = wld.add();
 		const auto& duplicate = add_runtime_component(
@@ -1056,7 +1056,7 @@ TEST_CASE("Component cache - runtime registration") {
 		auto& cc = wld.comp_cache_mut();
 
 		constexpr const char* RuntimeCompName = "Runtime_Component_SoA";
-		constexpr uint8_t SoaSizes[] = {4, 1, 2};
+		constexpr uint16_t SoaSizes[] = {4, 1, 2};
 		const ecs::ComponentLookupHash customHash{0x00f00d00baadf00dull};
 		const auto entity = wld.add();
 
@@ -1091,7 +1091,7 @@ TEST_CASE("Component cache - runtime registration") {
 
 	SUBCASE("runtime SoA fields expose non-contiguous views and cursors") {
 		TestWorld twld;
-		constexpr uint8_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
+		constexpr uint16_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
 		const ecs::RuntimeFieldInit fields[] = {
 				{util::str_view("health"), ecs::U32, 0, 0}, //
 				{util::str_view("score"), ecs::F64, 8, 0} //
@@ -1183,7 +1183,7 @@ TEST_CASE("Component cache - runtime registration") {
 
 	SUBCASE("runtime SoA fields expose contiguous iterator field views") {
 		TestWorld twld;
-		constexpr uint8_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
+		constexpr uint16_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
 		const ecs::RuntimeFieldInit fields[] = {
 				{util::str_view("health"), ecs::U32, 0, 0}, //
 				{util::str_view("score"), ecs::F64, 8, 0} //
@@ -1267,7 +1267,7 @@ TEST_CASE("Component cache - runtime registration") {
 
 	SUBCASE("runtime SoA iterator field mutation tracks component writes") {
 		TestWorld twld;
-		constexpr uint8_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
+		constexpr uint16_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
 		const ecs::RuntimeFieldInit fields[] = {
 				{util::str_view("health"), ecs::U32, 0, 0}, //
 				{util::str_view("score"), ecs::F64, 8, 0} //
@@ -1379,7 +1379,7 @@ TEST_CASE("Component cache - runtime registration") {
 
 	SUBCASE("runtime SoA pair fields expose contiguous iterator field views") {
 		TestWorld twld;
-		constexpr uint8_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
+		constexpr uint16_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
 		const ecs::RuntimeFieldInit fields[] = {
 				{util::str_view("health"), ecs::U32, 0, 0}, //
 				{util::str_view("score"), ecs::F64, 8, 0} //
@@ -1560,7 +1560,7 @@ TEST_CASE("Component cache - runtime registration") {
 
 	SUBCASE("runtime SoA iterator field views reject non-self sources") {
 		TestWorld twld;
-		constexpr uint8_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
+		constexpr uint16_t SoaSizes[] = {sizeof(uint32_t), sizeof(double)};
 		const ecs::RuntimeFieldInit fields[] = {
 				{util::str_view("health"), ecs::U32, 0, 0}, //
 				{util::str_view("score"), ecs::F64, 8, 0} //
@@ -1654,7 +1654,7 @@ TEST_CASE("Component cache - runtime registration") {
 
 	SUBCASE("runtime SoA field access rejects sparse storage and supports table pairs") {
 		TestWorld twld;
-		constexpr uint8_t SoaSizes[] = {sizeof(uint32_t)};
+		constexpr uint16_t SoaSizes[] = {sizeof(uint32_t)};
 		const ecs::RuntimeFieldInit fields[] = {{util::str_view("value"), ecs::U32, 0, 0}};
 
 		ecs::ComponentDesc desc{};
@@ -3749,7 +3749,7 @@ TEST_CASE("Runtime pair payloads use relation metadata across erased APIs") {
 TEST_CASE("Runtime pair SoA fields expose direct field views and cursors") {
 	constexpr uint32_t XOffset = 0;
 	constexpr uint32_t CountOffset = sizeof(float);
-	const uint8_t soaSizes[] = {sizeof(float), sizeof(uint32_t)};
+	const uint16_t soaSizes[] = {sizeof(float), sizeof(uint32_t)};
 	const ecs::RuntimeFieldInit fields[] = {
 			{util::str_view("x"), ecs::F32, XOffset, 0}, {util::str_view("count"), ecs::U32, CountOffset, 0}};
 

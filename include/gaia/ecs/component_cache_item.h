@@ -138,7 +138,7 @@ namespace gaia {
 			//! Hash used for component lookup by registered symbol.
 			ComponentLookupHash hashLookup;
 			//! Per-element byte sizes for SoA components. Unused for AoS components.
-			uint8_t soaSizes[meta::StructToTupleMaxTypes];
+			uint16_t soaSizes[meta::StructToTupleMaxTypes];
 
 			//! Interned registered component symbol.
 			SymbolId name;
@@ -231,7 +231,7 @@ namespace gaia {
 			void move_soa_element(
 					void* pDst, const void* pSrc, uint32_t idxDst, uint32_t idxSrc, uint32_t capDst,
 					uint32_t capSrc) const noexcept {
-				const std::span<const uint8_t> fieldSizes{soaSizes, comp.soa()};
+				const std::span<const uint16_t> fieldSizes{soaSizes, comp.soa()};
 				GAIA_FOR(comp.soa()) {
 					auto* pD = mem::data_view_policy_soa_erased::set(pDst, comp.alig(), fieldSizes, i, idxDst, capDst);
 					const auto* pS = mem::data_view_policy_soa_erased::get(pSrc, comp.alig(), fieldSizes, i, idxSrc, capSrc);
@@ -249,7 +249,7 @@ namespace gaia {
 			void swap_soa_elements(
 					void* pLeft, void* pRight, uint32_t idxLeft, uint32_t idxRight, uint32_t capLeft,
 					uint32_t capRight) const noexcept {
-				const std::span<const uint8_t> fieldSizes{soaSizes, comp.soa()};
+				const std::span<const uint16_t> fieldSizes{soaSizes, comp.soa()};
 				GAIA_FOR(comp.soa()) {
 					auto* pL = mem::data_view_policy_soa_erased::set(pLeft, comp.alig(), fieldSizes, i, idxLeft, capLeft);
 					auto* pR = mem::data_view_policy_soa_erased::set(pRight, comp.alig(), fieldSizes, i, idxRight, capRight);
@@ -809,9 +809,9 @@ namespace gaia {
 				char nameTmp[MaxNameLength];
 				const auto nameTmpLen = init_type_name<T>(nameTmp);
 
-				uint8_t soaSizes[meta::StructToTupleMaxTypes]{};
+				uint16_t soaSizes[meta::StructToTupleMaxTypes]{};
 				auto desc = detail::ComponentDesc<T>::make(
-						util::str_view(nameTmp, nameTmpLen), std::span<uint8_t, meta::StructToTupleMaxTypes>{soaSizes});
+						util::str_view(nameTmp, nameTmpLen), std::span<uint16_t, meta::StructToTupleMaxTypes>{soaSizes});
 				if (pRuntimeType != nullptr) {
 					desc.runtimeType = *pRuntimeType;
 				}

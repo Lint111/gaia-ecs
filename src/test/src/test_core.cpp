@@ -2355,9 +2355,9 @@ TEST_CASE("Data layout - erased SoA field addressing matches typed policy") {
 	constexpr uint32_t Bytes = Policy::get_min_byte_size(0, Capacity);
 	mem::raw_data_holder<DummySoA, Bytes> storage{};
 	std::span<uint8_t> data{storage.data, Capacity};
-	const uint8_t fieldSizes[] = {
+	const uint16_t fieldSizes[] = {
 			(uint8_t)sizeof(float), (uint8_t)sizeof(float), (uint8_t)sizeof(bool), (uint8_t)sizeof(float)};
-	const std::span<const uint8_t> sizes{fieldSizes};
+	const std::span<const uint16_t> sizes{fieldSizes};
 
 	auto x = Policy::set<0>(data);
 	auto y = Policy::set<1>(data);

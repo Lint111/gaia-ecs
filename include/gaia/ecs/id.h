@@ -46,13 +46,14 @@ namespace gaia {
 			//! Bit mask covering all valid component ids.
 			static constexpr uint32_t IdMask = IdentifierIdBad;
 			//! Number of bits used to store the component size.
-			static constexpr uint32_t MaxComponentSize_Bits = 13;
+			static constexpr uint32_t MaxComponentSize_Bits = 16;
 			//! Largest component size storable, in bytes.
 			static constexpr uint32_t MaxComponentSizeInBytes = (1 << MaxComponentSize_Bits) - 1;
-			//! Number of bits used to store the component alignment.
-			static constexpr uint32_t MaxAlignment_Bits = MaxComponentSize_Bits;
+			//! Number of bits used to store the component alignment. The alignment is a power of two and is stored as
+			//! log2(alig) + 1, with 0 meaning no alignment (tags).
+			static constexpr uint32_t MaxAlignment_Bits = 5;
 			//! Largest component alignment storable.
-			static constexpr uint32_t MaxAlignment = MaxComponentSizeInBytes;
+			static constexpr uint32_t MaxAlignment = (1U << 13) - 1;
 
 			//! Bit-packed storage layout of a component id.
 			struct InternalData {
@@ -60,12 +61,14 @@ namespace gaia {
 				uint32_t id;
 				//! Component size
 				IdentifierData size : MaxComponentSize_Bits;
-				//! Component alignment
+				//! Component alignment as log2(alig) + 1, or 0 for no alignment
 				IdentifierData alig : MaxAlignment_Bits;
 				//! Component storage kind. 0 = table, 1 = sparse.
 				IdentifierData storage : 1;
 				//! Component is SoA
 				IdentifierData soa : meta::StructToTupleMaxTypes_Bits;
+				//! Unused bits
+				IdentifierData unused : 64 - 32 - MaxComponentSize_Bits - MaxAlignment_Bits - 1 - meta::StructToTupleMaxTypes_Bits;
 			};
 			static_assert(sizeof(InternalData) == sizeof(Identifier));
 
@@ -82,7 +85,9 @@ namespace gaia {
 				data.id = id;
 				data.soa = soa;
 				data.size = size;
-				data.alig = alig;
+				GAIA_ASSERT(alig == 0 || core::is_pow2(alig));
+				data.alig = core::count_bits(alig);
+				data.unused = 0;
 				data.storage = (IdentifierData)storage;
 			}
 
@@ -107,7 +112,7 @@ namespace gaia {
 			//! Component alignment in bytes.
 			//! \return Component alignment in bytes.
 			GAIA_NODISCARD constexpr auto alig() const noexcept {
-				return (uint32_t)data.alig;
+				return data.alig == 0 ? 0U : 1U << (data.alig - 1);
 			}
 
 			//! Storage mode of the component.
