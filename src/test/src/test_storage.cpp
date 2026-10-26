@@ -2961,6 +2961,8 @@ TEST_CASE("Over-aligned runtime table component stays aligned across archetype m
 		CHECK(is_aligned_to(view.data, Alig));
 		CHECK(((const uint8_t*)view.data)[0] == (uint8_t)i);
 	}
+}
+
 namespace {
 struct WideSoA16 {
 	GAIA_LAYOUT(SoA);
