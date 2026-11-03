@@ -1,11 +1,11 @@
 var classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85 =
 [
-    [ "const_iterator", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a0857bb1c9f01b22ca08d02c0e7143e77", null ],
+    [ "const_iterator", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a0c4ac4e77fd161c5ba7bbff7b03cb97b", null ],
     [ "const_pointer", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a8078af21a9c1ff0febb30d3cd742f5e9", null ],
     [ "const_reference", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a131a1dc58d7f5d2c218de7e2be4ce507", null ],
     [ "difference_type", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a7b497bd2882c1c4e2588650b5dfeec80", null ],
-    [ "iterator", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a0ede6b17d4d94cebea5ef5e8c718836a", null ],
-    [ "page_type", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a81f4e80ace8a3680ebd47530258eeedc", null ],
+    [ "iterator", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a82ecab02f0d1fd92d22075dbe8388c02", null ],
+    [ "page_type", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a8eadf7c8f1622d50a2dfea055792a17f", null ],
     [ "pointer", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#ab270eed785e471ddda66feeb0de8a5d6", null ],
     [ "reference", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#ad1b6846c9c763eed758d9ec6559afa4d", null ],
     [ "size_type", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a6c1c6b66aad0798d8afe3e74b52ff320", null ],
@@ -32,5 +32,7 @@ var classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_0
     [ "operator=", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#ac2c888fa848bd55c9b760893b7f13e99", null ],
     [ "operator=", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#a6ea582751f32dc48daa6b3669b6f1d28", null ],
     [ "operator==", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#af5e7b217b5371b28116b4e4e1c24535f", null ],
+    [ "operator[]", "classgaia_1_1cnt_1_1sparse__storage.html#a423bb901875bbb64b6db195c0b3bf33e", null ],
+    [ "set", "classgaia_1_1cnt_1_1sparse__storage.html#a2ee20b50f94832e2f5017b36809152ca", null ],
     [ "size", "classgaia_1_1cnt_1_1sparse__storage_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1enable__ie087b7e8314b32ca924843d3e0f50e85.html#aea2cab60757a27cc6d1223c1b2aaea30", null ]
 ];

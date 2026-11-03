@@ -7,7 +7,7 @@ var searchData=
   ['ilist_5fitem_5ftraits_4',['ilist_item_traits',['../structgaia_1_1cnt_1_1ilist__item__traits.html',1,'gaia::cnt']]],
   ['inherit_5f_5',['Inherit_',['../structgaia_1_1ecs_1_1Inherit__.html',1,'gaia::ecs']]],
   ['input_5fiterator_5ftag_6',['input_iterator_tag',['../structgaia_1_1core_1_1input__iterator__tag.html',1,'gaia::core']]],
-  ['internaldata_7',['internaldata',['../structgaia_1_1ecs_1_1Component_1_1InternalData.html',1,'gaia::ecs::Component::InternalData'],['../structgaia_1_1ecs_1_1Entity_1_1InternalData.html',1,'gaia::ecs::Entity::InternalData']]],
+  ['internaldata_7',['InternalData',['../structgaia_1_1ecs_1_1Component_1_1InternalData.html',1,'gaia::ecs::Component::InternalData'],['../structgaia_1_1ecs_1_1Entity_1_1InternalData.html',1,'gaia::ecs::Entity::InternalData']]],
   ['is_5f_8',['Is_',['../structgaia_1_1ecs_1_1Is__.html',1,'gaia::ecs']]],
   ['is_5fflt_5fkind_5fid_9',['is_flt_kind_id',['../structgaia_1_1ser_1_1is__flt__kind__id.html',1,'gaia::ser']]],
   ['is_5fgreater_10',['is_greater',['../structgaia_1_1core_1_1is__greater.html',1,'gaia::core']]],
@@ -15,11 +15,12 @@ var searchData=
   ['is_5fiterator_12',['is_iterator',['../structgaia_1_1core_1_1is__iterator.html',1,'gaia::core']]],
   ['is_5fpair_13',['is_pair',['../structgaia_1_1ecs_1_1is__pair.html',1,'gaia::ecs']]],
   ['is_5fsmaller_14',['is_smaller',['../structgaia_1_1core_1_1is__smaller.html',1,'gaia::core']]],
-  ['is_5fsmaller_5for_5fequal_15',['is_smaller_or_equal',['../structgaia_1_1core_1_1is__smaller__or__equal.html',1,'gaia::core']]],
-  ['is_5ftrivially_5fserializable_16',['is_trivially_serializable',['../structgaia_1_1ser_1_1is__trivially__serializable.html',1,'gaia::ser']]],
-  ['itemdata_17',['ItemData',['../structgaia_1_1cnt_1_1ilist__item_1_1ItemData.html',1,'gaia::cnt::ilist_item']]],
-  ['iter_18',['Iter',['../classgaia_1_1ecs_1_1Iter.html',1,'gaia::ecs']]],
-  ['itermodeacceptall_19',['IterModeAcceptAll',['../structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeAcceptAll.html',1,'gaia::ecs::detail::QueryImpl']]],
-  ['itermodedisabledonly_20',['IterModeDisabledOnly',['../structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeDisabledOnly.html',1,'gaia::ecs::detail::QueryImpl']]],
-  ['itermodeenabled_21',['IterModeEnabled',['../structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeEnabled.html',1,'gaia::ecs::detail::QueryImpl']]]
+  ['is_5fsmaller_3c_20entity_20_3e_15',['is_smaller&lt; Entity &gt;',['../structgaia_1_1core_1_1is__smaller.html',1,'gaia::core']]],
+  ['is_5fsmaller_5for_5fequal_16',['is_smaller_or_equal',['../structgaia_1_1core_1_1is__smaller__or__equal.html',1,'gaia::core']]],
+  ['is_5ftrivially_5fserializable_17',['is_trivially_serializable',['../structgaia_1_1ser_1_1is__trivially__serializable.html',1,'gaia::ser']]],
+  ['itemdata_18',['ItemData',['../structgaia_1_1cnt_1_1ilist__item_1_1ItemData.html',1,'gaia::cnt::ilist_item']]],
+  ['iter_19',['Iter',['../classgaia_1_1ecs_1_1Iter.html',1,'gaia::ecs']]],
+  ['itermodeacceptall_20',['IterModeAcceptAll',['../structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeAcceptAll.html',1,'gaia::ecs::detail::QueryImpl']]],
+  ['itermodedisabledonly_21',['IterModeDisabledOnly',['../structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeDisabledOnly.html',1,'gaia::ecs::detail::QueryImpl']]],
+  ['itermodeenabled_22',['IterModeEnabled',['../structgaia_1_1ecs_1_1detail_1_1QueryImpl_1_1IterModeEnabled.html',1,'gaia::ecs::detail::QueryImpl']]]
 ];

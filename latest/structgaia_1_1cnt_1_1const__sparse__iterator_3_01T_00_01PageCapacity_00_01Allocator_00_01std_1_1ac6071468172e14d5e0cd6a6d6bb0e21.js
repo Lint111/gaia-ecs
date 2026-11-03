@@ -3,6 +3,8 @@ var structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Al
     [ "difference_type", "structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1ac6071468172e14d5e0cd6a6d6bb0e21.html#a2c3a98300de280cc6b667169a6aae01e", null ],
     [ "iterator", "structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1ac6071468172e14d5e0cd6a6d6bb0e21.html#a8bd8b6c1912a8cc104c08381bfe59395", null ],
     [ "iterator_category", "structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1ac6071468172e14d5e0cd6a6d6bb0e21.html#a47e27b1d8976f3b571470d166734a7a5", null ],
+    [ "pointer", "structgaia_1_1cnt_1_1const__sparse__iterator.html#adb79becf4954aecc0cfa1544ccf3ae61", null ],
+    [ "reference", "structgaia_1_1cnt_1_1const__sparse__iterator.html#a99824c8b05d308500f8d04b8aa9a15fe", null ],
     [ "size_type", "structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1ac6071468172e14d5e0cd6a6d6bb0e21.html#a9d5dc2b44aee030eb0fb27596effb341", null ],
     [ "value_type", "structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1ac6071468172e14d5e0cd6a6d6bb0e21.html#a8533f8e21320a5d040c11eaf6caff4d9", null ],
     [ "const_sparse_iterator", "structgaia_1_1cnt_1_1const__sparse__iterator_3_01T_00_01PageCapacity_00_01Allocator_00_01std_1_1ac6071468172e14d5e0cd6a6d6bb0e21.html#a1f850c07fba9f8e707f132a3dbbcb30b", null ],

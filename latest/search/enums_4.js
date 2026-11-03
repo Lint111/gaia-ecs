@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['matcharchetypequeryret_0',['MatchArchetypeQueryRet',['../classgaia_1_1ecs_1_1QueryInfo.html#a33e537aa04091a4466391190e2dd5e0d',1,'gaia::ecs::QueryInfo']]]
+  ['jobcreationflags_0',['JobCreationFlags',['../namespacegaia_1_1mt.html#af57327060d70113af9812a4d98bac0c6',1,'gaia::mt']]],
+  ['jobpriority_1',['JobPriority',['../namespacegaia_1_1mt.html#a44ed23dc65ea0479fc73df64b8d6035a',1,'gaia::mt']]]
 ];

@@ -1,5 +1,27 @@
 var searchData=
 [
-  ['empty_0',['empty',['../structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa338ade924f6a9c2bbf4c9d55124c1a73',1,'gaia::ecs::QueryCtx::Empty'],['../classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ad1e79b5af228c9fb3ba9e22fbdd5bbe4ace2c8aed9c2fa0cfbed56cbda4d8bf07',1,'gaia::ecs::detail::QueryImpl::Empty']]],
-  ['entityseed_1',['EntitySeed',['../classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ad1e79b5af228c9fb3ba9e22fbdd5bbe4aa469e2ac2307cba7cabc60710a69986c',1,'gaia::ecs::detail::QueryImpl']]]
+  ['data_5fand_5fsize_0',['data_and_size',['../namespacegaia_1_1ser.html#ad9a349ae048bd13594a316b91f0fe4cfad5c0446ee30aad1f11067085384469a8',1,'gaia::ser']]],
+  ['debug_1',['Debug',['../namespacegaia_1_1util.html#aa4bdb5d67b691dfe249bbec23a7b2d03aa603905470e2a5b8c13e96b579ef0dba',1,'gaia::util']]],
+  ['default_2',['Default',['../namespacegaia_1_1mt.html#af57327060d70113af9812a4d98bac0c6a98f92c35c95c00362165e603ef4323ff',1,'gaia::mt::Default'],['../namespacegaia_1_1ecs.html#af6e908ae607ebd1b679079c323b6473ba7a1920d61156abc05a60135aefe8bc67',1,'gaia::ecs::Default'],['../namespacegaia_1_1ecs.html#a7d82f6d77229027c91cb4ffca7a4469ca7a1920d61156abc05a60135aefe8bc67',1,'gaia::ecs::Default'],['../namespacegaia_1_1ecs.html#ad44f6c749f58eef3aa8233e5c47dc425a7a1920d61156abc05a60135aefe8bc67',1,'gaia::ecs::Default']]],
+  ['dependencyhasanyterms_3',['DependencyHasAnyTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a5fe040c63ec875cf33f0077099ee8503',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhasentityfilterterms_4',['DependencyHasEntityFilterTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a4f2a6736352141b1f504b54c12cd2060',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhasgroup_5',['DependencyHasGroup',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3aedf51a920b732cd8f3da537d2f4b1e2a',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhasinheriteddataterms_6',['DependencyHasInheritedDataTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a6d9786581a8e9829ea3fb3d8873b262c',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhasnegativeterms_7',['DependencyHasNegativeTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3ac9153fd57b425bd27b72d9529e440cd9',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhaspositiveterms_8',['DependencyHasPositiveTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a3dab95ebcda9d55e424a82d7957c7ce4',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhaspotentialinheritedidterms_9',['DependencyHasPotentialInheritedIdTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a5e22409252fdcdb77d571a9e8dafa7e1',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhassort_10',['DependencyHasSort',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3ab2e97a2106909b796f0524cf343cdf14',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhassourceterms_11',['DependencyHasSourceTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a49bb0364f577658cbf45e111768ee977',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhastraversalterms_12',['DependencyHasTraversalTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a9bc6d962fbd1be15ac6ea04b18f24458',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhasvariableterms_13',['DependencyHasVariableTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a53751fde9ccf94c0f30c94b074752911',1,'gaia::ecs::QueryCtx']]],
+  ['dependencyhaswildcardterms_14',['DependencyHasWildcardTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3a2930a462110d0692d521cccc6e5c4201',1,'gaia::ecs::QueryCtx']]],
+  ['dependencynone_15',['DependencyNone',['../structgaia_1_1ecs_1_1QueryCtx.html#a5c21e6754dd9afa669fecb6cb24f29e3ac79d8cc30f3a83ed1e78ad96f8434f85',1,'gaia::ecs::QueryCtx']]],
+  ['direct_16',['Direct',['../namespacegaia_1_1ecs.html#ad78b1c69caebe56e06968b14c4ee04abafd1dd0c603be8170f9eae0be9f2f6afb',1,'gaia::ecs']]],
+  ['directdense_17',['DirectDense',['../classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ad1e79b5af228c9fb3ba9e22fbdd5bbe4aa2a007e1aadb91e8f5c05b04bfc37e50',1,'gaia::ecs::detail::QueryImpl']]],
+  ['directsource_18',['DirectSource',['../structgaia_1_1ecs_1_1QueryCtx.html#adb9e3e7d3f0ff86c236849de7c619ee6a671b43a8aa7f492975b2f27645d9d3ca',1,'gaia::ecs::QueryCtx']]],
+  ['directstructuralterms_19',['DirectStructuralTerms',['../structgaia_1_1ecs_1_1QueryCtx.html#a97d2f17f09aed5a440566bb3f2797ae1a5cf0a1f2d32b582f060fb2cdce53d282',1,'gaia::ecs::QueryCtx']]],
+  ['disabledonly_20',['DisabledOnly',['../namespacegaia_1_1ecs.html#a9aa230e37cf0d8688020939d18fb0bc5ae2ecc325f079352942b1c343bf5421a2',1,'gaia::ecs']]],
+  ['dontfragment_21',['DontFragment',['../namespacegaia_1_1ecs.html#a6b55a6cb8d204f379de77520430054eda9cc8831e94f0ebd5bf5c95e6d0ef8830',1,'gaia::ecs::DontFragment'],['../namespacegaia_1_1ecs.html#aa9c9cdd5cb4e32248105d33c8512a976a9cc8831e94f0ebd5bf5c95e6d0ef8830',1,'gaia::ecs::DontFragment']]],
+  ['down_22',['Down',['../namespacegaia_1_1ecs.html#ae94b4b368e80bd03c1997a5c3b24bcaaa08a38277b0309070706f6652eeae9a53',1,'gaia::ecs::Down'],['../namespacegaia_1_1ecs.html#a27e85c04d9a4788fdc13349f4c57e38ca08a38277b0309070706f6652eeae9a53',1,'gaia::ecs::Down']]],
+  ['dynamic_23',['Dynamic',['../structgaia_1_1ecs_1_1QueryCtx.html#ae52188f6f38dcc11f98de27ed02be345a971fd8cc345d8bd9f92e9f7d88fdf20c',1,'gaia::ecs::QueryCtx']]]
 ];

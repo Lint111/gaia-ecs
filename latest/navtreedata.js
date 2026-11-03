@@ -165,6 +165,17 @@ var NAVTREE =
     [ "Future", "index.html#future", null ],
     [ "Contributions", "index.html#contributions", null ],
     [ "License", "index.html#license", null ],
+    [ "Namespaces", "namespaces.html", [
+      [ "Namespace List", "namespaces.html", "namespaces_dup" ],
+      [ "Namespace Members", "namespacemembers.html", [
+        [ "All", "namespacemembers.html", "namespacemembers_dup" ],
+        [ "Functions", "namespacemembers_func.html", "namespacemembers_func" ],
+        [ "Variables", "namespacemembers_vars.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ],
+        [ "Enumerations", "namespacemembers_enum.html", null ],
+        [ "Enumerator", "namespacemembers_eval.html", null ]
+      ] ]
+    ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],
       [ "Class Index", "classes.html", null ],
@@ -188,21 +199,39 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classgaia_1_1cnt_1_1darr__ext__soa.html#adb8d3fccf92f1ed0f3a9eb21e72145ee",
-"classgaia_1_1cnt_1_1sarr__ext.html#a263de1fd2e6a28c0c7291ef35b701770",
-"classgaia_1_1cnt_1_1sringbuffer.html#a0cabb22652f0a7af690a331ba8e35938",
-"classgaia_1_1ecs_1_1Chunk.html#a86b5f4873ef794bfcd92a557292f82fc",
-"classgaia_1_1ecs_1_1World.html#a1b798a953338422626ceb9c31fc64803",
-"classgaia_1_1ecs_1_1World.html#aff0c1e47e21ba37d948d3f06467d5085",
-"classgaia_1_1mt_1_1ThreadPool.html#abae2dc1ab79367b708af43dfa2cae810",
-"index.html#constraints",
-"structgaia_1_1cnt_1_1darray__ilist__storage.html#ad436ec5b52d262ae1500c1f76a8800f4",
-"structgaia_1_1cnt_1_1sringbuffer__iterator.html#a94e36c8c2d7b41824c73717ca3072b07",
-"structgaia_1_1ecs_1_1CursorResult.html#ab58acb7e521355c7da0ab55890973cad",
-"structgaia_1_1ecs_1_1QueryHandleLookupKey.html#a2934576035e5f3ad00447ec092f26386",
-"structgaia_1_1ecs_1_1detail_1_1NonFragmentingRelationStore.html#aa9accc5309adbb4e25638b7dd020d49a",
-"structgaia_1_1mem_1_1data__view__policy__soa.html#a83ea68b9f1bee961dfd1b3715e8697d7"
+"classgaia_1_1cnt_1_1darr__ext.html#a0f5743ed43b85e3965c6f5d28c556658",
+"classgaia_1_1cnt_1_1darr__ext__soa.html#aeec6b64b78cd2521a2951fd4310d7153",
+"classgaia_1_1cnt_1_1page__storage.html#a37933bef66fbfad97c342c333044f038",
+"classgaia_1_1cnt_1_1sarr__ext.html#a4501943afaf7f3d0252764ae008c7a76",
+"classgaia_1_1cnt_1_1sarr__soa.html#a5a4091d7715ad8c2e8d18a3adf9e3053",
+"classgaia_1_1cnt_1_1sringbuffer.html#a24bbb2b6a8701ee0d4d9b75c36213bd2",
+"classgaia_1_1ecs_1_1Archetype.html#a41b9c90757df2d308acbfc616d848d24",
+"classgaia_1_1ecs_1_1Chunk.html#aa5dc5d3e0895c877baf2b267b9dcb618",
+"classgaia_1_1ecs_1_1QueryInfo.html#a48ae38116f7eb441ff97ff0fd2ef4467",
+"classgaia_1_1ecs_1_1World.html#a20fc4b3bad2ca1d55175c6345db01091",
+"classgaia_1_1ecs_1_1World.html#a917d386737e94a6eba3005c62090df9e",
+"classgaia_1_1ecs_1_1detail_1_1CommandBuffer.html#a26b8c93c2eea8fcf964bad120da98eb4",
+"classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#abc73b07a260a753073757d6ce0418d62",
+"classgaia_1_1mt_1_1ThreadPool.html#a3b0a7d7790d17f4e46595805c623104d",
+"functions_d.html",
+"namespacegaia_1_1cnt.html#a2f9bbaff1c172b1dcb7cbc28a91de823",
+"namespacegaia_1_1ecs.html#a7d57f54e249a6ee80d63845a9a3e7a5eab1c94ca2fbc3e78fc30069c8d0f01680",
+"namespacegaia_1_1ser.html#a0079e1ecf080d80bf1b71ede15340659",
+"structgaia_1_1cnt_1_1const__sparse__iterator.html#a54b5fec8fd5c00cc0a18ae075e8a2eb1",
+"structgaia_1_1cnt_1_1ilist__handle__traits_3_01TItemHandle_00_01std_1_1void__t_3_01decltype_07st2a0d0d6f9c6aac50cc62708895916597.html",
+"structgaia_1_1cnt_1_1sparse__iterator.html#acc715fea6ec6cb6b53e0979368429a98",
+"structgaia_1_1core_1_1type__list.html#acdabd7a40b4d3e48740c0f4c308a1f1f",
+"structgaia_1_1ecs_1_1ComponentDesc.html#af2899253209ea56f645fcd5cb5f30eca",
+"structgaia_1_1ecs_1_1QueryAccessSet.html#a4ef94b5dd47a1809342daa6bb905a357",
+"structgaia_1_1ecs_1_1QueryCtx_1_1Data.html#abaddfd1ecccf57175d487cf2ce4c0837",
+"structgaia_1_1ecs_1_1QueryTermOptions.html#acffff38b92ada4654faa1c7cf063cb61",
+"structgaia_1_1ecs_1_1World_1_1EntityBuilder.html#a5e758f62ad12d8d972113f2969b529ec",
+"structgaia_1_1ecs_1_1detail_1_1SystemScheduleScratch.html#a7a136b3950a2491f264db290d1ea04d5",
+"structgaia_1_1mem_1_1data__layout__properties_3_01DataLayout_1_1SoA_00_01TItem_01_4.html#a92e38f579f38bcc4db148daf86e7b021",
+"structgaia_1_1mt_1_1JobHandle.html#a312daf0e7dcf9b293cde0168d1246d6a",
+"structgaia_1_1util_1_1str__view.html#a613609bb6fbd4090504bf5c48c0d0b2d"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronisation';
-var SYNCOFFMSG = 'click to enable panel synchronisation';
+var SYNCONMSG = 'click to disable panel synchronization';
+var SYNCOFFMSG = 'click to enable panel synchronization';
+var LISTOFALLMEMBERS = 'List of all members';

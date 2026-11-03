@@ -1,6 +1,7 @@
 var searchData=
 [
-  ['mappeddense_0',['MappedDense',['../classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#ad1e79b5af228c9fb3ba9e22fbdd5bbe4ac06e1a773ffa78a669c0e231a5e82eb1',1,'gaia::ecs::detail::QueryImpl']]],
-  ['matchprefab_1',['MatchPrefab',['../structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa215832865698b1b73c8f68e54605ff66',1,'gaia::ecs::QueryCtx']]],
-  ['mixed_2',['Mixed',['../structgaia_1_1ecs_1_1QueryCtx.html#adb9e3e7d3f0ff86c236849de7c619ee6a699b4f79215d191584653efebf156e52',1,'gaia::ecs::QueryCtx']]]
+  ['last_0',['Last',['../namespacegaia_1_1ser.html#ad9a349ae048bd13594a316b91f0fe4cfad55b30607c2a9a2616347d6edb789f6b',1,'gaia::ser']]],
+  ['lazy_1',['Lazy',['../structgaia_1_1ecs_1_1QueryCtx.html#ae52188f6f38dcc11f98de27ed02be345a46a9ebdb80117bfa1f0cdea65438290a',1,'gaia::ecs::QueryCtx']]],
+  ['local_2',['Local',['../namespacegaia_1_1ecs.html#a4e319508aebc8e8a559d77c6f8534234a509820290d57f333403f490dde7316f4',1,'gaia::ecs']]],
+  ['low_3',['Low',['../namespacegaia_1_1mt.html#a44ed23dc65ea0479fc73df64b8d6035aa28d0edd045e05cf5af64e35ae0c4c6ef',1,'gaia::mt']]]
 ];

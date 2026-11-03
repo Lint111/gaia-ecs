@@ -1,7 +1,7 @@
 var structgaia_1_1mem_1_1data__view__policy__soa__set =
 [
-    [ "accessor", "structgaia_1_1mem_1_1data__view__policy__soa__set_1_1accessor.html", "structgaia_1_1mem_1_1data__view__policy__soa__set_1_1accessor" ],
     [ "data_view_policy_idx_info", "structgaia_1_1mem_1_1data__view__policy__soa__set_1_1data__view__policy__idx__info.html", "structgaia_1_1mem_1_1data__view__policy__soa__set_1_1data__view__policy__idx__info" ],
+    [ "accessor", "structgaia_1_1mem_1_1data__view__policy__soa__set_1_1accessor.html", "structgaia_1_1mem_1_1data__view__policy__soa__set_1_1accessor" ],
     [ "view_policy", "structgaia_1_1mem_1_1data__view__policy__soa__set.html#a9f8be2570ccce653f9c65aef216a0a4e", null ],
     [ "data_view_policy_soa_set", "structgaia_1_1mem_1_1data__view__policy__soa__set.html#a30587f317f5111b1f716dfff1f6d8ad2", null ],
     [ "data_view_policy_soa_set", "structgaia_1_1mem_1_1data__view__policy__soa__set.html#abef3148b0993fd41ea1549e3a95422b5", null ],

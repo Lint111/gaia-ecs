@@ -10,7 +10,7 @@ var classgaia_1_1core_1_1span =
     [ "pointer", "classgaia_1_1core_1_1span.html#a3e1ae557ea433504cb15dd74ce443d39", null ],
     [ "reference", "classgaia_1_1core_1_1span.html#a62a8c355bec47b603164ddf8266dec13", null ],
     [ "size_type", "classgaia_1_1core_1_1span.html#a494915256b3002d9d7bceb0e321c3eed", null ],
-    [ "subspan_return_t", "classgaia_1_1core_1_1span.html#a5cce039798ae1ba41a80f1e4e3e56b56", null ],
+    [ "subspan_return_t", "classgaia_1_1core_1_1span.html#ac4bdfb6b1c0f6a8136ee798e286793f1", null ],
     [ "value_type", "classgaia_1_1core_1_1span.html#a0388761108aa4c7ef4f67567581744e1", null ],
     [ "span", "classgaia_1_1core_1_1span.html#a392704c1d8db51aea85110303f4c5181", null ],
     [ "span", "classgaia_1_1core_1_1span.html#af5da9cd380540beaea45da139fff2d5c", null ],

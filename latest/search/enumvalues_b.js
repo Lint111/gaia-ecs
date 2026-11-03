@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['ok_0',['Ok',['../classgaia_1_1ecs_1_1QueryInfo.html#a33e537aa04091a4466391190e2dd5e0daa60852f204ed8028c1c58808b746d115',1,'gaia::ecs::QueryInfo']]],
-  ['ordergroups_1',['OrderGroups',['../structgaia_1_1ecs_1_1QueryCtx.html#a5a19b18a83e14d043d91f0f854ef598aa5cd29e78d8ddc77a98f09c9e822a2a80',1,'gaia::ecs::QueryCtx']]]
+  ['none_0',['None',['../structgaia_1_1ecs_1_1QueryCtx.html#adb9e3e7d3f0ff86c236849de7c619ee6a6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::QueryCtx::None'],['../namespacegaia_1_1ecs.html#ac452eeb9b45d2cef9ac61e11fbb57eaaa6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None'],['../namespacegaia_1_1ecs.html#aa9c9cdd5cb4e32248105d33c8512a976a6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None'],['../namespacegaia_1_1ecs.html#a40574c13ed41c06e4c6c69c0f94e10f8a6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None'],['../namespacegaia_1_1ecs.html#a7d82f6d77229027c91cb4ffca7a4469ca6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None'],['../namespacegaia_1_1ecs.html#afd0dc696ebdfac3e6d99b1880eb92102a6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None'],['../namespacegaia_1_1ecs.html#adb45d0bbed5490cf74d5bfbb0342ad05a6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None'],['../namespacegaia_1_1ecs.html#a27e85c04d9a4788fdc13349f4c57e38ca6adf97f83acf6453d4a6a4b1070f3754',1,'gaia::ecs::None']]],
+  ['nonfragmentingarchetypepair_1',['NonFragmentingArchetypePair',['../namespacegaia_1_1ecs_1_1detail.html#ab60ef8c185ca4a1dc31a98ad67007f14af00a0bec2512ad5c044e058190aa74a5',1,'gaia::ecs::detail']]],
+  ['nonfragmentingexclusive_2',['NonFragmentingExclusive',['../namespacegaia_1_1ecs_1_1detail.html#ab60ef8c185ca4a1dc31a98ad67007f14ae77683c08ac5d8819132f9c97ab19173',1,'gaia::ecs::detail']]],
+  ['nontrivial_3',['NonTrivial',['../classgaia_1_1ecs_1_1detail_1_1QueryImpl.html#a41a7406850a2bb116013e94605a78fbdaa7f558fd6ae72e45d83647b938ffa9f4',1,'gaia::ecs::detail::QueryImpl']]],
+  ['not_4',['Not',['../namespacegaia_1_1ecs.html#a7d57f54e249a6ee80d63845a9a3e7a5eaa74c05d080620f087c4e523977230666',1,'gaia::ecs']]]
 ];
