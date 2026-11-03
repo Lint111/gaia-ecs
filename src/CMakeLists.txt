@@ -2,6 +2,24 @@ if(NOT GAIA_BUILD_SRC)
   return()
 endif()
 
+if(GAIA_BUILD_COMPILED)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+	find_package(Threads REQUIRED)
+	add_library(gaia_compiled STATIC gaia_compiled.cpp)
+	target_include_directories(gaia_compiled PUBLIC
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+		$<INSTALL_INTERFACE:include>)
+	target_link_libraries(gaia_compiled PUBLIC gaia Threads::Threads)
+  target_compile_definitions(gaia_compiled PRIVATE GAIA_COMPILED_MODE=1)
+  target_compile_definitions(gaia_compiled INTERFACE GAIA_COMPILED_MODE=1)
+  target_compile_features(gaia_compiled PUBLIC cxx_std_17)
+  install(TARGETS gaia_compiled EXPORT ${PROJECT_NAME}-targets
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+  add_library(gaia::compiled ALIAS gaia_compiled)
+endif()
+
 # Library configuration
 if(GAIA_DEVMODE)
   add_definitions(-DGAIA_DEVMODE=1)

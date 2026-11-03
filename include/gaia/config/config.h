@@ -126,6 +126,13 @@
 	#define GAIA_ECS_AUTO_COMPONENT_REGISTRATION 1
 #endif
 
+//! If enabled, common Gaia implementations are supplied by a separately compiled Gaia translation unit.
+//! The default remains header-only. Consumers using this mode must link the compiled Gaia target or
+//! provide one translation unit that defines GAIA_COMPILED_MODE_IMPLEMENTATION before including gaia.h.
+#ifndef GAIA_COMPILED_MODE
+	#define GAIA_COMPILED_MODE 0
+#endif
+
 //------------------------------------------------------------------------------
 
 #include "gaia/config/config_core_end.h"

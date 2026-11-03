@@ -5036,6 +5036,7 @@ Parameter | Description
 **GAIA_BUILD_UNITTEST** | Builds the [unit test project](#testing)
 **GAIA_BUILD_BENCHMARK** | Builds the [benchmark project](#benchmarks)
 **GAIA_BUILD_EXAMPLES** | Builds [example projects](#examples)
+**GAIA_BUILD_COMPILED** | Builds the opt-in `gaia::compiled` library, which supplies common command-buffer commit and query-plan compilation routines from one translation unit; the default remains header-only
 **BUILD_TESTING** | Registers available example smoke tests with CTest when examples are built (ON by default)
 **GAIA_GENERATE_CC** | Exports `compile_commands.json` and copies it to `ninja/compile_commands.json` for tooling when the active generator supports it
 **GAIA_GENERATE_DOCS** | Builds the [documentation](#documentation)
@@ -5049,6 +5050,21 @@ Parameter | Description
 **GAIA_ALLOC_ARENA_LOCK** | Process-wide spinlock on alloc/free/flush of `mem::SmallBlockAllocator`, `ecs::ChunkAllocator`, and `mem::PagedAllocator`. Off by default (`0`). Set to `1` to allow independent Worlds to mutate concurrently. With the lock off, assert builds abort if two threads enter an allocator at once. See [Worlds, threads, and allocation arenas](#worlds-threads-and-allocation-arenas).
 **GAIA_FORCE_DEBUG** | Forces `GAIA_DEBUG` and Gaia asserts on even in optimized configurations
 **GAIA_DISABLE_ASSERTS** | Disables all Gaia asserts even in Debug builds
+
+### Compiled mode
+
+Gaia remains header-only by default. For applications with many translation units, the opt-in compiled mode supplies
+common command-buffer commit and query-plan compilation routines from one library translation unit while typed
+component access and query iteration callbacks stay in the including translation unit:
+
+```bash
+cmake -DGAIA_BUILD_COMPILED=ON -S . -B build
+cmake --build build
+```
+
+Link the resulting `gaia::compiled` target (or the installed `gaia_compiled` library) and let its interface define
+`GAIA_COMPILED_MODE=1` for application sources. Do not define the macro in only some application translation units;
+all Gaia users in one link must use either the default header-only mode or the compiled mode.
 
 ### Asserts
 Gaia asserts when asserts are enabled. Debug builds enable them by default. Optimized builds strip them unless you set `GAIA_FORCE_DEBUG`. Keep asserts enabled while developing. Do not treat stripped asserts as missing bounds checks.

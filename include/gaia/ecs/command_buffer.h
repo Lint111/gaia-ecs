@@ -1250,38 +1250,53 @@ namespace gaia {
 		//! Recording order is lock acquisition order; competing threads have no predetermined order.
 		using CommandBufferPlainMT = detail::CommandBuffer<AccessContextMT, false>;
 
+#if GAIA_COMPILED_MODE && !defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		extern template void detail::CommandBuffer<AccessContextST, true>::commit();
+		extern template void detail::CommandBuffer<AccessContextMT, true>::commit();
+		extern template void detail::CommandBuffer<AccessContextST, false>::commit();
+		extern template void detail::CommandBuffer<AccessContextMT, false>::commit();
+#endif
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		#define GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION
+	#else
+		#define GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION inline
+	#endif
 		//! Creates a heap-allocated single-threaded command buffer.
 		//! \param world World that receives the recorded operations on commit.
 		//! \return Pointer to the new command buffer. Destroy it with cmd_buffer_destroy.
-		inline CommandBufferST* cmd_buffer_st_create(World& world) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION CommandBufferST* cmd_buffer_st_create(World& world) {
 			return new CommandBufferST(world);
 		}
 		//! Destroys a heap-allocated single-threaded command buffer.
 		//! \param cmdBuffer Command buffer previously returned by cmd_buffer_st_create.
-		inline void cmd_buffer_destroy(CommandBufferST& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_destroy(CommandBufferST& cmdBuffer) {
 			delete &cmdBuffer;
 		}
 		//! Commits a single-threaded command buffer.
 		//! \param cmdBuffer Command buffer to replay into the world.
-		inline void cmd_buffer_commit(CommandBufferST& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_commit(CommandBufferST& cmdBuffer) {
 			cmdBuffer.commit();
 		}
 
 		//! Creates a heap-allocated multi-threaded command buffer.
 		//! \param world World that receives the recorded operations on commit.
 		//! \return Pointer to the new command buffer. Destroy it with cmd_buffer_destroy.
-		inline CommandBufferMT* cmd_buffer_mt_create(World& world) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION CommandBufferMT* cmd_buffer_mt_create(World& world) {
 			return new CommandBufferMT(world);
 		}
 		//! Destroys a heap-allocated multi-threaded command buffer.
 		//! \param cmdBuffer Command buffer previously returned by cmd_buffer_mt_create.
-		inline void cmd_buffer_destroy(CommandBufferMT& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_destroy(CommandBufferMT& cmdBuffer) {
 			delete &cmdBuffer;
 		}
 		//! Commits a multi-threaded command buffer.
 		//! \param cmdBuffer Command buffer to replay into the world.
-		inline void cmd_buffer_commit(CommandBufferMT& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_commit(CommandBufferMT& cmdBuffer) {
 			cmdBuffer.commit();
 		}
+	#undef GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION
+#endif
 	} // namespace ecs
 } // namespace gaia

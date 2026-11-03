@@ -196,24 +196,32 @@ namespace gaia {
 
 		// CommandBuffer API
 
-		GAIA_NODISCARD inline CommandBufferST& cmd_buffer_st_get(World& world) {
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		#define GAIA_COMPILED_MODE_API_FUNCTION
+	#else
+		#define GAIA_COMPILED_MODE_API_FUNCTION inline
+	#endif
+		GAIA_NODISCARD GAIA_COMPILED_MODE_API_FUNCTION CommandBufferST& cmd_buffer_st_get(World& world) {
 			return world.cmd_buffer_st();
 		}
 
-		GAIA_NODISCARD inline CommandBufferMT& cmd_buffer_mt_get(World& world) {
+		GAIA_NODISCARD GAIA_COMPILED_MODE_API_FUNCTION CommandBufferMT& cmd_buffer_mt_get(World& world) {
 			return world.cmd_buffer_mt();
 		}
 
-		inline void commit_cmd_buffer_st(World& world) {
+		GAIA_COMPILED_MODE_API_FUNCTION void commit_cmd_buffer_st(World& world) {
 			if (world.locked())
 				return;
 			cmd_buffer_commit(world.cmd_buffer_st());
 		}
 
-		inline void commit_cmd_buffer_mt(World& world) {
+		GAIA_COMPILED_MODE_API_FUNCTION void commit_cmd_buffer_mt(World& world) {
 			if (world.locked())
 				return;
 			cmd_buffer_commit(world.cmd_buffer_mt());
 		}
+	#undef GAIA_COMPILED_MODE_API_FUNCTION
+#endif
 	} // namespace ecs
 } // namespace gaia

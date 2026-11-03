@@ -816,6 +816,13 @@ namespace gaia {
 	#define GAIA_ECS_AUTO_COMPONENT_REGISTRATION 1
 #endif
 
+//! If enabled, common Gaia implementations are supplied by a separately compiled Gaia translation unit.
+//! The default remains header-only. Consumers using this mode must link the compiled Gaia target or
+//! provide one translation unit that defines GAIA_COMPILED_MODE_IMPLEMENTATION before including gaia.h.
+#ifndef GAIA_COMPILED_MODE
+	#define GAIA_COMPILED_MODE 0
+#endif
+
 //------------------------------------------------------------------------------
 
 
@@ -52486,48 +52493,14 @@ namespace gaia {
 			//! \return Compiled query info owning \a ctx in slot \a id.
 			GAIA_NODISCARD static QueryInfo create(
 					QueryId id, QueryCtx&& ctx, const EntityToArchetypeMap& entityToArchetypeMap,
-					std::span<const Archetype*> allArchetypes) {
-				// Make sure query items are sorted
-				sort(ctx);
-
-				QueryInfo info;
-				info.idx = id;
-				info.gen = 0;
-
-				info.m_plan.ctx = GAIA_MOV(ctx);
-				info.m_plan.ctx.q.handle = {id, 0};
-
-				// Compile the query
-				info.compile(entityToArchetypeMap, allArchetypes);
-
-				return info;
-			}
+					std::span<const Archetype*> allArchetypes);
 
 			//! Creates and compiles a query info object from slot creation context.
 			//! \param idx Query slot index.
 			//! \param gen Query slot generation.
 			//! \param pCtx Pointer to QueryInfoCreationCtx.
 			//! \return Compiled query info initialized for the allocated slot.
-			GAIA_NODISCARD static QueryInfo create(uint32_t idx, uint32_t gen, void* pCtx) {
-				auto* pCreationCtx = (QueryInfoCreationCtx*)pCtx;
-				auto& queryCtx = *pCreationCtx->pQueryCtx;
-				auto& entityToArchetypeMap = (EntityToArchetypeMap&)*pCreationCtx->pEntityToArchetypeMap;
-
-				// Make sure query items are sorted
-				sort(queryCtx);
-
-				QueryInfo info;
-				info.idx = idx;
-				info.gen = gen;
-
-				info.m_plan.ctx = GAIA_MOV(queryCtx);
-				info.m_plan.ctx.q.handle = {idx, gen};
-
-				// Compile the query
-				info.compile(entityToArchetypeMap, pCreationCtx->allArchetypes);
-
-				return info;
-			}
+			GAIA_NODISCARD static QueryInfo create(uint32_t idx, uint32_t gen, void* pCtx);
 
 			//! Builds a stable query handle from query slot metadata.
 			//! \param info Query info providing slot index and generation.
@@ -54254,6 +54227,48 @@ namespace gaia {
 			}
 #endif
 		};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		#define GAIA_COMPILED_MODE_QUERY_FUNCTION
+	#else
+		#define GAIA_COMPILED_MODE_QUERY_FUNCTION inline
+	#endif
+
+		GAIA_NODISCARD GAIA_COMPILED_MODE_QUERY_FUNCTION QueryInfo QueryInfo::create(
+				QueryId id, QueryCtx&& ctx, const EntityToArchetypeMap& entityToArchetypeMap,
+				std::span<const Archetype*> allArchetypes) {
+			// Make sure query items are sorted.
+			sort(ctx);
+
+			QueryInfo info;
+			info.idx = id;
+			info.gen = 0;
+			info.m_plan.ctx = GAIA_MOV(ctx);
+			info.m_plan.ctx.q.handle = {id, 0};
+			info.compile(entityToArchetypeMap, allArchetypes);
+			return info;
+		}
+
+		GAIA_NODISCARD GAIA_COMPILED_MODE_QUERY_FUNCTION QueryInfo QueryInfo::create(uint32_t idx, uint32_t gen, void* pCtx) {
+			auto* pCreationCtx = (QueryInfoCreationCtx*)pCtx;
+			auto& queryCtx = *pCreationCtx->pQueryCtx;
+			auto& entityToArchetypeMap = (EntityToArchetypeMap&)*pCreationCtx->pEntityToArchetypeMap;
+
+			// Make sure query items are sorted.
+			sort(queryCtx);
+
+			QueryInfo info;
+			info.idx = idx;
+			info.gen = gen;
+			info.m_plan.ctx = GAIA_MOV(queryCtx);
+			info.m_plan.ctx.q.handle = {idx, gen};
+			info.compile(entityToArchetypeMap, pCreationCtx->allArchetypes);
+			return info;
+		}
+
+	#undef GAIA_COMPILED_MODE_QUERY_FUNCTION
+#endif
 	} // namespace ecs
 } // namespace gaia
 
@@ -82721,25 +82736,33 @@ namespace gaia {
 
 		// CommandBuffer API
 
-		GAIA_NODISCARD inline CommandBufferST& cmd_buffer_st_get(World& world) {
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		#define GAIA_COMPILED_MODE_API_FUNCTION
+	#else
+		#define GAIA_COMPILED_MODE_API_FUNCTION inline
+	#endif
+		GAIA_NODISCARD GAIA_COMPILED_MODE_API_FUNCTION CommandBufferST& cmd_buffer_st_get(World& world) {
 			return world.cmd_buffer_st();
 		}
 
-		GAIA_NODISCARD inline CommandBufferMT& cmd_buffer_mt_get(World& world) {
+		GAIA_NODISCARD GAIA_COMPILED_MODE_API_FUNCTION CommandBufferMT& cmd_buffer_mt_get(World& world) {
 			return world.cmd_buffer_mt();
 		}
 
-		inline void commit_cmd_buffer_st(World& world) {
+		GAIA_COMPILED_MODE_API_FUNCTION void commit_cmd_buffer_st(World& world) {
 			if (world.locked())
 				return;
 			cmd_buffer_commit(world.cmd_buffer_st());
 		}
 
-		inline void commit_cmd_buffer_mt(World& world) {
+		GAIA_COMPILED_MODE_API_FUNCTION void commit_cmd_buffer_mt(World& world) {
 			if (world.locked())
 				return;
 			cmd_buffer_commit(world.cmd_buffer_mt());
 		}
+	#undef GAIA_COMPILED_MODE_API_FUNCTION
+#endif
 	} // namespace ecs
 } // namespace gaia
 #if GAIA_OBSERVERS_ENABLED
@@ -92405,38 +92428,53 @@ namespace gaia {
 		//! Recording order is lock acquisition order; competing threads have no predetermined order.
 		using CommandBufferPlainMT = detail::CommandBuffer<AccessContextMT, false>;
 
+#if GAIA_COMPILED_MODE && !defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		extern template void detail::CommandBuffer<AccessContextST, true>::commit();
+		extern template void detail::CommandBuffer<AccessContextMT, true>::commit();
+		extern template void detail::CommandBuffer<AccessContextST, false>::commit();
+		extern template void detail::CommandBuffer<AccessContextMT, false>::commit();
+#endif
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		#define GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION
+	#else
+		#define GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION inline
+	#endif
 		//! Creates a heap-allocated single-threaded command buffer.
 		//! \param world World that receives the recorded operations on commit.
 		//! \return Pointer to the new command buffer. Destroy it with cmd_buffer_destroy.
-		inline CommandBufferST* cmd_buffer_st_create(World& world) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION CommandBufferST* cmd_buffer_st_create(World& world) {
 			return new CommandBufferST(world);
 		}
 		//! Destroys a heap-allocated single-threaded command buffer.
 		//! \param cmdBuffer Command buffer previously returned by cmd_buffer_st_create.
-		inline void cmd_buffer_destroy(CommandBufferST& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_destroy(CommandBufferST& cmdBuffer) {
 			delete &cmdBuffer;
 		}
 		//! Commits a single-threaded command buffer.
 		//! \param cmdBuffer Command buffer to replay into the world.
-		inline void cmd_buffer_commit(CommandBufferST& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_commit(CommandBufferST& cmdBuffer) {
 			cmdBuffer.commit();
 		}
 
 		//! Creates a heap-allocated multi-threaded command buffer.
 		//! \param world World that receives the recorded operations on commit.
 		//! \return Pointer to the new command buffer. Destroy it with cmd_buffer_destroy.
-		inline CommandBufferMT* cmd_buffer_mt_create(World& world) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION CommandBufferMT* cmd_buffer_mt_create(World& world) {
 			return new CommandBufferMT(world);
 		}
 		//! Destroys a heap-allocated multi-threaded command buffer.
 		//! \param cmdBuffer Command buffer previously returned by cmd_buffer_mt_create.
-		inline void cmd_buffer_destroy(CommandBufferMT& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_destroy(CommandBufferMT& cmdBuffer) {
 			delete &cmdBuffer;
 		}
 		//! Commits a multi-threaded command buffer.
 		//! \param cmdBuffer Command buffer to replay into the world.
-		inline void cmd_buffer_commit(CommandBufferMT& cmdBuffer) {
+		GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION void cmd_buffer_commit(CommandBufferMT& cmdBuffer) {
 			cmdBuffer.commit();
 		}
+	#undef GAIA_COMPILED_MODE_COMMAND_BUFFER_FUNCTION
+#endif
 	} // namespace ecs
 } // namespace gaia
