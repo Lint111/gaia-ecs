@@ -52493,14 +52493,48 @@ namespace gaia {
 			//! \return Compiled query info owning \a ctx in slot \a id.
 			GAIA_NODISCARD static QueryInfo create(
 					QueryId id, QueryCtx&& ctx, const EntityToArchetypeMap& entityToArchetypeMap,
-					std::span<const Archetype*> allArchetypes);
+					std::span<const Archetype*> allArchetypes) {
+				// Make sure query items are sorted
+				sort(ctx);
+
+				QueryInfo info;
+				info.idx = id;
+				info.gen = 0;
+
+				info.m_plan.ctx = GAIA_MOV(ctx);
+				info.m_plan.ctx.q.handle = {id, 0};
+
+				// Compile the query
+				info.compile(entityToArchetypeMap, allArchetypes);
+
+				return info;
+			}
 
 			//! Creates and compiles a query info object from slot creation context.
 			//! \param idx Query slot index.
 			//! \param gen Query slot generation.
 			//! \param pCtx Pointer to QueryInfoCreationCtx.
 			//! \return Compiled query info initialized for the allocated slot.
-			GAIA_NODISCARD static QueryInfo create(uint32_t idx, uint32_t gen, void* pCtx);
+			GAIA_NODISCARD static QueryInfo create(uint32_t idx, uint32_t gen, void* pCtx) {
+				auto* pCreationCtx = (QueryInfoCreationCtx*)pCtx;
+				auto& queryCtx = *pCreationCtx->pQueryCtx;
+				auto& entityToArchetypeMap = (EntityToArchetypeMap&)*pCreationCtx->pEntityToArchetypeMap;
+
+				// Make sure query items are sorted
+				sort(queryCtx);
+
+				QueryInfo info;
+				info.idx = idx;
+				info.gen = gen;
+
+				info.m_plan.ctx = GAIA_MOV(queryCtx);
+				info.m_plan.ctx.q.handle = {idx, gen};
+
+				// Compile the query
+				info.compile(entityToArchetypeMap, pCreationCtx->allArchetypes);
+
+				return info;
+			}
 
 			//! Builds a stable query handle from query slot metadata.
 			//! \param info Query info providing slot index and generation.
@@ -54227,48 +54261,6 @@ namespace gaia {
 			}
 #endif
 		};
-
-#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
-	#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
-		#define GAIA_COMPILED_MODE_QUERY_FUNCTION
-	#else
-		#define GAIA_COMPILED_MODE_QUERY_FUNCTION inline
-	#endif
-
-		GAIA_NODISCARD GAIA_COMPILED_MODE_QUERY_FUNCTION QueryInfo QueryInfo::create(
-				QueryId id, QueryCtx&& ctx, const EntityToArchetypeMap& entityToArchetypeMap,
-				std::span<const Archetype*> allArchetypes) {
-			// Make sure query items are sorted.
-			sort(ctx);
-
-			QueryInfo info;
-			info.idx = id;
-			info.gen = 0;
-			info.m_plan.ctx = GAIA_MOV(ctx);
-			info.m_plan.ctx.q.handle = {id, 0};
-			info.compile(entityToArchetypeMap, allArchetypes);
-			return info;
-		}
-
-		GAIA_NODISCARD GAIA_COMPILED_MODE_QUERY_FUNCTION QueryInfo QueryInfo::create(uint32_t idx, uint32_t gen, void* pCtx) {
-			auto* pCreationCtx = (QueryInfoCreationCtx*)pCtx;
-			auto& queryCtx = *pCreationCtx->pQueryCtx;
-			auto& entityToArchetypeMap = (EntityToArchetypeMap&)*pCreationCtx->pEntityToArchetypeMap;
-
-			// Make sure query items are sorted.
-			sort(queryCtx);
-
-			QueryInfo info;
-			info.idx = idx;
-			info.gen = gen;
-			info.m_plan.ctx = GAIA_MOV(queryCtx);
-			info.m_plan.ctx.q.handle = {idx, gen};
-			info.compile(entityToArchetypeMap, pCreationCtx->allArchetypes);
-			return info;
-		}
-
-	#undef GAIA_COMPILED_MODE_QUERY_FUNCTION
-#endif
 	} // namespace ecs
 } // namespace gaia
 

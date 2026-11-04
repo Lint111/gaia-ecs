@@ -5036,7 +5036,7 @@ Parameter | Description
 **GAIA_BUILD_UNITTEST** | Builds the [unit test project](#testing)
 **GAIA_BUILD_BENCHMARK** | Builds the [benchmark project](#benchmarks)
 **GAIA_BUILD_EXAMPLES** | Builds [example projects](#examples)
-**GAIA_BUILD_COMPILED** | Builds the opt-in `gaia::compiled` library, which supplies common command-buffer commit and query-plan compilation routines from one translation unit; the default remains header-only
+**GAIA_BUILD_COMPILED** | Builds the opt-in `gaia::compiled` library, which supplies common command-buffer commit routines from one translation unit; the default remains header-only
 **BUILD_TESTING** | Registers available example smoke tests with CTest when examples are built (ON by default)
 **GAIA_GENERATE_CC** | Exports `compile_commands.json` and copies it to `ninja/compile_commands.json` for tooling when the active generator supports it
 **GAIA_GENERATE_DOCS** | Builds the [documentation](#documentation)
@@ -5054,8 +5054,8 @@ Parameter | Description
 ### Compiled mode
 
 Gaia remains header-only by default. For applications with many translation units, the opt-in compiled mode supplies
-common command-buffer commit and query-plan compilation routines from one library translation unit while typed
-component access and query iteration callbacks stay in the including translation unit:
+common command-buffer commit routines from one library translation unit while typed component access, query-plan
+compilation, and query iteration callbacks stay in the including translation unit:
 
 ```bash
 cmake -DGAIA_BUILD_COMPILED=ON -S . -B build
