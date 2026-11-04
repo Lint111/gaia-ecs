@@ -81,8 +81,11 @@ namespace gaia {
 
 					auto indicesView = queryInfo.try_indices_mapping_view(ec.pArchetype);
 					if (!indicesView.empty()) {
-						GAIA_FOR(queryIdCnt) {
-							cachedIndices[i] = indicesView[i];
+						GAIA_ASSERT(queryIdCnt <= ChunkHeader::MAX_COMPONENTS);
+						if (queryIdCnt <= ChunkHeader::MAX_COMPONENTS) {
+							GAIA_FOR(queryIdCnt) {
+								cachedIndices[i] = indicesView[i];
+							}
 						}
 					} else {
 						GAIA_FOR(queryIdCnt) {

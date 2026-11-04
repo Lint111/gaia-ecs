@@ -719,10 +719,14 @@ namespace gaia {
 				//   MSVC     : aaa::bbb::temp<struct Position>
 				// Therefore, we first copy the compile-time string and then tweak it so it is
 				// the same on all supported compilers.
-				auto nameTmpLen = (uint32_t)ct_name.size();
-				GAIA_ASSERT(nameTmpLen < MaxNameLength);
+				const auto ctNameLen = ct_name.size();
+				GAIA_ASSERT(ctNameLen < MaxNameLength);
+				if (ctNameLen >= MaxNameLength)
+					return 0;
+
+				auto nameTmpLen = (uint32_t)ctNameLen;
 				memcpy((void*)nameTmp, (const void*)ct_name.data(), nameTmpLen);
-				nameTmp[ct_name.size()] = 0;
+				nameTmp[nameTmpLen] = 0;
 
 				auto strip_prefix = [&](const char* prefix, uint32_t prefixLen) {
 					if (nameTmpLen <= prefixLen || memcmp(nameTmp, prefix, prefixLen) != 0)
@@ -741,12 +745,17 @@ namespace gaia {
 					strip_prefix(to_remove[i], to_remove_len[i]);
 				}
 
+				if (nameTmpLen >= MaxNameLength)
+					return 0;
+
 				while (nameTmpLen > 0) {
-					const auto ch = nameTmp[nameTmpLen - 1];
+					const auto trimIndex = nameTmpLen - 1;
+					const auto ch = nameTmp[trimIndex];
 					if (ch != ' ' && ch != '&' && ch != '*')
 						break;
 
-					nameTmp[--nameTmpLen] = 0;
+					nameTmp[trimIndex] = 0;
+					nameTmpLen = (uint32_t)trimIndex;
 				}
 
 				if (nameTmpLen > 6 && strncmp(nameTmp + nameTmpLen - 6, " const", 6) == 0) {
