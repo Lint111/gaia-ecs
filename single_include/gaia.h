@@ -53020,119 +53020,7 @@ namespace gaia {
 			//! \param matchedSelector Optional selector that already matched the archetype.
 			//! \param assumeNew True when the caller knows the archetype is not present in the caches.
 			//! \return True when the archetype was added to a cache.
-			bool register_archetype(const Archetype& archetype, Entity matchedSelector = EntityBad, bool assumeNew = false) {
-				auto& ctxData = m_plan.ctx.data;
-
-				// Recompile if necessary.
-				if ((ctxData.flags & QueryCtx::QueryFlags::Recompile) != 0)
-					recompile();
-
-				if (!can_update_with_new_archetype())
-					return false;
-
-				const bool hadMatchBefore = !assumeNew && m_state.archetypeSet.contains(&archetype);
-				if (can_use_direct_create_archetype_match()) {
-					const bool usesIs = direct_create_archetype_match_uses_is();
-					bool hasOrTerms = false;
-					bool matchedOrTerm = false;
-					for (const auto& term: ctxData.terms_view()) {
-						if (term.id == matchedSelector) {
-							if (term.op == QueryOpKind::Or)
-								matchedOrTerm = true;
-							continue;
-						}
-
-						const bool present = usesIs ? vm::detail::match_single_id_on_archetype(*world(), archetype, term.id)
-																				: world_component_index_match_count(*world(), archetype, term.id) != 0;
-						if (term.op == QueryOpKind::Or) {
-							hasOrTerms = true;
-							matchedOrTerm |= present;
-							continue;
-						}
-						if (term.op == QueryOpKind::Any)
-							continue;
-
-						const bool matched = term.op == QueryOpKind::Not ? !present : present;
-						if (!matched)
-							return false;
-					}
-					if (hasOrTerms && !matchedOrTerm)
-						return false;
-					if (hadMatchBefore)
-						return false;
-
-					if (assumeNew)
-						add_new_archetype_to_immediate_caches(&archetype, true);
-					else {
-						add_archetype_to_seed_cache(&archetype, false);
-						add_archetype_to_cache(&archetype, true, false);
-					}
-					return true;
-				}
-
-				SingleArchetypeLookup singleArchetypeLookup;
-				auto addLookupUnique = [&](Entity key, uint16_t compIdx, uint16_t matchCount) {
-					const auto keyLookup = EntityLookupKey(key);
-					const auto itLookup =
-							core::find_if(singleArchetypeLookup.begin(), singleArchetypeLookup.end(), [&](const auto& item) {
-								return item.matches(keyLookup);
-							});
-					if (itLookup != singleArchetypeLookup.end()) {
-						auto& entry = itLookup->entry;
-						entry.matchCount = (uint16_t)(entry.matchCount + matchCount);
-						if (compIdx != ComponentIndexBad)
-							entry.compIdx = compIdx;
-						return;
-					}
-					singleArchetypeLookup.push_back(
-							SingleArchetypeLookupItem{
-									keyLookup, ComponentIndexEntry{const_cast<Archetype*>(&archetype), compIdx, matchCount}});
-				};
-				auto archetypeIds = archetype.ids_view();
-				const auto cntIds = (uint32_t)archetypeIds.size();
-				GAIA_FOR(cntIds) {
-					const auto entity = archetypeIds[i];
-					singleArchetypeLookup.push_back(
-							SingleArchetypeLookupItem{
-									EntityLookupKey(entity), ComponentIndexEntry{const_cast<Archetype*>(&archetype), (uint16_t)i, 1}});
-
-					if (!entity.pair())
-						continue;
-
-					// Wildcard pair lookups use the same special records as the world-level
-					// entity-to-archetype map, so incremental matching can reuse the normal VM path.
-					const auto rel = Entity((EntityId)entity.id(), 0, false, false);
-					const auto tgt = Entity((EntityId)entity.gen(), 0, false, false);
-					addLookupUnique(Pair(All, tgt), ComponentIndexBad, 1);
-					addLookupUnique(Pair(rel, All), ComponentIndexBad, 1);
-					addLookupUnique(Pair(All, All), ComponentIndexBad, 1);
-				}
-
-				auto lastMatchedArchetypeIdx_All = GAIA_MOV(ctxData.lastMatchedArchetypeIdx_All);
-				auto lastMatchedArchetypeIdx_Or = GAIA_MOV(ctxData.lastMatchedArchetypeIdx_Or);
-				auto lastMatchedArchetypeIdx_Not = GAIA_MOV(ctxData.lastMatchedArchetypeIdx_Not);
-				GAIA_ASSERT(ctxData.lastMatchedArchetypeIdx_All.empty());
-				GAIA_ASSERT(ctxData.lastMatchedArchetypeIdx_Or.empty());
-				GAIA_ASSERT(ctxData.lastMatchedArchetypeIdx_Not.empty());
-
-				const auto* pArchetype = &archetype;
-				const cnt::sarray<Entity, MaxVarCnt> noRuntimeVarBindings{};
-				match(
-						singleArchetypeLookup, std::span((const Archetype**)&pArchetype, 1), nullptr, archetype.id(),
-						noRuntimeVarBindings, 0);
-				ctxData.lastMatchedArchetypeIdx_All = GAIA_MOV(lastMatchedArchetypeIdx_All);
-				ctxData.lastMatchedArchetypeIdx_Or = GAIA_MOV(lastMatchedArchetypeIdx_Or);
-				ctxData.lastMatchedArchetypeIdx_Not = GAIA_MOV(lastMatchedArchetypeIdx_Not);
-				const bool matched = assumeNew ? m_state.archetypeSet.contains(&archetype)
-																			 : !hadMatchBefore && m_state.archetypeSet.contains(&archetype);
-
-				if (!matched)
-					return false;
-
-				sort_entities();
-				sort_cache_groups();
-				return true;
-			}
+			bool register_archetype(const Archetype& archetype, Entity matchedSelector = EntityBad, bool assumeNew = false);
 
 			//! Calculates the sort data for the archetypes in the cache.
 			//! This allows us to iterate entites in the order they are sorted across all archetypes.
@@ -54269,6 +54157,126 @@ namespace gaia {
 			}
 #endif
 		};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION) || GAIA_ECS_TEST_HOOKS
+#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+		bool QueryInfo::register_archetype(const Archetype& archetype, Entity matchedSelector, bool assumeNew) {
+#else
+		inline bool QueryInfo::register_archetype(const Archetype& archetype, Entity matchedSelector, bool assumeNew) {
+#endif
+			auto& ctxData = m_plan.ctx.data;
+
+			// Recompile if necessary.
+			if ((ctxData.flags & QueryCtx::QueryFlags::Recompile) != 0)
+				recompile();
+
+			if (!can_update_with_new_archetype())
+				return false;
+
+			const bool hadMatchBefore = !assumeNew && m_state.archetypeSet.contains(&archetype);
+			if (can_use_direct_create_archetype_match()) {
+				const bool usesIs = direct_create_archetype_match_uses_is();
+				bool hasOrTerms = false;
+				bool matchedOrTerm = false;
+				for (const auto& term: ctxData.terms_view()) {
+					if (term.id == matchedSelector) {
+						if (term.op == QueryOpKind::Or)
+							matchedOrTerm = true;
+						continue;
+					}
+
+					const bool present = usesIs ? vm::detail::match_single_id_on_archetype(*world(), archetype, term.id)
+																					: world_component_index_match_count(*world(), archetype, term.id) != 0;
+					if (term.op == QueryOpKind::Or) {
+						hasOrTerms = true;
+						matchedOrTerm |= present;
+						continue;
+					}
+					if (term.op == QueryOpKind::Any)
+						continue;
+
+					const bool matched = term.op == QueryOpKind::Not ? !present : present;
+					if (!matched)
+						return false;
+				}
+				if (hasOrTerms && !matchedOrTerm)
+					return false;
+				if (hadMatchBefore)
+					return false;
+
+				if (assumeNew)
+					add_new_archetype_to_immediate_caches(&archetype, true);
+				else {
+					add_archetype_to_seed_cache(&archetype, false);
+					add_archetype_to_cache(&archetype, true, false);
+				}
+				return true;
+			}
+
+			SingleArchetypeLookup singleArchetypeLookup;
+			auto addLookupUnique = [&](Entity key, uint16_t compIdx, uint16_t matchCount) {
+				const auto keyLookup = EntityLookupKey(key);
+				const auto itLookup =
+						core::find_if(singleArchetypeLookup.begin(), singleArchetypeLookup.end(), [&](const auto& item) {
+							return item.matches(keyLookup);
+						});
+				if (itLookup != singleArchetypeLookup.end()) {
+					auto& entry = itLookup->entry;
+					entry.matchCount = (uint16_t)(entry.matchCount + matchCount);
+					if (compIdx != ComponentIndexBad)
+						entry.compIdx = compIdx;
+					return;
+				}
+				singleArchetypeLookup.push_back(
+						SingleArchetypeLookupItem{
+								keyLookup, ComponentIndexEntry{const_cast<Archetype*>(&archetype), compIdx, matchCount}});
+			};
+			auto archetypeIds = archetype.ids_view();
+			const auto cntIds = (uint32_t)archetypeIds.size();
+			GAIA_FOR(cntIds) {
+				const auto entity = archetypeIds[i];
+				singleArchetypeLookup.push_back(
+						SingleArchetypeLookupItem{
+								EntityLookupKey(entity), ComponentIndexEntry{const_cast<Archetype*>(&archetype), (uint16_t)i, 1}});
+
+				if (!entity.pair())
+					continue;
+
+				// Wildcard pair lookups use the same special records as the world-level
+				// entity-to-archetype map, so incremental matching can reuse the normal VM path.
+				const auto rel = Entity((EntityId)entity.id(), 0, false, false);
+				const auto tgt = Entity((EntityId)entity.gen(), 0, false, false);
+				addLookupUnique(Pair(All, tgt), ComponentIndexBad, 1);
+				addLookupUnique(Pair(rel, All), ComponentIndexBad, 1);
+				addLookupUnique(Pair(All, All), ComponentIndexBad, 1);
+			}
+
+			auto lastMatchedArchetypeIdx_All = GAIA_MOV(ctxData.lastMatchedArchetypeIdx_All);
+			auto lastMatchedArchetypeIdx_Or = GAIA_MOV(ctxData.lastMatchedArchetypeIdx_Or);
+			auto lastMatchedArchetypeIdx_Not = GAIA_MOV(ctxData.lastMatchedArchetypeIdx_Not);
+			GAIA_ASSERT(ctxData.lastMatchedArchetypeIdx_All.empty());
+			GAIA_ASSERT(ctxData.lastMatchedArchetypeIdx_Or.empty());
+			GAIA_ASSERT(ctxData.lastMatchedArchetypeIdx_Not.empty());
+
+			const auto* pArchetype = &archetype;
+			const cnt::sarray<Entity, MaxVarCnt> noRuntimeVarBindings{};
+			match(
+					singleArchetypeLookup, std::span((const Archetype**)&pArchetype, 1), nullptr, archetype.id(),
+					noRuntimeVarBindings, 0);
+			ctxData.lastMatchedArchetypeIdx_All = GAIA_MOV(lastMatchedArchetypeIdx_All);
+			ctxData.lastMatchedArchetypeIdx_Or = GAIA_MOV(lastMatchedArchetypeIdx_Or);
+			ctxData.lastMatchedArchetypeIdx_Not = GAIA_MOV(lastMatchedArchetypeIdx_Not);
+			const bool matched = assumeNew ? m_state.archetypeSet.contains(&archetype)
+																				 : !hadMatchBefore && m_state.archetypeSet.contains(&archetype);
+
+			if (!matched)
+				return false;
+
+			sort_entities();
+			sort_cache_groups();
+			return true;
+		}
+#endif
 	} // namespace ecs
 } // namespace gaia
 
