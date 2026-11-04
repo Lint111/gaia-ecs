@@ -2095,148 +2095,7 @@ namespace gaia {
 
 				//! Commits all gathered changes and performs an archetype movement.
 				//! \warning Once called, the object is returned to its default state (as if no add/remove was ever called).
-				void commit() {
-					// No requests to change the archetype were made
-					if (m_pArchetype == nullptr) {
-						return;
-					}
-
-					// Change in archetype detected
-					if (m_pArchetypeSrc != m_pArchetype) {
-						auto& ec = m_world.fetch(m_entity);
-						GAIA_ASSERT(ec.pArchetype == m_pArchetypeSrc);
-#if GAIA_OBSERVERS_ENABLED
-						const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
-						const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
-						const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
-						auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
-																								 : m_world.m_observers.prepare_diff(
-																											 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
-																											 EntitySpan{&m_entity, 1});
-						auto addDiffCtx =
-								!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
-								: hasNonfragmentingAdds
-										? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
-										: m_world.m_observers.prepare_diff(
-													m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
-						if (hasNonfragmentingAdds)
-							m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
-#endif
-
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							flush_del_nonfragmenting_relations();
-#endif
-
-						// Trigger remove hooks if there are any
-						trigger_del_hooks(*m_pArchetype);
-
-						// Now that we have the final archetype move the entity to it
-						m_world.move_entity_raw(m_entity, ec, *m_pArchetype);
-
-						if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
-							const auto compIdx = ec.pChunk->comp_idx(GAIA_ID(EntityDesc));
-							// No need to update version, entity move did it already.
-							auto* pDesc = reinterpret_cast<EntityDesc*>(ec.pChunk->comp_ptr_mut_gen<false>(compIdx, ec.row));
-							GAIA_ASSERT(core::check_alignment(pDesc));
-
-							// Update the entity name string pointers if necessary
-							if (m_targetNameKey.str() != nullptr) {
-								pDesc->name = m_targetNameKey.str();
-								pDesc->name_len = m_targetNameKey.len();
-							}
-
-							// Update the entity alias string pointers if necessary
-							if (m_targetAliasKey.str() != nullptr) {
-								pDesc->alias = m_targetAliasKey.str();
-								pDesc->alias_len = m_targetAliasKey.len();
-							}
-						}
-
-						// Trigger add hooks if there are any
-						trigger_add_hooks(*m_pArchetype);
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
-						if (hasOnAddObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
-#endif
-						cleanup_deleted_sparse_components();
-
-						m_pArchetypeSrc = ec.pArchetype;
-						m_pChunkSrc = ec.pChunk;
-						m_rowSrc = ec.row;
-					}
-					// Archetype is still the same. Make sure no chunk movement has happened.
-					else {
-#if GAIA_ASSERT_ENABLED
-						auto& ec = m_world.fetch(m_entity);
-						GAIA_ASSERT(ec.pChunk == m_pChunkSrc);
-#endif
-
-#if GAIA_OBSERVERS_ENABLED
-						const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
-						const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
-						const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
-						auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
-																								 : m_world.m_observers.prepare_diff(
-																											 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
-																											 EntitySpan{&m_entity, 1});
-						auto addDiffCtx =
-								!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
-								: hasNonfragmentingAdds
-										? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
-										: m_world.m_observers.prepare_diff(
-													m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
-						if (hasNonfragmentingAdds)
-							m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
-#endif
-
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							flush_del_nonfragmenting_relations();
-#endif
-
-						if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
-							const auto compIdx = m_pChunkSrc->comp_idx(GAIA_ID(EntityDesc));
-							auto* pDesc = reinterpret_cast<EntityDesc*>(m_pChunkSrc->comp_ptr_mut_gen<true>(compIdx, m_rowSrc));
-							GAIA_ASSERT(core::check_alignment(pDesc));
-
-							// Update the entity name string pointers if necessary
-							if (m_targetNameKey.str() != nullptr) {
-								pDesc->name = m_targetNameKey.str();
-								pDesc->name_len = m_targetNameKey.len();
-							}
-
-							// Update the entity alias string pointers if necessary
-							if (m_targetAliasKey.str() != nullptr) {
-								pDesc->alias = m_targetAliasKey.str();
-								pDesc->alias_len = m_targetAliasKey.len();
-							}
-						}
-
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							m_world.m_observers.on_del(m_world, *m_pArchetypeSrc, EntitySpan{tl_del_comps}, EntitySpan{&m_entity, 1});
-						if (hasOnAddObservers)
-							m_world.m_observers.on_add(m_world, *m_pArchetypeSrc, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
-						if (hasOnDelObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
-						if (hasOnAddObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
-#endif
-						cleanup_deleted_sparse_components();
-					}
-
-#if GAIA_OBSERVERS_ENABLED
-					finish_relation_diff_contexts();
-#endif
-
-					// Finalize the builder by reseting the archetype pointer
-					m_pArchetype = nullptr;
-					m_targetNameKey = {};
-					m_targetAliasKey = {};
-				}
+				void commit();
 
 				//! Assigns a \a name to entity. Ignored if used with pair.
 				//! The string is copied and kept internally.
@@ -15054,6 +14913,155 @@ namespace gaia {
 				}
 			}
 		};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+#if GAIA_COMPILED_MODE
+		void World::EntityBuilder::commit() {
+#else
+		inline void World::EntityBuilder::commit() {
+#endif
+			// No requests to change the archetype were made
+			if (m_pArchetype == nullptr) {
+				return;
+			}
+
+			// Change in archetype detected
+			if (m_pArchetypeSrc != m_pArchetype) {
+				auto& ec = m_world.fetch(m_entity);
+				GAIA_ASSERT(ec.pArchetype == m_pArchetypeSrc);
+#if GAIA_OBSERVERS_ENABLED
+				const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
+				const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
+				const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
+				auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
+																						 : m_world.m_observers.prepare_diff(
+																									 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
+																									 EntitySpan{&m_entity, 1});
+				auto addDiffCtx =
+						!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
+						: hasNonfragmentingAdds
+								? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
+								: m_world.m_observers.prepare_diff(
+											m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
+				if (hasNonfragmentingAdds)
+					m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
+#endif
+
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					flush_del_nonfragmenting_relations();
+#endif
+
+				// Trigger remove hooks if there are any
+				trigger_del_hooks(*m_pArchetype);
+
+				// Now that we have the final archetype move the entity to it
+				m_world.move_entity_raw(m_entity, ec, *m_pArchetype);
+
+				if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
+					const auto compIdx = ec.pChunk->comp_idx(GAIA_ID(EntityDesc));
+					// No need to update version, entity move did it already.
+					auto* pDesc = reinterpret_cast<EntityDesc*>(ec.pChunk->comp_ptr_mut_gen<false>(compIdx, ec.row));
+					GAIA_ASSERT(core::check_alignment(pDesc));
+
+					// Update the entity name string pointers if necessary
+					if (m_targetNameKey.str() != nullptr) {
+						pDesc->name = m_targetNameKey.str();
+						pDesc->name_len = m_targetNameKey.len();
+					}
+
+					// Update the entity alias string pointers if necessary
+					if (m_targetAliasKey.str() != nullptr) {
+						pDesc->alias = m_targetAliasKey.str();
+						pDesc->alias_len = m_targetAliasKey.len();
+					}
+				}
+
+				// Trigger add hooks if there are any
+				trigger_add_hooks(*m_pArchetype);
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
+				if (hasOnAddObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
+#endif
+				cleanup_deleted_sparse_components();
+
+				m_pArchetypeSrc = ec.pArchetype;
+				m_pChunkSrc = ec.pChunk;
+				m_rowSrc = ec.row;
+			}
+			// Archetype is still the same. Make sure no chunk movement has happened.
+			else {
+#if GAIA_ASSERT_ENABLED
+				auto& ec = m_world.fetch(m_entity);
+				GAIA_ASSERT(ec.pChunk == m_pChunkSrc);
+#endif
+
+#if GAIA_OBSERVERS_ENABLED
+				const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
+				const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
+				const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
+				auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
+																						 : m_world.m_observers.prepare_diff(
+																									 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
+																									 EntitySpan{&m_entity, 1});
+				auto addDiffCtx =
+						!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
+						: hasNonfragmentingAdds
+								? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
+								: m_world.m_observers.prepare_diff(
+											m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
+				if (hasNonfragmentingAdds)
+					m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
+#endif
+
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					flush_del_nonfragmenting_relations();
+#endif
+
+				if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
+					const auto compIdx = m_pChunkSrc->comp_idx(GAIA_ID(EntityDesc));
+					auto* pDesc = reinterpret_cast<EntityDesc*>(m_pChunkSrc->comp_ptr_mut_gen<true>(compIdx, m_rowSrc));
+					GAIA_ASSERT(core::check_alignment(pDesc));
+
+					// Update the entity name string pointers if necessary
+					if (m_targetNameKey.str() != nullptr) {
+						pDesc->name = m_targetNameKey.str();
+						pDesc->name_len = m_targetNameKey.len();
+					}
+
+					// Update the entity alias string pointers if necessary
+					if (m_targetAliasKey.str() != nullptr) {
+						pDesc->alias = m_targetAliasKey.str();
+						pDesc->alias_len = m_targetAliasKey.len();
+					}
+				}
+
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					m_world.m_observers.on_del(m_world, *m_pArchetypeSrc, EntitySpan{tl_del_comps}, EntitySpan{&m_entity, 1});
+				if (hasOnAddObservers)
+					m_world.m_observers.on_add(m_world, *m_pArchetypeSrc, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
+				if (hasOnDelObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
+				if (hasOnAddObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
+#endif
+				cleanup_deleted_sparse_components();
+			}
+
+#if GAIA_OBSERVERS_ENABLED
+			finish_relation_diff_contexts();
+#endif
+
+			// Finalize the builder by reseting the archetype pointer
+			m_pArchetype = nullptr;
+			m_targetNameKey = {};
+			m_targetAliasKey = {};
+		}
+#endif
 
 		//! Forwards raw read-only component lookup to the owning world.
 		inline ComponentRawView world_get_raw(const World& world, Entity entity, Entity component) {

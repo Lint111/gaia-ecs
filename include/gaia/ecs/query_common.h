@@ -1581,7 +1581,50 @@ namespace gaia {
 			}
 
 			//! Rebuilds derived masks, dependency metadata, and cache policy after authored terms change.
-			void refresh() {
+			void refresh();
+
+			//! Compares shared query identity without requiring invalid handles.
+			//! \param leftCtx First query context.
+			//! \param rightCtx Second query context.
+			//! \return True when lookup hashes and complete identity payloads match.
+			GAIA_NODISCARD static bool
+			equals_no_handle_assumption(const QueryCtx& leftCtx, const QueryCtx& rightCtx) noexcept {
+				// Lookup hash must match
+				if (leftCtx.hashLookup != rightCtx.hashLookup)
+					return false;
+
+				const auto& left = leftCtx.data;
+				const auto& right = rightCtx.data;
+				return left.identity_payload_equal(right);
+			}
+
+			//! Compares query contexts during initial shared-query lookup.
+			//! \param other Query context to compare.
+			//! \return True when both contexts have the same shared query identity.
+			GAIA_NODISCARD bool operator==(const QueryCtx& other) const noexcept {
+				// Comparison expected to be done only the first time the query is set up
+				GAIA_ASSERT(q.handle.id() == QueryIdBad);
+				// Fast path when cache ids are set
+				// if (queryId != QueryIdBad && queryId == other.queryId)
+				// 	return true;
+
+				return equals_no_handle_assumption(*this, other);
+			}
+
+			//! Compares query contexts for distinct shared query identity.
+			//! \param other Query context to compare.
+			//! \return True when the contexts do not have the same identity.
+			GAIA_NODISCARD bool operator!=(const QueryCtx& other) const noexcept {
+				return !operator==(other);
+			}
+		};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+#if GAIA_COMPILED_MODE
+		void QueryCtx::refresh() {
+#else
+		inline void QueryCtx::refresh() {
+#endif
 #if GAIA_ASSERT_ENABLED
 				// Sorting reads component values even when the callback does not.
 				if (data.has_match_terms() && data.sortByFunc != nullptr) {
@@ -1939,43 +1982,8 @@ namespace gaia {
 						exclusions_old != data.deps.exclusions || relations_old != data.deps.relations ||
 						sourceEntities_old != data.deps.sourceEntities)
 					data.flags |= QueryCtx::QueryFlags::Recompile;
-			}
-
-			//! Compares shared query identity without requiring invalid handles.
-			//! \param leftCtx First query context.
-			//! \param rightCtx Second query context.
-			//! \return True when lookup hashes and complete identity payloads match.
-			GAIA_NODISCARD static bool
-			equals_no_handle_assumption(const QueryCtx& leftCtx, const QueryCtx& rightCtx) noexcept {
-				// Lookup hash must match
-				if (leftCtx.hashLookup != rightCtx.hashLookup)
-					return false;
-
-				const auto& left = leftCtx.data;
-				const auto& right = rightCtx.data;
-				return left.identity_payload_equal(right);
-			}
-
-			//! Compares query contexts during initial shared-query lookup.
-			//! \param other Query context to compare.
-			//! \return True when both contexts have the same shared query identity.
-			GAIA_NODISCARD bool operator==(const QueryCtx& other) const noexcept {
-				// Comparison expected to be done only the first time the query is set up
-				GAIA_ASSERT(q.handle.id() == QueryIdBad);
-				// Fast path when cache ids are set
-				// if (queryId != QueryIdBad && queryId == other.queryId)
-				// 	return true;
-
-				return equals_no_handle_assumption(*this, other);
-			}
-
-			//! Compares query contexts for distinct shared query identity.
-			//! \param other Query context to compare.
-			//! \return True when the contexts do not have the same identity.
-			GAIA_NODISCARD bool operator!=(const QueryCtx& other) const noexcept {
-				return !operator==(other);
-			}
-		};
+		}
+#endif
 
 		//! Functor for sorting terms in a query before compilation
 		struct query_sort_cond {

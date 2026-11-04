@@ -1036,58 +1036,7 @@ namespace gaia {
 				//! Fetches the QueryInfo object.
 				//! Creates or refreshes the backing QueryInfo if needed.
 				//! \return QueryInfo object.
-				QueryInfo& fetch() {
-					GAIA_PROF_SCOPE(query::fetch);
-					refresh_world_lifetime();
-
-					// Make sure the query was created by World::query()
-					GAIA_ASSERT(m_storage.is_initialized());
-
-					if (!uses_query_cache_storage()) {
-						if GAIA_UNLIKELY (!m_storage.has_owned_query_info()) {
-							QueryCtx ctx;
-							ctx.init(m_storage.world());
-							commit(ctx);
-							m_storage.init_owned_query_info(
-									QueryInfo::create(QueryId{}, GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view()));
-						} else if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad) {
-							recommit(m_storage.owned_query_info().ctx());
-						}
-
-						return m_storage.owned_query_info();
-					}
-
-					// If queryId is set it means QueryInfo was already created.
-					// This is the common case for cached queries.
-					if GAIA_LIKELY (m_storage.m_identity.handle.id() != QueryIdBad) {
-						auto* pQueryInfo = m_storage.try_query_info_fast();
-						if GAIA_UNLIKELY (pQueryInfo == nullptr)
-							pQueryInfo = m_storage.m_pCache->try_get(m_storage.m_identity.handle);
-
-						// The only time when this can be nullptr is just once after Query::destroy is called.
-						if GAIA_LIKELY (pQueryInfo != nullptr) {
-							m_storage.cache_query_info(*pQueryInfo);
-							if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad)
-								recommit(pQueryInfo->ctx());
-							return *pQueryInfo;
-						}
-
-						m_storage.invalidate();
-					}
-
-					// No queryId is set which means QueryInfo needs to be created
-					QueryCtx ctx;
-					ctx.init(m_storage.world());
-					commit(ctx);
-					auto& queryInfo =
-							uses_shared_cache_layer()
-									? m_storage.m_pCache->add(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view())
-									: m_storage.m_pCache->add_local(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view());
-					m_storage.m_identity.handle = QueryInfo::handle(queryInfo);
-					m_storage.cache_query_info(queryInfo);
-					m_storage.allow_to_destroy_again();
-					return queryInfo;
-				}
+			QueryInfo& fetch();
 
 				//! Matches the query against all relevant archetypes.
 				//! \param queryInfo Query info
@@ -7328,6 +7277,65 @@ namespace gaia {
 					GAIA_LOG_N("END DIAG Query");
 				}
 			};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE
+			QueryInfo& QueryImpl::fetch() {
+	#else
+			inline QueryInfo& QueryImpl::fetch() {
+	#endif
+				GAIA_PROF_SCOPE(query::fetch);
+				refresh_world_lifetime();
+
+				// Make sure the query was created by World::query()
+				GAIA_ASSERT(m_storage.is_initialized());
+
+				if (!uses_query_cache_storage()) {
+					if GAIA_UNLIKELY (!m_storage.has_owned_query_info()) {
+						QueryCtx ctx;
+						ctx.init(m_storage.world());
+						commit(ctx);
+						m_storage.init_owned_query_info(
+								QueryInfo::create(QueryId{}, GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view()));
+					} else if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad) {
+						recommit(m_storage.owned_query_info().ctx());
+					}
+
+					return m_storage.owned_query_info();
+				}
+
+				// If queryId is set it means QueryInfo was already created.
+				// This is the common case for cached queries.
+				if GAIA_LIKELY (m_storage.m_identity.handle.id() != QueryIdBad) {
+					auto* pQueryInfo = m_storage.try_query_info_fast();
+					if GAIA_UNLIKELY (pQueryInfo == nullptr)
+						pQueryInfo = m_storage.m_pCache->try_get(m_storage.m_identity.handle);
+
+					// The only time when this can be nullptr is just once after Query::destroy is called.
+					if GAIA_LIKELY (pQueryInfo != nullptr) {
+						m_storage.cache_query_info(*pQueryInfo);
+						if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad)
+							recommit(pQueryInfo->ctx());
+						return *pQueryInfo;
+					}
+
+					m_storage.invalidate();
+				}
+
+				// No queryId is set which means QueryInfo needs to be created
+				QueryCtx ctx;
+				ctx.init(m_storage.world());
+				commit(ctx);
+				auto& queryInfo =
+						uses_shared_cache_layer()
+								? m_storage.m_pCache->add(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view())
+								: m_storage.m_pCache->add_local(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view());
+				m_storage.m_identity.handle = QueryInfo::handle(queryInfo);
+				m_storage.cache_query_info(queryInfo);
+				m_storage.allow_to_destroy_again();
+				return queryInfo;
+			}
+#endif
 		} // namespace detail
 
 		//! Public query builder and execution type.

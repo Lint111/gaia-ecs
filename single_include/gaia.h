@@ -43469,7 +43469,50 @@ namespace gaia {
 			}
 
 			//! Rebuilds derived masks, dependency metadata, and cache policy after authored terms change.
-			void refresh() {
+			void refresh();
+
+			//! Compares shared query identity without requiring invalid handles.
+			//! \param leftCtx First query context.
+			//! \param rightCtx Second query context.
+			//! \return True when lookup hashes and complete identity payloads match.
+			GAIA_NODISCARD static bool
+			equals_no_handle_assumption(const QueryCtx& leftCtx, const QueryCtx& rightCtx) noexcept {
+				// Lookup hash must match
+				if (leftCtx.hashLookup != rightCtx.hashLookup)
+					return false;
+
+				const auto& left = leftCtx.data;
+				const auto& right = rightCtx.data;
+				return left.identity_payload_equal(right);
+			}
+
+			//! Compares query contexts during initial shared-query lookup.
+			//! \param other Query context to compare.
+			//! \return True when both contexts have the same shared query identity.
+			GAIA_NODISCARD bool operator==(const QueryCtx& other) const noexcept {
+				// Comparison expected to be done only the first time the query is set up
+				GAIA_ASSERT(q.handle.id() == QueryIdBad);
+				// Fast path when cache ids are set
+				// if (queryId != QueryIdBad && queryId == other.queryId)
+				// 	return true;
+
+				return equals_no_handle_assumption(*this, other);
+			}
+
+			//! Compares query contexts for distinct shared query identity.
+			//! \param other Query context to compare.
+			//! \return True when the contexts do not have the same identity.
+			GAIA_NODISCARD bool operator!=(const QueryCtx& other) const noexcept {
+				return !operator==(other);
+			}
+		};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+#if GAIA_COMPILED_MODE
+		void QueryCtx::refresh() {
+#else
+		inline void QueryCtx::refresh() {
+#endif
 #if GAIA_ASSERT_ENABLED
 				// Sorting reads component values even when the callback does not.
 				if (data.has_match_terms() && data.sortByFunc != nullptr) {
@@ -43827,43 +43870,8 @@ namespace gaia {
 						exclusions_old != data.deps.exclusions || relations_old != data.deps.relations ||
 						sourceEntities_old != data.deps.sourceEntities)
 					data.flags |= QueryCtx::QueryFlags::Recompile;
-			}
-
-			//! Compares shared query identity without requiring invalid handles.
-			//! \param leftCtx First query context.
-			//! \param rightCtx Second query context.
-			//! \return True when lookup hashes and complete identity payloads match.
-			GAIA_NODISCARD static bool
-			equals_no_handle_assumption(const QueryCtx& leftCtx, const QueryCtx& rightCtx) noexcept {
-				// Lookup hash must match
-				if (leftCtx.hashLookup != rightCtx.hashLookup)
-					return false;
-
-				const auto& left = leftCtx.data;
-				const auto& right = rightCtx.data;
-				return left.identity_payload_equal(right);
-			}
-
-			//! Compares query contexts during initial shared-query lookup.
-			//! \param other Query context to compare.
-			//! \return True when both contexts have the same shared query identity.
-			GAIA_NODISCARD bool operator==(const QueryCtx& other) const noexcept {
-				// Comparison expected to be done only the first time the query is set up
-				GAIA_ASSERT(q.handle.id() == QueryIdBad);
-				// Fast path when cache ids are set
-				// if (queryId != QueryIdBad && queryId == other.queryId)
-				// 	return true;
-
-				return equals_no_handle_assumption(*this, other);
-			}
-
-			//! Compares query contexts for distinct shared query identity.
-			//! \param other Query context to compare.
-			//! \return True when the contexts do not have the same identity.
-			GAIA_NODISCARD bool operator!=(const QueryCtx& other) const noexcept {
-				return !operator==(other);
-			}
-		};
+		}
+#endif
 
 		//! Functor for sorting terms in a query before compilation
 		struct query_sort_cond {
@@ -56885,58 +56893,7 @@ namespace gaia {
 				//! Fetches the QueryInfo object.
 				//! Creates or refreshes the backing QueryInfo if needed.
 				//! \return QueryInfo object.
-				QueryInfo& fetch() {
-					GAIA_PROF_SCOPE(query::fetch);
-					refresh_world_lifetime();
-
-					// Make sure the query was created by World::query()
-					GAIA_ASSERT(m_storage.is_initialized());
-
-					if (!uses_query_cache_storage()) {
-						if GAIA_UNLIKELY (!m_storage.has_owned_query_info()) {
-							QueryCtx ctx;
-							ctx.init(m_storage.world());
-							commit(ctx);
-							m_storage.init_owned_query_info(
-									QueryInfo::create(QueryId{}, GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view()));
-						} else if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad) {
-							recommit(m_storage.owned_query_info().ctx());
-						}
-
-						return m_storage.owned_query_info();
-					}
-
-					// If queryId is set it means QueryInfo was already created.
-					// This is the common case for cached queries.
-					if GAIA_LIKELY (m_storage.m_identity.handle.id() != QueryIdBad) {
-						auto* pQueryInfo = m_storage.try_query_info_fast();
-						if GAIA_UNLIKELY (pQueryInfo == nullptr)
-							pQueryInfo = m_storage.m_pCache->try_get(m_storage.m_identity.handle);
-
-						// The only time when this can be nullptr is just once after Query::destroy is called.
-						if GAIA_LIKELY (pQueryInfo != nullptr) {
-							m_storage.cache_query_info(*pQueryInfo);
-							if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad)
-								recommit(pQueryInfo->ctx());
-							return *pQueryInfo;
-						}
-
-						m_storage.invalidate();
-					}
-
-					// No queryId is set which means QueryInfo needs to be created
-					QueryCtx ctx;
-					ctx.init(m_storage.world());
-					commit(ctx);
-					auto& queryInfo =
-							uses_shared_cache_layer()
-									? m_storage.m_pCache->add(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view())
-									: m_storage.m_pCache->add_local(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view());
-					m_storage.m_identity.handle = QueryInfo::handle(queryInfo);
-					m_storage.cache_query_info(queryInfo);
-					m_storage.allow_to_destroy_again();
-					return queryInfo;
-				}
+			QueryInfo& fetch();
 
 				//! Matches the query against all relevant archetypes.
 				//! \param queryInfo Query info
@@ -63177,6 +63134,65 @@ namespace gaia {
 					GAIA_LOG_N("END DIAG Query");
 				}
 			};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+	#if GAIA_COMPILED_MODE
+			QueryInfo& QueryImpl::fetch() {
+	#else
+			inline QueryInfo& QueryImpl::fetch() {
+	#endif
+				GAIA_PROF_SCOPE(query::fetch);
+				refresh_world_lifetime();
+
+				// Make sure the query was created by World::query()
+				GAIA_ASSERT(m_storage.is_initialized());
+
+				if (!uses_query_cache_storage()) {
+					if GAIA_UNLIKELY (!m_storage.has_owned_query_info()) {
+						QueryCtx ctx;
+						ctx.init(m_storage.world());
+						commit(ctx);
+						m_storage.init_owned_query_info(
+								QueryInfo::create(QueryId{}, GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view()));
+					} else if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad) {
+						recommit(m_storage.owned_query_info().ctx());
+					}
+
+					return m_storage.owned_query_info();
+				}
+
+				// If queryId is set it means QueryInfo was already created.
+				// This is the common case for cached queries.
+				if GAIA_LIKELY (m_storage.m_identity.handle.id() != QueryIdBad) {
+					auto* pQueryInfo = m_storage.try_query_info_fast();
+					if GAIA_UNLIKELY (pQueryInfo == nullptr)
+						pQueryInfo = m_storage.m_pCache->try_get(m_storage.m_identity.handle);
+
+					// The only time when this can be nullptr is just once after Query::destroy is called.
+					if GAIA_LIKELY (pQueryInfo != nullptr) {
+						m_storage.cache_query_info(*pQueryInfo);
+						if GAIA_UNLIKELY (m_storage.m_identity.serId != QueryIdBad)
+							recommit(pQueryInfo->ctx());
+						return *pQueryInfo;
+					}
+
+					m_storage.invalidate();
+				}
+
+				// No queryId is set which means QueryInfo needs to be created
+				QueryCtx ctx;
+				ctx.init(m_storage.world());
+				commit(ctx);
+				auto& queryInfo =
+						uses_shared_cache_layer()
+								? m_storage.m_pCache->add(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view())
+								: m_storage.m_pCache->add_local(GAIA_MOV(ctx), *m_entityToArchetypeMap, all_archetypes_view());
+				m_storage.m_identity.handle = QueryInfo::handle(queryInfo);
+				m_storage.cache_query_info(queryInfo);
+				m_storage.allow_to_destroy_again();
+				return queryInfo;
+			}
+#endif
 		} // namespace detail
 
 		//! Public query builder and execution type.
@@ -69500,148 +69516,7 @@ namespace gaia {
 
 				//! Commits all gathered changes and performs an archetype movement.
 				//! \warning Once called, the object is returned to its default state (as if no add/remove was ever called).
-				void commit() {
-					// No requests to change the archetype were made
-					if (m_pArchetype == nullptr) {
-						return;
-					}
-
-					// Change in archetype detected
-					if (m_pArchetypeSrc != m_pArchetype) {
-						auto& ec = m_world.fetch(m_entity);
-						GAIA_ASSERT(ec.pArchetype == m_pArchetypeSrc);
-#if GAIA_OBSERVERS_ENABLED
-						const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
-						const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
-						const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
-						auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
-																								 : m_world.m_observers.prepare_diff(
-																											 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
-																											 EntitySpan{&m_entity, 1});
-						auto addDiffCtx =
-								!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
-								: hasNonfragmentingAdds
-										? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
-										: m_world.m_observers.prepare_diff(
-													m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
-						if (hasNonfragmentingAdds)
-							m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
-#endif
-
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							flush_del_nonfragmenting_relations();
-#endif
-
-						// Trigger remove hooks if there are any
-						trigger_del_hooks(*m_pArchetype);
-
-						// Now that we have the final archetype move the entity to it
-						m_world.move_entity_raw(m_entity, ec, *m_pArchetype);
-
-						if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
-							const auto compIdx = ec.pChunk->comp_idx(GAIA_ID(EntityDesc));
-							// No need to update version, entity move did it already.
-							auto* pDesc = reinterpret_cast<EntityDesc*>(ec.pChunk->comp_ptr_mut_gen<false>(compIdx, ec.row));
-							GAIA_ASSERT(core::check_alignment(pDesc));
-
-							// Update the entity name string pointers if necessary
-							if (m_targetNameKey.str() != nullptr) {
-								pDesc->name = m_targetNameKey.str();
-								pDesc->name_len = m_targetNameKey.len();
-							}
-
-							// Update the entity alias string pointers if necessary
-							if (m_targetAliasKey.str() != nullptr) {
-								pDesc->alias = m_targetAliasKey.str();
-								pDesc->alias_len = m_targetAliasKey.len();
-							}
-						}
-
-						// Trigger add hooks if there are any
-						trigger_add_hooks(*m_pArchetype);
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
-						if (hasOnAddObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
-#endif
-						cleanup_deleted_sparse_components();
-
-						m_pArchetypeSrc = ec.pArchetype;
-						m_pChunkSrc = ec.pChunk;
-						m_rowSrc = ec.row;
-					}
-					// Archetype is still the same. Make sure no chunk movement has happened.
-					else {
-#if GAIA_ASSERT_ENABLED
-						auto& ec = m_world.fetch(m_entity);
-						GAIA_ASSERT(ec.pChunk == m_pChunkSrc);
-#endif
-
-#if GAIA_OBSERVERS_ENABLED
-						const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
-						const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
-						const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
-						auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
-																								 : m_world.m_observers.prepare_diff(
-																											 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
-																											 EntitySpan{&m_entity, 1});
-						auto addDiffCtx =
-								!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
-								: hasNonfragmentingAdds
-										? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
-										: m_world.m_observers.prepare_diff(
-													m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
-						if (hasNonfragmentingAdds)
-							m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
-#endif
-
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							flush_del_nonfragmenting_relations();
-#endif
-
-						if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
-							const auto compIdx = m_pChunkSrc->comp_idx(GAIA_ID(EntityDesc));
-							auto* pDesc = reinterpret_cast<EntityDesc*>(m_pChunkSrc->comp_ptr_mut_gen<true>(compIdx, m_rowSrc));
-							GAIA_ASSERT(core::check_alignment(pDesc));
-
-							// Update the entity name string pointers if necessary
-							if (m_targetNameKey.str() != nullptr) {
-								pDesc->name = m_targetNameKey.str();
-								pDesc->name_len = m_targetNameKey.len();
-							}
-
-							// Update the entity alias string pointers if necessary
-							if (m_targetAliasKey.str() != nullptr) {
-								pDesc->alias = m_targetAliasKey.str();
-								pDesc->alias_len = m_targetAliasKey.len();
-							}
-						}
-
-#if GAIA_OBSERVERS_ENABLED
-						if (hasOnDelObservers)
-							m_world.m_observers.on_del(m_world, *m_pArchetypeSrc, EntitySpan{tl_del_comps}, EntitySpan{&m_entity, 1});
-						if (hasOnAddObservers)
-							m_world.m_observers.on_add(m_world, *m_pArchetypeSrc, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
-						if (hasOnDelObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
-						if (hasOnAddObservers)
-							m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
-#endif
-						cleanup_deleted_sparse_components();
-					}
-
-#if GAIA_OBSERVERS_ENABLED
-					finish_relation_diff_contexts();
-#endif
-
-					// Finalize the builder by reseting the archetype pointer
-					m_pArchetype = nullptr;
-					m_targetNameKey = {};
-					m_targetAliasKey = {};
-				}
+				void commit();
 
 				//! Assigns a \a name to entity. Ignored if used with pair.
 				//! The string is copied and kept internally.
@@ -82459,6 +82334,155 @@ namespace gaia {
 				}
 			}
 		};
+
+#if !GAIA_COMPILED_MODE || defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+#if GAIA_COMPILED_MODE
+		void World::EntityBuilder::commit() {
+#else
+		inline void World::EntityBuilder::commit() {
+#endif
+			// No requests to change the archetype were made
+			if (m_pArchetype == nullptr) {
+				return;
+			}
+
+			// Change in archetype detected
+			if (m_pArchetypeSrc != m_pArchetype) {
+				auto& ec = m_world.fetch(m_entity);
+				GAIA_ASSERT(ec.pArchetype == m_pArchetypeSrc);
+#if GAIA_OBSERVERS_ENABLED
+				const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
+				const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
+				const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
+				auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
+																						 : m_world.m_observers.prepare_diff(
+																									 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
+																									 EntitySpan{&m_entity, 1});
+				auto addDiffCtx =
+						!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
+						: hasNonfragmentingAdds
+								? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
+								: m_world.m_observers.prepare_diff(
+											m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
+				if (hasNonfragmentingAdds)
+					m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
+#endif
+
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					flush_del_nonfragmenting_relations();
+#endif
+
+				// Trigger remove hooks if there are any
+				trigger_del_hooks(*m_pArchetype);
+
+				// Now that we have the final archetype move the entity to it
+				m_world.move_entity_raw(m_entity, ec, *m_pArchetype);
+
+				if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
+					const auto compIdx = ec.pChunk->comp_idx(GAIA_ID(EntityDesc));
+					// No need to update version, entity move did it already.
+					auto* pDesc = reinterpret_cast<EntityDesc*>(ec.pChunk->comp_ptr_mut_gen<false>(compIdx, ec.row));
+					GAIA_ASSERT(core::check_alignment(pDesc));
+
+					// Update the entity name string pointers if necessary
+					if (m_targetNameKey.str() != nullptr) {
+						pDesc->name = m_targetNameKey.str();
+						pDesc->name_len = m_targetNameKey.len();
+					}
+
+					// Update the entity alias string pointers if necessary
+					if (m_targetAliasKey.str() != nullptr) {
+						pDesc->alias = m_targetAliasKey.str();
+						pDesc->alias_len = m_targetAliasKey.len();
+					}
+				}
+
+				// Trigger add hooks if there are any
+				trigger_add_hooks(*m_pArchetype);
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
+				if (hasOnAddObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
+#endif
+				cleanup_deleted_sparse_components();
+
+				m_pArchetypeSrc = ec.pArchetype;
+				m_pChunkSrc = ec.pChunk;
+				m_rowSrc = ec.row;
+			}
+			// Archetype is still the same. Make sure no chunk movement has happened.
+			else {
+#if GAIA_ASSERT_ENABLED
+				auto& ec = m_world.fetch(m_entity);
+				GAIA_ASSERT(ec.pChunk == m_pChunkSrc);
+#endif
+
+#if GAIA_OBSERVERS_ENABLED
+				const bool hasOnDelObservers = !tl_del_comps.empty() && m_world.m_observers.has_on_del_observers();
+				const bool hasOnAddObservers = !tl_new_comps.empty() && m_world.m_observers.has_on_add_observers();
+				const bool hasNonfragmentingAdds = hasOnAddObservers && has_nonfragmenting_adds();
+				auto delDiffCtx = !hasOnDelObservers ? ObserverRegistry::DiffDispatchCtx{}
+																						 : m_world.m_observers.prepare_diff(
+																									 m_world, ObserverEvent::OnDel, EntitySpan{tl_del_comps},
+																									 EntitySpan{&m_entity, 1});
+				auto addDiffCtx =
+						!hasOnAddObservers ? ObserverRegistry::DiffDispatchCtx{}
+						: hasNonfragmentingAdds
+								? m_world.m_observers.prepare_diff_add_new(m_world, EntitySpan{tl_new_comps})
+								: m_world.m_observers.prepare_diff(
+											m_world, ObserverEvent::OnAdd, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
+				if (hasNonfragmentingAdds)
+					m_world.m_observers.add_diff_targets(m_world, addDiffCtx, EntitySpan{&m_entity, 1});
+#endif
+
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					flush_del_nonfragmenting_relations();
+#endif
+
+				if (m_targetNameKey.str() != nullptr || m_targetAliasKey.str() != nullptr) {
+					const auto compIdx = m_pChunkSrc->comp_idx(GAIA_ID(EntityDesc));
+					auto* pDesc = reinterpret_cast<EntityDesc*>(m_pChunkSrc->comp_ptr_mut_gen<true>(compIdx, m_rowSrc));
+					GAIA_ASSERT(core::check_alignment(pDesc));
+
+					// Update the entity name string pointers if necessary
+					if (m_targetNameKey.str() != nullptr) {
+						pDesc->name = m_targetNameKey.str();
+						pDesc->name_len = m_targetNameKey.len();
+					}
+
+					// Update the entity alias string pointers if necessary
+					if (m_targetAliasKey.str() != nullptr) {
+						pDesc->alias = m_targetAliasKey.str();
+						pDesc->alias_len = m_targetAliasKey.len();
+					}
+				}
+
+#if GAIA_OBSERVERS_ENABLED
+				if (hasOnDelObservers)
+					m_world.m_observers.on_del(m_world, *m_pArchetypeSrc, EntitySpan{tl_del_comps}, EntitySpan{&m_entity, 1});
+				if (hasOnAddObservers)
+					m_world.m_observers.on_add(m_world, *m_pArchetypeSrc, EntitySpan{tl_new_comps}, EntitySpan{&m_entity, 1});
+				if (hasOnDelObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(delDiffCtx));
+				if (hasOnAddObservers)
+					m_world.m_observers.finish_diff(m_world, GAIA_MOV(addDiffCtx));
+#endif
+				cleanup_deleted_sparse_components();
+			}
+
+#if GAIA_OBSERVERS_ENABLED
+			finish_relation_diff_contexts();
+#endif
+
+			// Finalize the builder by reseting the archetype pointer
+			m_pArchetype = nullptr;
+			m_targetNameKey = {};
+			m_targetAliasKey = {};
+		}
+#endif
 
 		//! Forwards raw read-only component lookup to the owning world.
 		inline ComponentRawView world_get_raw(const World& world, Entity entity, Entity component) {
