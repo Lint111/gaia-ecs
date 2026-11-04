@@ -133,6 +133,13 @@
 	#define GAIA_COMPILED_MODE 0
 #endif
 
+//! If enabled, iterator-callback query walks must use the non-template erased entry point.
+//! Typed component callbacks remain available. This is intended for consumers that keep query
+//! execution in a separately compiled Gaia translation unit.
+#ifndef GAIA_QUERY_WALK_COMPILED_ONLY
+	#define GAIA_QUERY_WALK_COMPILED_ONLY 0
+#endif
+
 //------------------------------------------------------------------------------
 
 #include "gaia/config/config_core_end.h"

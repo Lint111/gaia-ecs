@@ -12,6 +12,39 @@ namespace {
 	struct ReductionVelocity {
 		float x, y, z;
 	};
+
+	struct IterBatchTrace {
+		cnt::darr<uint16_t> sizes;
+		cnt::darr<ecs::Entity> entities;
+	};
+
+	void collect_iter_batches(void* pCtx, ecs::Iter& it) {
+		auto& trace = *static_cast<IterBatchTrace*>(pCtx);
+		trace.sizes.push_back(it.size());
+		const auto entities = it.view<ecs::Entity>();
+		GAIA_FOR(it.size()) trace.entities.push_back(entities[i]);
+	}
+
+	void check_erased_batching(ecs::Query& query, ecs::detail::QueryImpl::QueryPlanMode mode) {
+		CHECK(query.test_iter_plan().mode == mode);
+
+		IterBatchTrace templated;
+		query.each([&](ecs::Iter& it) {
+			collect_iter_batches(&templated, it);
+		});
+
+		IterBatchTrace erased;
+		query.each(&erased, &collect_iter_batches);
+
+		CHECK(templated.sizes.size() == erased.sizes.size());
+		CHECK(templated.entities.size() == erased.entities.size());
+		if (templated.sizes.size() != erased.sizes.size() || templated.entities.size() != erased.entities.size())
+			return;
+		for (uint32_t i = 0; i < templated.sizes.size(); ++i)
+			CHECK(templated.sizes[i] == erased.sizes[i]);
+		for (uint32_t i = 0; i < templated.entities.size(); ++i)
+			CHECK(templated.entities[i] == erased.entities[i]);
+	}
 } // namespace
 
 TEST_CASE("Query - empty storage is copyable") {
@@ -564,6 +597,72 @@ TEST_CASE("Query - query plan classification") {
 	CHECK((depthDisabledPrunedPlan.flags & ecs::detail::QueryImpl::QueryPlanFlag_Sorted) != 0);
 	CHECK((depthDisabledPrunedPlan.flags & ecs::detail::QueryImpl::QueryPlanFlag_BarrierCache) != 0);
 	CHECK(depthDisabledPrunedPlan.idxFrom < depthDisabledPrunedPlan.idxTo);
+}
+
+TEST_CASE("Query - erased and templated walks preserve plan batching") {
+	{
+		TestWorld twld;
+		GAIA_FOR(1'800) {
+			const auto entity = wld.add();
+			wld.add<Position>(entity, {(float)i, (float)i, (float)i});
+		}
+		check_erased_batching(wld.query().all<Position>(), ecs::detail::QueryImpl::QueryPlanMode::DirectDense);
+	}
+
+	{
+		TestWorld twld;
+		const auto animal = wld.add();
+		const auto mammal = wld.add();
+		const auto wolf = wld.add();
+		wld.add(mammal, ecs::Pair(ecs::Is, animal));
+		wld.add(wolf, ecs::Pair(ecs::Is, mammal));
+		check_erased_batching(wld.query().is(animal), ecs::detail::QueryImpl::QueryPlanMode::EntitySeed);
+	}
+
+	{
+		SparseTestWorld twld;
+		const auto entity = wld.add();
+		wld.add<PositionSparse>(entity, {1.0f, 2.0f, 3.0f});
+		check_erased_batching(
+				wld.query().all<PositionSparse>(), ecs::detail::QueryImpl::QueryPlanMode::DirectDense);
+	}
+
+	{
+		TestWorld twld;
+		const auto root = wld.add();
+		const auto child = wld.add();
+		wld.add<Position>(root, {1.0f, 2.0f, 3.0f});
+		wld.add<Position>(child, {4.0f, 5.0f, 6.0f});
+		wld.add(child, ecs::Pair(ecs::ChildOf, root));
+		wld.enable(root, false);
+		check_erased_batching(
+				wld.query().all<Position>().depth_order(ecs::ChildOf), ecs::detail::QueryImpl::QueryPlanMode::Traversal);
+	}
+
+	{
+		TestWorld twld;
+		const auto first = wld.add();
+		const auto second = wld.add();
+		wld.add<Position>(first, {2.0f, 0.0f, 0.0f});
+		wld.add<Position>(second, {1.0f, 0.0f, 0.0f});
+		auto q = wld.query().all<Position>().sort_by(
+				wld.get<Position>(), []([[maybe_unused]] const ecs::World&, const void* pData0, const void* pData1) {
+					const auto& p0 = *static_cast<const Position*>(pData0);
+					const auto& p1 = *static_cast<const Position*>(pData1);
+					return p0.x < p1.x ? -1 : (p0.x > p1.x ? 1 : 0);
+				});
+		check_erased_batching(q, ecs::detail::QueryImpl::QueryPlanMode::Sorted);
+	}
+
+	{
+		TestWorld twld;
+		const auto filter = wld.add();
+		wld.add(filter, ecs::DontFragment);
+		const auto entity = wld.add();
+		wld.add<Position>(entity, {1.0f, 2.0f, 3.0f});
+		wld.add(entity, filter);
+		check_erased_batching(wld.query().all<Position>().all(filter), ecs::detail::QueryImpl::QueryPlanMode::DirectDense);
+	}
 }
 
 TEST_CASE("Query - direct typed chunk rows") {

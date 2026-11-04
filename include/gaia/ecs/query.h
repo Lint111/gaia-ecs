@@ -1666,12 +1666,16 @@ namespace gaia {
 					return access;
 				}
 
+				#if !GAIA_COMPILED_MODE
 				void add_entity_term(QueryOpKind op, Entity entity, const QueryTermOptions& options) {
 					const auto access = normalize_access(op, options.access);
 					add(
-							{op, access, entity, options.entSrc, options.entTrav, options.travKind, options.travDepth,
-							 options.matchKind});
+						{op, access, entity, options.entSrc, options.entTrav, options.travKind, options.travDepth,
+						 options.matchKind});
 				}
+				#else
+				void add_entity_term(QueryOpKind op, Entity entity, const QueryTermOptions& options);
+				#endif
 
 				template <typename T>
 				void add_inter(QueryOpKind op) {
@@ -1749,10 +1753,14 @@ namespace gaia {
 
 				//--------------------------------------------------------------------------------
 
+				#if !GAIA_COMPILED_MODE
 				void changed_inter(Entity entity) {
 					QueryCmd_AddFilter cmd{entity};
 					add_cmd(cmd);
 				}
+				#else
+				void changed_inter(Entity entity);
+				#endif
 
 				template <typename T>
 				void changed_inter() {
@@ -1779,10 +1787,14 @@ namespace gaia {
 
 				//--------------------------------------------------------------------------------
 
+				#if !GAIA_COMPILED_MODE
 				void sort_by_inter(Entity entity, TSortByFunc func) {
 					QueryCmd_SortBy cmd{entity, func};
 					add_cmd(cmd);
 				}
+				#else
+				void sort_by_inter(Entity entity, TSortByFunc func);
+				#endif
 
 				template <typename T>
 				void sort_by_inter(TSortByFunc func) {
@@ -1815,10 +1827,14 @@ namespace gaia {
 
 				//--------------------------------------------------------------------------------
 
+				#if !GAIA_COMPILED_MODE
 				void group_by_inter(Entity entity, TGroupByFunc func, bool orderGroups = false) {
 					QueryCmd_GroupBy cmd{entity, func, orderGroups ? (uint16_t)QueryCtx::QueryFlags::OrderGroups : (uint16_t)0};
 					add_cmd(cmd);
 				}
+				#else
+				void group_by_inter(Entity entity, TGroupByFunc func, bool orderGroups = false);
+				#endif
 
 				template <typename T>
 				void group_by_inter(Entity entity, TGroupByFunc func) {
@@ -1844,11 +1860,15 @@ namespace gaia {
 
 				//--------------------------------------------------------------------------------
 
+				#if !GAIA_COMPILED_MODE
 				void group_dep_inter(Entity relation) {
 					GAIA_ASSERT(!relation.pair());
 					QueryCmd_GroupDep cmd{relation};
 					add_cmd(cmd);
 				}
+				#else
+				void group_dep_inter(Entity relation);
+				#endif
 
 				template <typename T>
 				void group_dep_inter() {
@@ -1861,6 +1881,7 @@ namespace gaia {
 
 				//--------------------------------------------------------------------------------
 
+				#if !GAIA_COMPILED_MODE
 				void set_group_id_inter(GroupId groupId) {
 					refresh_world_lifetime();
 					// Dummy usage of GroupIdMax to avoid warning about unused constant
@@ -1869,10 +1890,17 @@ namespace gaia {
 					invalidate_each_walk_cache();
 					m_groupIdSet = groupId;
 				}
+				#else
+				void set_group_id_inter(GroupId groupId);
+				#endif
 
+				#if !GAIA_COMPILED_MODE
 				void set_group_id_inter(Entity groupId) {
 					set_group_id_inter(groupId.id());
 				}
+				#else
+				void set_group_id_inter(Entity groupId);
+				#endif
 
 				template <typename T>
 				void set_group_id_inter() {
@@ -4100,6 +4128,7 @@ namespace gaia {
 				//! \param pFunc Pointer to the stored callback object.
 				//! \param invoke Type-erased callback invoker.
 				//! \param constraints Entity-row subset exposed to the callback.
+			#if !GAIA_COMPILED_MODE
 				void each_runtime_erased(
 						QueryExecType execType, void* pFunc, void (*invoke)(void*, Iter&), Constraints constraints) {
 					auto& queryInfo = fetch();
@@ -4107,6 +4136,10 @@ namespace gaia {
 					const auto plan = prepare_query_plan(queryInfo, constraints);
 					each_runtime_erased(queryInfo, plan, execType, pFunc, invoke, constraints);
 				}
+			#else
+				void each_runtime_erased(
+						QueryExecType execType, void* pFunc, void (*invoke)(void*, Iter&), Constraints constraints);
+			#endif
 
 				//! Runs a type-erased public iterator callback using an already prepared query cache and plan.
 				//! \param queryInfo Prepared query cache and execution metadata.
@@ -4115,6 +4148,7 @@ namespace gaia {
 				//! \param pFunc Pointer to the stored callback object.
 				//! \param invoke Type-erased callback invoker.
 				//! \param constraints Entity-row subset exposed to the callback.
+			#if !GAIA_COMPILED_MODE
 				void each_runtime_erased(
 						QueryInfo& queryInfo, const QueryPlan& plan, QueryExecType execType, void* pFunc,
 						void (*invoke)(void*, Iter&), Constraints constraints) {
@@ -4125,6 +4159,22 @@ namespace gaia {
 
 					if (plan.mode == QueryPlanMode::EntitySeed) {
 						each_direct_iter_inter(queryInfo, constraints, cb);
+						return;
+					}
+
+					if (execType == QueryExecType::Default && plan.mode == QueryPlanMode::DirectDense) {
+						const bool hasGroups = (plan.flags & QueryPlanFlag_Grouped) != 0;
+						if ((plan.flags & QueryPlanFlag_Filtered) != 0) {
+							if (hasGroups)
+								run_query_on_chunks_runtime_direct_plain_impl<true, true>(queryInfo, plan, constraints, cb);
+							else
+								run_query_on_chunks_runtime_direct_plain_impl<true, false>(queryInfo, plan, constraints, cb);
+						} else {
+							if (hasGroups)
+								run_query_on_chunks_runtime_direct_plain_impl<false, true>(queryInfo, plan, constraints, cb);
+							else
+								run_query_on_chunks_runtime_direct_plain_impl<false, false>(queryInfo, plan, constraints, cb);
+						}
 						return;
 					}
 
@@ -4143,6 +4193,11 @@ namespace gaia {
 							break;
 					}
 				}
+			#else
+				void each_runtime_erased(
+						QueryInfo& queryInfo, const QueryPlan& plan, QueryExecType execType, void* pFunc,
+						void (*invoke)(void*, Iter&), Constraints constraints);
+			#endif
 
 				//------------------------------------------------
 
@@ -6573,6 +6628,15 @@ namespace gaia {
 				void validate_typed_access();
 #endif
 
+				//! Iterates query matches through a non-template type-erased iterator callback.
+				//! \param pCtx User context passed to \a func.
+				//! \param func Callback invoked for each matching chunk window.
+				//! \param execType Query execution mode.
+				//! \param constraints Entity-row subset exposed to the callback.
+				void each(
+						void* pCtx, void (*func)(void*, Iter&), QueryExecType execType = QueryExecType::Default,
+						Constraints constraints = Constraints::EnabledOnly);
+
 				//! Iterates query matches using the default execution mode.
 				//! Each callback receives a contiguous chunk window. DontFragment / sparse entity-filter
 				//! terms restrict that window to matching rows, the same set count() reports. A chunk with
@@ -6581,10 +6645,15 @@ namespace gaia {
 				//! \param func Callable invoked for each match.
 				//! \see Iter::ctx() const
 				//! \see count(Constraints)
+#if GAIA_QUERY_WALK_COMPILED_ONLY
+				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
+				void each(Func) = delete;
+#else
 				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
 				void each(Func func) {
 					each_runtime_inter<QueryExecType::Default, Func>(func, Constraints::EnabledOnly);
 				}
+#endif
 
 				//! Iterates query matches with a typed component callback using the default execution mode.
 				//! \tparam Func Typed callback whose arguments identify the requested query components.
@@ -6597,25 +6666,39 @@ namespace gaia {
 				//! \param func Callable invoked for each match.
 				//! \param execType Execution mode.
 				//! \see Iter::ctx() const
+#if GAIA_QUERY_WALK_COMPILED_ONLY
+				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
+				void each(Func, QueryExecType) = delete;
+#else
 				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
 				void each(Func func, QueryExecType execType) {
 					each(func, execType, Constraints::EnabledOnly);
 				}
+#endif
 
 				//! Iterates query matches with an iterator callback under the selected row constraints.
 				//! \tparam Func Iterator callback type invocable with `Iter&`.
 				//! \param func Callable invoked for each match.
 				//! \param constraints Entity-row subset exposed to the callback.
+#if GAIA_QUERY_WALK_COMPILED_ONLY
+				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
+				void each(Func, Constraints) = delete;
+#else
 				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
 				void each(Func func, Constraints constraints) {
 					each(func, QueryExecType::Default, constraints);
 				}
+#endif
 
 				//! Iterates query matches with an iterator callback using the selected execution mode and row constraints.
 				//! \tparam Func Iterator callback type invocable with `Iter&`.
 				//! \param func Callable invoked for each match.
 				//! \param execType Execution mode.
 				//! \param constraints Entity-row subset exposed to the callback.
+#if GAIA_QUERY_WALK_COMPILED_ONLY
+				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
+				void each(Func, QueryExecType, Constraints) = delete;
+#else
 				template <typename Func, std::enable_if_t<detail::is_query_iter_callback_v<Func>, int> = 0>
 				void each(Func func, QueryExecType execType, Constraints constraints) {
 					switch (execType) {
@@ -6633,6 +6716,7 @@ namespace gaia {
 							break;
 					}
 				}
+#endif
 
 				//! Iterates query matches with a typed component callback using the selected execution mode.
 				//! \tparam Func Typed callback whose arguments identify the requested query components.
@@ -7332,6 +7416,121 @@ namespace gaia {
 					GAIA_LOG_N("END DIAG Query");
 				}
 			};
+
+			#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+			void QueryImpl::add_entity_term(QueryOpKind op, Entity entity, const QueryTermOptions& options) {
+				const auto access = normalize_access(op, options.access);
+				add(
+						{op, access, entity, options.entSrc, options.entTrav, options.travKind, options.travDepth,
+						 options.matchKind});
+			}
+
+			void QueryImpl::changed_inter(Entity entity) {
+				QueryCmd_AddFilter cmd{entity};
+				add_cmd(cmd);
+			}
+
+			void QueryImpl::sort_by_inter(Entity entity, TSortByFunc func) {
+				QueryCmd_SortBy cmd{entity, func};
+				add_cmd(cmd);
+			}
+
+			void QueryImpl::group_by_inter(Entity entity, TGroupByFunc func, bool orderGroups) {
+				QueryCmd_GroupBy cmd{entity, func, orderGroups ? (uint16_t)QueryCtx::QueryFlags::OrderGroups : (uint16_t)0};
+				add_cmd(cmd);
+			}
+
+			void QueryImpl::group_dep_inter(Entity relation) {
+				GAIA_ASSERT(!relation.pair());
+				QueryCmd_GroupDep cmd{relation};
+				add_cmd(cmd);
+			}
+
+			void QueryImpl::set_group_id_inter(GroupId groupId) {
+				refresh_world_lifetime();
+				(void)GroupIdMax;
+
+				invalidate_each_walk_cache();
+				m_groupIdSet = groupId;
+			}
+
+			void QueryImpl::set_group_id_inter(Entity groupId) {
+				set_group_id_inter(groupId.id());
+			}
+			#endif
+
+			#if !GAIA_COMPILED_MODE
+			inline void QueryImpl::each(
+					void* pCtx, void (*func)(void*, Iter&), QueryExecType execType, Constraints constraints) {
+				GAIA_ASSERT(func != nullptr);
+				if (func == nullptr)
+					return;
+				each_runtime_erased(execType, pCtx, func, constraints);
+			}
+			#endif
+
+			#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
+			void QueryImpl::each(
+					void* pCtx, void (*func)(void*, Iter&), QueryExecType execType, Constraints constraints) {
+				GAIA_ASSERT(func != nullptr);
+				if (func == nullptr)
+					return;
+				each_runtime_erased(execType, pCtx, func, constraints);
+			}
+
+			void QueryImpl::each_runtime_erased(
+					QueryExecType execType, void* pFunc, void (*invoke)(void*, Iter&), Constraints constraints) {
+				auto& queryInfo = fetch();
+				match_all(queryInfo);
+				const auto plan = prepare_query_plan(queryInfo, constraints);
+				each_runtime_erased(queryInfo, plan, execType, pFunc, invoke, constraints);
+			}
+
+			void QueryImpl::each_runtime_erased(
+					QueryInfo& queryInfo, const QueryPlan& plan, QueryExecType execType, void* pFunc,
+					void (*invoke)(void*, Iter&), Constraints constraints) {
+				RuntimeIterCallback cb{pFunc, m_ctx, invoke};
+#if GAIA_ASSERT_ENABLED
+				cb.pQueryAccess = &queryInfo.ctx().data;
+#endif
+
+				if (plan.mode == QueryPlanMode::EntitySeed) {
+					each_direct_iter_inter(queryInfo, constraints, cb);
+					return;
+				}
+
+				if (execType == QueryExecType::Default && plan.mode == QueryPlanMode::DirectDense) {
+					const bool hasGroups = (plan.flags & QueryPlanFlag_Grouped) != 0;
+					if ((plan.flags & QueryPlanFlag_Filtered) != 0) {
+						if (hasGroups)
+							run_query_on_chunks_runtime_direct_plain_impl<true, true>(queryInfo, plan, constraints, cb);
+						else
+							run_query_on_chunks_runtime_direct_plain_impl<true, false>(queryInfo, plan, constraints, cb);
+					} else {
+						if (hasGroups)
+							run_query_on_chunks_runtime_direct_plain_impl<false, true>(queryInfo, plan, constraints, cb);
+						else
+							run_query_on_chunks_runtime_direct_plain_impl<false, false>(queryInfo, plan, constraints, cb);
+					}
+					return;
+				}
+
+				switch (execType) {
+					case QueryExecType::Parallel:
+						run_query_on_chunks_runtime_planned<QueryExecType::Parallel>(queryInfo, plan, constraints, cb);
+						break;
+					case QueryExecType::ParallelPerf:
+						run_query_on_chunks_runtime_planned<QueryExecType::ParallelPerf>(queryInfo, plan, constraints, cb);
+						break;
+					case QueryExecType::ParallelEff:
+						run_query_on_chunks_runtime_planned<QueryExecType::ParallelEff>(queryInfo, plan, constraints, cb);
+						break;
+					default:
+						run_query_on_chunks_runtime_planned<QueryExecType::Default>(queryInfo, plan, constraints, cb);
+						break;
+				}
+			}
+			#endif
 
 			#if GAIA_COMPILED_MODE && defined(GAIA_COMPILED_MODE_IMPLEMENTATION)
 			QueryInfo& QueryImpl::fetch() {
