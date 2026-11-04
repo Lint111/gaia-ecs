@@ -2016,7 +2016,7 @@ namespace gaia {
 			// Sort data. Necessary for correct hash calculation.
 			// Without sorting query.all<XXX, YYY> would be different than query.all<YYY, XXX>.
 			// Also makes sure data is in optimal order for query processing.
-			core::sort(
+			core::sort<MAX_ITEMS_IN_QUERY>(
 					ctxData.terms.data(), ctxData.terms.data() + ctxData.idsCnt, query_sort_cond{}, //
 					[&](uint32_t left, uint32_t right) {
 						core::swap(ctxData.ids[left], ctxData.ids[right]);

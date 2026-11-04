@@ -35610,10 +35610,14 @@ namespace gaia {
 				//   MSVC     : aaa::bbb::temp<struct Position>
 				// Therefore, we first copy the compile-time string and then tweak it so it is
 				// the same on all supported compilers.
-				auto nameTmpLen = (uint32_t)ct_name.size();
-				GAIA_ASSERT(nameTmpLen < MaxNameLength);
+				const auto ctNameLen = ct_name.size();
+				GAIA_ASSERT(ctNameLen < MaxNameLength);
+				if (ctNameLen >= MaxNameLength)
+					return 0;
+
+				auto nameTmpLen = (uint32_t)ctNameLen;
 				memcpy((void*)nameTmp, (const void*)ct_name.data(), nameTmpLen);
-				nameTmp[ct_name.size()] = 0;
+				nameTmp[nameTmpLen] = 0;
 
 				auto strip_prefix = [&](const char* prefix, uint32_t prefixLen) {
 					if (nameTmpLen <= prefixLen || memcmp(nameTmp, prefix, prefixLen) != 0)
@@ -35632,12 +35636,17 @@ namespace gaia {
 					strip_prefix(to_remove[i], to_remove_len[i]);
 				}
 
+				if (nameTmpLen >= MaxNameLength)
+					return 0;
+
 				while (nameTmpLen > 0) {
-					const auto ch = nameTmp[nameTmpLen - 1];
+					const auto trimIndex = nameTmpLen - 1;
+					const auto ch = nameTmp[trimIndex];
 					if (ch != ' ' && ch != '&' && ch != '*')
 						break;
 
-					nameTmp[--nameTmpLen] = 0;
+					nameTmp[trimIndex] = 0;
+					nameTmpLen = (uint32_t)trimIndex;
 				}
 
 				if (nameTmpLen > 6 && strncmp(nameTmp + nameTmpLen - 6, " const", 6) == 0) {
@@ -43888,7 +43897,7 @@ namespace gaia {
 			// Sort data. Necessary for correct hash calculation.
 			// Without sorting query.all<XXX, YYY> would be different than query.all<YYY, XXX>.
 			// Also makes sure data is in optimal order for query processing.
-			core::sort(
+			core::sort<MAX_ITEMS_IN_QUERY>(
 					ctxData.terms.data(), ctxData.terms.data() + ctxData.idsCnt, query_sort_cond{}, //
 					[&](uint32_t left, uint32_t right) {
 						core::swap(ctxData.ids[left], ctxData.ids[right]);
@@ -84254,8 +84263,11 @@ namespace gaia {
 
 					auto indicesView = queryInfo.try_indices_mapping_view(ec.pArchetype);
 					if (!indicesView.empty()) {
-						GAIA_FOR(queryIdCnt) {
-							cachedIndices[i] = indicesView[i];
+						GAIA_ASSERT(queryIdCnt <= ChunkHeader::MAX_COMPONENTS);
+						if (queryIdCnt <= ChunkHeader::MAX_COMPONENTS) {
+							GAIA_FOR(queryIdCnt) {
+								cachedIndices[i] = indicesView[i];
+							}
 						}
 					} else {
 						GAIA_FOR(queryIdCnt) {
