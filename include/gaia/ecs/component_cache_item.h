@@ -710,7 +710,11 @@ namespace gaia {
 			//! \return Length of the normalized component name, excluding the null terminator.
 			template <typename T>
 			GAIA_NODISCARD static uint32_t init_type_name(char (&nameTmp)[MaxNameLength]) {
-				auto ct_name = detail::ComponentDesc<T>::name();
+				constexpr auto ctNameLen = detail::ComponentDesc<T>::name().size();
+				static_assert(
+						ctNameLen < MaxNameLength,
+						"Compile-time component name for T exceeds ComponentCacheItem::MaxNameLength; raise MaxNameLength or shorten T's type name");
+				const auto ct_name = detail::ComponentDesc<T>::name();
 
 				// Allocate enough memory for the name string + the null-terminating character (
 				// the compile time string returned by ComponentDesc<T>::name is not null-terminated).
@@ -719,10 +723,9 @@ namespace gaia {
 				//   MSVC     : aaa::bbb::temp<struct Position>
 				// Therefore, we first copy the compile-time string and then tweak it so it is
 				// the same on all supported compilers.
-				auto nameTmpLen = (uint32_t)ct_name.size();
-				GAIA_ASSERT(nameTmpLen < MaxNameLength);
+				auto nameTmpLen = (uint32_t)ctNameLen;
 				memcpy((void*)nameTmp, (const void*)ct_name.data(), nameTmpLen);
-				nameTmp[ct_name.size()] = 0;
+				nameTmp[nameTmpLen] = 0;
 
 				auto strip_prefix = [&](const char* prefix, uint32_t prefixLen) {
 					if (nameTmpLen <= prefixLen || memcmp(nameTmp, prefix, prefixLen) != 0)
@@ -740,13 +743,16 @@ namespace gaia {
 				GAIA_FOR(NSubstrings) {
 					strip_prefix(to_remove[i], to_remove_len[i]);
 				}
+				GAIA_ASSUME(nameTmpLen < MaxNameLength);
 
 				while (nameTmpLen > 0) {
-					const auto ch = nameTmp[nameTmpLen - 1];
+					const auto trimIndex = nameTmpLen - 1;
+					const auto ch = nameTmp[trimIndex];
 					if (ch != ' ' && ch != '&' && ch != '*')
 						break;
 
-					nameTmp[--nameTmpLen] = 0;
+					nameTmp[trimIndex] = 0;
+					nameTmpLen = (uint32_t)trimIndex;
 				}
 
 				if (nameTmpLen > 6 && strncmp(nameTmp + nameTmpLen - 6, " const", 6) == 0) {

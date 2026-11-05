@@ -9,6 +9,10 @@
 #if GAIA_OBSERVERS_ENABLED
 namespace gaia {
 	namespace ecs {
+		static_assert(
+				MAX_ITEMS_IN_QUERY <= ChunkHeader::MAX_COMPONENTS,
+				"Observer query-term capacity must fit ChunkHeader::MAX_COMPONENTS; raise chunk capacity if MAX_ITEMS_IN_QUERY grows");
+
 		inline void world_finish_write(World& world, Entity term, Entity entity);
 
 		static void observer_finish_iter_writes(Iter& it) {
@@ -80,12 +84,14 @@ namespace gaia {
 					}
 
 					auto indicesView = queryInfo.try_indices_mapping_view(ec.pArchetype);
+					GAIA_ASSERT(queryIdCnt <= ChunkHeader::MAX_COMPONENTS);
+					const auto copyCount = queryIdCnt < MAX_ITEMS_IN_QUERY ? queryIdCnt : MAX_ITEMS_IN_QUERY;
 					if (!indicesView.empty()) {
-						GAIA_FOR(queryIdCnt) {
+						GAIA_FOR(copyCount) {
 							cachedIndices[i] = indicesView[i];
 						}
 					} else {
-						GAIA_FOR(queryIdCnt) {
+						GAIA_FOR(copyCount) {
 							const auto* pTerm = termsByField[i];
 							if (pTerm == nullptr || !query_term_maps_to_current_archetype(*pTerm))
 								continue;
