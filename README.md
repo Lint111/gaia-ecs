@@ -1240,7 +1240,7 @@ Cleaning up or destroying the world resets every `ecs::WeakEntity` that points i
 
 ### Archetype lifespan
 
-Once all entities of given archetype are deleted (and as a result all chunks in the archetypes are empty), the archetype stays alive for another 127 ticks of `ecs::World::update`. However, there might be cases where this behavior is insufficient. Maybe you want the archetype deleted faster, or you want to keep it around forever.
+Once all entities of given archetype are deleted (and as a result all chunks in the archetypes are empty), the archetype stays alive for one more tick of `ecs::World::update` by default. However, there might be cases where this behavior is insufficient. Maybe you want the archetype deleted faster, or you want to keep it around longer.
 
 For instance, you might often end up deleting all entities of a given archetype only to create new ones seconds later. In this case, keeping the archetype around can have several performance benefits:
 1) no need to recreate the archetype
@@ -1284,7 +1284,7 @@ EntityContainer& ec = w.fetch(player0);
 ec.pArchetype->set_max_lifespan(50);
 ```
 
-New archetypes start with the world's default lifespan, 127 ticks unless you change it. Change it once when entities keep moving between a bounded set of archetypes, so that each one is created only once. Archetypes that already exist keep their lifespan, and `ecs::World::cleanup` keeps the setting.
+New archetypes start with the world's default lifespan, one tick unless you change it. Change it once when entities keep moving between a bounded set of archetypes, so that each one is created only once. Archetypes that already exist keep their lifespan, and `ecs::World::cleanup` keeps the setting.
 
 ```cpp
 ecs::World w;

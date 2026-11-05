@@ -2731,11 +2731,12 @@ namespace {
 	}
 } // namespace
 
-TEST_CASE("World - an emptied archetype stays for the documented default lifespan") {
+TEST_CASE("World - an emptied archetype stays for its configured default lifespan") {
 	const uint32_t shortest = updates_until_shortest_lived_archetype_deleted();
 	CHECK(shortest < ArchetypeLifespanUpdateLimit);
 
 	ecs::World w;
+	w.set_default_max_lifespan(ecs::Archetype::MAX_ARCHETYPE_LIFESPAN);
 	auto e = add_position_acceleration(w);
 	// Each lifespan tick beyond the first keeps the archetype one update longer.
 	CHECK(updates_until_emptied_archetype_deleted(w, e) == shortest + ecs::Archetype::MAX_ARCHETYPE_LIFESPAN - 1);
@@ -2746,7 +2747,7 @@ TEST_CASE("World - default archetype lifespan applies to archetypes created afte
 
 	{
 		ecs::World w;
-		CHECK(w.default_max_lifespan() == ecs::Archetype::MAX_ARCHETYPE_LIFESPAN);
+		CHECK(w.default_max_lifespan() == 1);
 		w.set_default_max_lifespan(5);
 		CHECK(w.default_max_lifespan() == 5);
 		auto e = add_position_acceleration(w);
@@ -2762,6 +2763,7 @@ TEST_CASE("World - default archetype lifespan applies to archetypes created afte
 	{
 		// An archetype keeps the lifespan it was created with.
 		ecs::World w;
+		w.set_default_max_lifespan(ecs::Archetype::MAX_ARCHETYPE_LIFESPAN);
 		auto e = add_position_acceleration(w);
 		w.set_default_max_lifespan(0);
 		CHECK(updates_until_emptied_archetype_deleted(w, e) == shortest + ecs::Archetype::MAX_ARCHETYPE_LIFESPAN - 1);

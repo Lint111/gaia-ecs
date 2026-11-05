@@ -801,7 +801,7 @@ namespace gaia {
 			ArchetypeId m_nextArchetypeId = 0;
 
 			//! Lifespan a newly created archetype starts with, see set_default_max_lifespan()
-			uint32_t m_defaultMaxLifespan = Archetype::MAX_ARCHETYPE_LIFESPAN;
+			uint32_t m_defaultMaxLifespan = 1;
 
 			//! Entity records
 			EntityContainers m_recs;
