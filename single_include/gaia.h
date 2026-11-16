@@ -2,7 +2,6 @@
 // The file is generated. Do not edit it.
 #pragma once
 
-
 #if __has_include(<version.h>)
 	#include <version.h>
 #endif
@@ -830,7 +829,6 @@ namespace gaia {
 
 //------------------------------------------------------------------------------
 
-
 //------------------------------------------------------------------------------
 // DO NOT MODIFY THIS FILE
 //------------------------------------------------------------------------------
@@ -900,7 +898,7 @@ namespace gaia {
 				GAIA_MSVC_WARNING_POP()                                                                                        \
 			}
 	#else
-		// For non-Debug builds simulate asserts
+	// For non-Debug builds simulate asserts
 		#if GAIA_DEBUG
 			#define GAIA_ASSERT_ENABLED 1
 			#define GAIA_ASSERT(cond)                                                                                        \
@@ -1053,7 +1051,6 @@ namespace gaia {
 #else
 	#include <alloca.h>
 #endif
-
 
 #include <cstddef>
 #include <type_traits>
@@ -1253,8 +1250,7 @@ namespace gaia {
 		//! \param it Iterator to offset.
 		//! \return Offset iterator.
 		template <typename It, typename Diff>
-		GAIA_NODISCARD constexpr reverse_iterator<It, Diff> operator+(
-				Diff offset, const reverse_iterator<It, Diff>& it) {
+		GAIA_NODISCARD constexpr reverse_iterator<It, Diff> operator+(Diff offset, const reverse_iterator<It, Diff>& it) {
 			return it + offset;
 		}
 
@@ -2100,8 +2096,8 @@ namespace gaia {
 			//! \tparam T Type to inspect.
 			//! \return `std::true_type` when the expression is valid.
 			template <typename T>
-			constexpr auto has_mfunc_equals_check(int)
-					-> decltype(std::declval<T>().operator==(std::declval<T>()), std::true_type{});
+			constexpr auto
+			has_mfunc_equals_check(int) -> decltype(std::declval<T>().operator==(std::declval<T>()), std::true_type{});
 			//! False overload selected when member `operator==` is unavailable.
 			//! \tparam T Type to inspect.
 			//! \tparam Args Unused fallback argument types.
@@ -2113,8 +2109,8 @@ namespace gaia {
 			//! \tparam T Type to inspect.
 			//! \return `std::true_type` when the expression is valid.
 			template <typename T>
-			constexpr auto has_ffunc_equals_check(int)
-					-> decltype(operator==(std::declval<T>(), std::declval<T>()), std::true_type{});
+			constexpr auto
+			has_ffunc_equals_check(int) -> decltype(operator==(std::declval<T>(), std::declval<T>()), std::true_type{});
 			//! False overload selected when free `operator==` is unavailable.
 			//! \tparam T Type to inspect.
 			//! \tparam Args Unused fallback argument types.
@@ -2197,11 +2193,10 @@ namespace gaia {
 			//! \param func Callable invoked once for each selected tuple element type.
 			template <auto FirstIdx, typename Tuple, typename Func, auto... Is>
 			void each_tuple_impl(Func func, std::integer_sequence<decltype(FirstIdx), Is...> /*no_name*/) {
-				if constexpr (
-						(std::is_invocable_v<
-								 Func&&, decltype(std::tuple_element_t<FirstIdx + Is, Tuple>{}),
-								 std::integral_constant<decltype(FirstIdx), Is>> &&
-						 ...))
+				if constexpr ((std::is_invocable_v<
+													 Func&&, decltype(std::tuple_element_t<FirstIdx + Is, Tuple>{}),
+													 std::integral_constant<decltype(FirstIdx), Is>> &&
+											 ...))
 					// func(Args&& arg, uint32_t idx)
 					(func(
 							 std::tuple_element_t<FirstIdx + Is, Tuple>{},
@@ -2221,10 +2216,10 @@ namespace gaia {
 			//! \param func Callable invoked once for each selected tuple element.
 			template <auto FirstIdx, typename Tuple, typename Func, auto... Is>
 			void each_tuple_impl(Tuple&& tuple, Func func, std::integer_sequence<decltype(FirstIdx), Is...> /*no_name*/) {
-				if constexpr (
-						(std::is_invocable_v<
-								 Func&&, decltype(std::get<FirstIdx + Is>(tuple)), std::integral_constant<decltype(FirstIdx), Is>> &&
-						 ...))
+				if constexpr ((std::is_invocable_v<
+													 Func&&, decltype(std::get<FirstIdx + Is>(tuple)),
+													 std::integral_constant<decltype(FirstIdx), Is>> &&
+											 ...))
 					// func(Args&& arg, uint32_t idx)
 					(func(std::get<FirstIdx + Is>(tuple), std::integral_constant<decltype(FirstIdx), FirstIdx + Is>{}), ...);
 				else
@@ -4623,9 +4618,7 @@ namespace tracy {
 	#endif
 #endif
 
-
 #include <cstdint>
-
 
 // The same gaia headers used inside span_impl.h must be included here.
 // Amalgamated file would not be generated properly otherwise
@@ -4642,11 +4635,9 @@ namespace tracy {
 // (See accompanying file ../../LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-#include <initializer_list>
-#include <tuple>
-#include <type_traits>
-
+	#include <initializer_list>
+	#include <tuple>
+	#include <type_traits>
 
 namespace gaia {
 	namespace core {
@@ -4788,11 +4779,10 @@ namespace gaia {
 			template <span_size_type E = Extent, typename std::enable_if<(E == DynamicSpanExtent || E <= 0), int>::type = 0>
 			constexpr span() noexcept {}
 
-			//! Rejects temporary initializer-list storage because its backing array expires at the end of the full expression.
-			//! \tparam U Initializer-list element type.
+			//! Rejects temporary initializer-list storage because its backing array expires at the end of the full
+			//! expression. \tparam U Initializer-list element type.
 			template <
-					typename U,
-					typename std::enable_if<std::is_convertible<U (*)[], element_kind (*)[]>::value, int>::type = 0>
+					typename U, typename std::enable_if<std::is_convertible<U (*)[], element_kind (*)[]>::value, int>::type = 0>
 			span(std::initializer_list<U>) = delete;
 
 			//! Constructs a view over count elements starting at ptr.
@@ -5394,11 +5384,9 @@ namespace gaia {
 	} // namespace core
 } // namespace gaia
 
-
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace meta {
@@ -5478,254 +5466,245 @@ namespace gaia {
 
 			if constexpr (std::is_empty_v<type>) {
 				return std::make_tuple();
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28, p29, p30, p31] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30, p31);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28, p29, p30] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28, p29] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25, p26, p27, p28, p29);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25, p26, p27, p28);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25, p26, p27);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25, p26);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24, p25);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23, p24);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22, p23);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21, p22);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20,
-						p21] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20, p21);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20] = GAIA_FWD(object);
-				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19,
-						p20);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18,
-						p19] = GAIA_FWD(object);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30, p31] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28, p29, p30, p31);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28, p29, p30);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28, p29);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20] =
+						GAIA_FWD(object);
+				return std::make_tuple(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19] =
+						GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8, p9);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7, p8);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6, p7);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5, p6);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4, p5);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3, p4);
-			} else if constexpr (
-					detail::is_braces_constructible_t<type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3] = GAIA_FWD(object);
 				return std::make_tuple(p1, p2, p3);
 			} else if constexpr (detail::is_braces_constructible_t<type, detail::any_type, detail::any_type>{}) {
@@ -5752,201 +5731,184 @@ namespace gaia {
 
 			if constexpr (std::is_empty_v<type>) {
 				return 0;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				return 31;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 30;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 29;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 28;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 27;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				return 26;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 25;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 24;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 23;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 22;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				return 21;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 20;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 19;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 18;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 17;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				return 16;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 15;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 14;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 13;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 12;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				return 11;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 10;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 9;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 8;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 7;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				return 6;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				return 5;
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 4;
-			} else if constexpr (
-					detail::is_braces_constructible_t<type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				return 3;
 			} else if constexpr (detail::is_braces_constructible_t<type, detail::any_type, detail::any_type>{}) {
 				return 2;
@@ -5969,250 +5931,241 @@ namespace gaia {
 
 			if constexpr (std::is_empty_v<type>) {
 				visitor();
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28, p29, p30, p31] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25, p26, p27, p28, p29, p30, p31);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28, p29, p30] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25, p26, p27, p28, p29, p30);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28, p29] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25, p26, p27, p28, p29);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27, p28] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25, p26, p27, p28);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26, p27] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25, p26, p27);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25, p26] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25, p26);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24, p25] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24, p25);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23, p24] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23, p24);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22,
-						p23] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22, p23);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22] = object;
-				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21,
-						p22);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
-				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20,
-						p21] = object;
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30, p31] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28, p29, p30, p31);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29, p30] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28, p29, p30);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28, p29] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28, p29);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27, p28] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27, p28);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26, p27] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26, p27);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25, p26] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25, p26);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24, p25);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23,
+						p24);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22] =
+						object;
+				return visitor(
+						p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22);
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
+				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21] =
+						object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8, p9] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8, p9);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7, p8] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7, p8);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6, p7] = object;
 				return visitor(p1, p2, p3, p4, p5, p6, p7);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
-							detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5, p6] = object;
 				return visitor(p1, p2, p3, p4, p5, p6);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type,
+															 detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4, p5] = object;
 				return visitor(p1, p2, p3, p4, p5);
-			} else if constexpr (
-					detail::is_braces_constructible_t<
-							type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3, p4] = object;
 				return visitor(p1, p2, p3, p4);
-			} else if constexpr (
-					detail::is_braces_constructible_t<type, detail::any_type, detail::any_type, detail::any_type>{}) {
+			} else if constexpr (detail::is_braces_constructible_t<
+															 type, detail::any_type, detail::any_type, detail::any_type>{}) {
 				auto&& [p1, p2, p3] = object;
 				return visitor(p1, p2, p3);
 			} else if constexpr (detail::is_braces_constructible_t<type, detail::any_type, detail::any_type>{}) {
@@ -6229,7 +6182,6 @@ namespace gaia {
 		GAIA_MSVC_WARNING_POP() // C4702
 	} // namespace meta
 } // namespace gaia
-
 
 namespace gaia {
 	namespace meta {
@@ -6320,11 +6272,9 @@ namespace gaia {
 	} // namespace meta
 } // namespace gaia
 
-
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
 
 #include <cstdint>
 #include <cstring>
@@ -6332,9 +6282,7 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
-#if GAIA_ALLOC_ARENA_LOCK
-	#include <atomic>
-#endif
+#include <atomic>
 
 #if GAIA_PLATFORM_WINDOWS
 	#define GAIA_MEM_ALLC(size) ::malloc(size)
@@ -6359,24 +6307,63 @@ namespace gaia {
 	namespace mem {
 		//! \cond INTERNAL
 		namespace detail {
-			//! Optionally serializes mutating entry into an allocation arena.
+			//! State identifying the thread that owns an allocation arena.
+			struct ArenaState final {
+				std::atomic_uint64_t owner{0};
+			};
+
+			//! Returns a process-unique identifier for the calling thread.
+			inline thread_local uint8_t arena_thread_token;
+
+			GAIA_NODISCARD inline uint64_t arena_thread_id() noexcept {
+				return (uint64_t)(uintptr_t)&arena_thread_token;
+			}
+
+			//! Holds one owner-scoped allocator instance per thread.
+			template <typename T>
+			class arena_singleton final {
+				T* m_obj = new T();
+
+				arena_singleton() = default;
+
+			public:
+				static T& get() noexcept {
+					thread_local arena_singleton<T> singleton;
+					return *singleton.m_obj;
+				}
+
+				arena_singleton(arena_singleton&&) = delete;
+				arena_singleton(const arena_singleton&) = delete;
+				arena_singleton& operator=(arena_singleton&&) = delete;
+				arena_singleton& operator=(const arena_singleton&) = delete;
+
+				~arena_singleton() {
+					get().done();
+				}
+			};
+
+			//! Optionally serializes mutating entry into an allocation arena and detects foreign entry.
 			//!
-			//! SmallBlockAllocator, ChunkAllocator and PagedAllocator are thread-local
-			//! dyn_singletons. Their page lists and block headers are therefore owned by the
-			//! calling thread. Construct this on the mutating path of alloc/free/flush, after
-			//! call-local argument checks. stats() and diag() stay unlocked so they cannot
-			//! deadlock against a mutating caller.
+			//! SmallBlockAllocator, ChunkAllocator and PagedAllocator are owner-scoped
+			//! arena_singletons. Their pages carry the ArenaState of the allocator that created
+			//! them. Construct this on the mutating path after decoding the page owner; stats()
+			//! and diag() stay unlocked so they cannot deadlock against a mutating caller.
 			//!
 			//! GAIA_ALLOC_ARENA_LOCK remains an opt-in compatibility switch; it serializes
-			//! otherwise independent thread-local arenas and is not needed for correctness.
+			//! otherwise independent arenas and is not needed for correctness. It does not
+			//! transfer arena ownership, so a foreign free still fails in assert builds.
 			class ArenaLock final {
 #if GAIA_ALLOC_ARENA_LOCK
 				inline static std::atomic_int32_t s_lock{0};
 #endif
+				bool m_owned = false;
 
-			public:
-				ArenaLock() noexcept {
+#if GAIA_ECS_TEST_HOOKS
+				inline static std::atomic_uint32_t s_testViolations = 0;
+#endif
+
 #if GAIA_ALLOC_ARENA_LOCK
+				static void lock_global() noexcept {
 					while (s_lock.exchange(1, std::memory_order_acquire) != 0) {
 						while (s_lock.load(std::memory_order_relaxed) != 0)
 	#if defined(__aarch64__)
@@ -6385,7 +6372,25 @@ namespace gaia {
 							;
 	#endif
 					}
+				}
 #endif
+
+			public:
+				explicit ArenaLock(ArenaState& state) noexcept {
+#if GAIA_ALLOC_ARENA_LOCK
+					lock_global();
+#endif
+					const auto me = arena_thread_id();
+					auto owner = state.owner.load(std::memory_order_acquire);
+					if (owner == 0)
+						state.owner.compare_exchange_strong(owner, me, std::memory_order_acq_rel);
+					m_owned = owner == 0 || owner == me;
+					if (!m_owned) {
+#if GAIA_ECS_TEST_HOOKS
+						++s_testViolations;
+#endif
+						GAIA_ASSERT(false && "Allocation arena entered from a non-owning thread");
+					}
 				}
 
 				~ArenaLock() noexcept {
@@ -6397,10 +6402,18 @@ namespace gaia {
 				ArenaLock(const ArenaLock&) = delete;
 				ArenaLock& operator=(const ArenaLock&) = delete;
 
-				//! Returns concurrent-use violations observed since process start.
-				//! \return Always zero; arenas are owned by their calling thread.
+				//! Returns foreign-arena entries observed since process start.
+				//! \return Detected entries. Assert builds abort at the first entry.
 				GAIA_NODISCARD static uint32_t test_violations() noexcept {
+#if GAIA_ECS_TEST_HOOKS
+					return s_testViolations.load(std::memory_order_relaxed);
+#else
 					return 0;
+#endif
+				}
+
+				GAIA_NODISCARD bool owned() const noexcept {
+					return m_owned;
 				}
 			};
 		} // namespace detail
@@ -7406,8 +7419,8 @@ namespace gaia {
 
 		private:
 			template <size_t... Ids>
-			GAIA_NODISCARD constexpr static size_t
-			get_aligned_byte_offset_seq(uintptr_t address, [[maybe_unused]] size_t cnt, std::index_sequence<Ids...> /*no_name*/) {
+			GAIA_NODISCARD constexpr static size_t get_aligned_byte_offset_seq(
+					uintptr_t address, [[maybe_unused]] size_t cnt, std::index_sequence<Ids...> /*no_name*/) {
 				((address = detail::get_aligned_byte_offset(address, Alignment, sizeof(value_type<Ids>), cnt)), ...);
 				address += mem::padding(address, Alignment);
 				return address;
@@ -7692,7 +7705,6 @@ namespace gaia {
 
 #include <cstdint>
 #include <type_traits>
-
 
 namespace gaia {
 	namespace mem {
@@ -8176,8 +8188,8 @@ namespace gaia {
 		//! \param sizeSrc Source capacity for SoA field strides.
 		template <typename T, bool SOA = mem::is_soa_layout_v<T>>
 		void move_element(
-				uint8_t* dst, uint8_t* src, uint32_t idxDst, uint32_t idxSrc,
-				[[maybe_unused]] uint32_t sizeDst, [[maybe_unused]] uint32_t sizeSrc) {
+				uint8_t* dst, uint8_t* src, uint32_t idxDst, uint32_t idxSrc, [[maybe_unused]] uint32_t sizeDst,
+				[[maybe_unused]] uint32_t sizeSrc) {
 			if GAIA_UNLIKELY (src == dst && idxSrc == idxDst)
 				return;
 
@@ -8369,7 +8381,6 @@ namespace gaia {
 
 #include <cinttypes>
 
-
 namespace gaia {
 	namespace mem {
 		//! \cond INTERNAL
@@ -8418,8 +8429,6 @@ namespace gaia {
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-
-
 
 namespace gaia {
 	namespace cnt {
@@ -8647,12 +8656,10 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 #include <cstddef>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -9004,67 +9011,14 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-namespace gaia {
-	namespace core {
-		//! Gaia-ECS is a header-only library which means we want to avoid using global
-		//! static variables because they would get copied to each translation units.
-		//! At the same time the goal is for users to not see any memory allocation used
-		//! by the library. Therefore, the only solution is a static variable with local
-		//! scope.
-		//!
-		//! Being a static variable with local scope which means the singleton is guaranteed
-		//! to be younger than its caller. Because static variables are released in the reverse
-		//! order in which they are created, if used with a static World it would mean we first
-		//! release the singleton and only then proceed with the world itself. As a result, in
-		//! its destructor the world could access memory that has already been released.
-		//!
-		//! Instead, we let the singleton allocate the object on the heap and once singleton's
-		//! destructor is called we tell the internal object it should destroy itself. This way
-		//! there are no memory leaks or access-after-freed issues on app exit reported.
-		//!
-		//! \warning The instance is thread-local, not process-wide. Each thread owns its own object,
-		//!          so allocation arenas built on dyn_singleton (SmallBlockAllocator, ChunkAllocator,
-		//!          PagedAllocator) can be used by independent Worlds concurrently without a process-wide
-		//!          lock. This does not make structural mutation of one World thread-safe; a World and
-		//!          its allocations must remain on the owning thread.
-		template <typename T>
-		class dyn_singleton final {
-			T* m_obj = new T();
-
-			dyn_singleton() = default;
-
-		public:
-			//! Returns the calling thread's singleton object.
-			//! \return Reference to the singleton instance.
-			static T& get() noexcept {
-				thread_local dyn_singleton<T> singleton;
-				return *singleton.m_obj;
-			}
-
-			dyn_singleton(dyn_singleton&& world) = delete;
-			dyn_singleton(const dyn_singleton& world) = delete;
-			dyn_singleton& operator=(dyn_singleton&&) = delete;
-			dyn_singleton& operator=(const dyn_singleton&) = delete;
-
-			~dyn_singleton() {
-				get().done();
-			}
-		};
-	} // namespace core
-} // namespace gaia
-
 #include <cstdarg>
 #include <cstdint>
 #include <cstdio>
-
-
 
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
-
-
 
 namespace gaia {
 	namespace cnt {
@@ -10262,13 +10216,15 @@ namespace gaia {
 				using BitView = core::bit_view<NBlocks_Bits>;
 
 				void* m_data;
+				ArenaState* m_arena;
+				std::atomic_uint64_t m_remoteFreeMask{0};
 				BlockArray m_blocks;
 
-				uint32_t m_sizeType : SizeTypeBits;
-				uint32_t m_blockCnt : NBlocks_Bits;
-				uint32_t m_usedBlocks : NBlocks_Bits;
-				uint32_t m_nextFreeBlock : NBlocks_Bits;
-				uint32_t m_freeBlocks : NBlocks_Bits;
+				uint32_t m_sizeType: SizeTypeBits;
+				uint32_t m_blockCnt: NBlocks_Bits;
+				uint32_t m_usedBlocks: NBlocks_Bits;
+				uint32_t m_nextFreeBlock: NBlocks_Bits;
+				uint32_t m_freeBlocks: NBlocks_Bits;
 
 #if GAIA_ASSERT_ENABLED
 				uint64_t m_usedMask = 0;
@@ -10277,8 +10233,9 @@ namespace gaia {
 				//! Constructs a page for the given size class.
 				//! \param ptr Raw page data.
 				//! \param sizeType Size class index.
-				SmallBlockPage(void* ptr, uint8_t sizeType):
-						m_data(ptr), m_sizeType(sizeType), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0), m_freeBlocks(0) {}
+				SmallBlockPage(void* ptr, uint8_t sizeType, ArenaState* arena):
+						m_data(ptr), m_arena(arena), m_sizeType(sizeType), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0),
+						m_freeBlocks(0) {}
 
 				//! Returns the stride of one block in this page.
 				GAIA_NODISCARD uint32_t block_stride() const {
@@ -10356,7 +10313,8 @@ namespace gaia {
 
 			//! Frees one block back to this page.
 			//! \param pBlock Pointer previously returned by alloc_block().
-			void free_block(void* pBlock) {
+			void
+			free_block(void* pBlock) {
 				GAIA_ASSERT(pBlock != nullptr);
 				GAIA_ASSERT(m_usedBlocks > 0);
 				GAIA_ASSERT(m_freeBlocks <= NBlocks);
@@ -10397,6 +10355,29 @@ namespace gaia {
 
 				++m_freeBlocks;
 				--m_usedBlocks;
+			}
+
+			//! Queues a free issued by a thread that does not own this page.
+			void free_block_remote(void* pBlock) {
+				const auto* pMemoryBlock = (uint8_t*)pBlock - SmallBlockUsableOffset;
+				const auto blckAddr = (uintptr_t)pMemoryBlock;
+				const auto dataAddr = (uintptr_t)m_data;
+				const auto blockIdx = (uint32_t)((blckAddr - dataAddr) / block_stride());
+				GAIA_ASSERT(blockIdx < NBlocks);
+				const auto bit = uint64_t(1) << blockIdx;
+				const auto previous = m_remoteFreeMask.fetch_or(bit, std::memory_order_release);
+				GAIA_ASSERT((previous & bit) == 0 && "Double free or corrupted block state");
+			}
+
+			//! Applies frees queued by non-owning threads.
+			void drain_remote() {
+				const auto mask = m_remoteFreeMask.exchange(0, std::memory_order_acquire);
+				for (uint32_t blockIdx = 0; blockIdx < NBlocks; ++blockIdx) {
+					if ((mask & (uint64_t(1) << blockIdx)) == 0)
+						continue;
+					auto* pBlock = (uint8_t*)m_data + blockIdx * block_stride() + SmallBlockUsableOffset;
+					free_block(pBlock);
+				}
 			}
 
 			//! Returns the number of live blocks.
@@ -10511,7 +10492,7 @@ namespace gaia {
 		//! \endcond
 
 	//! Shared allocator for variable-sized allocations up to SmallBlockMaxSize bytes.
-	using SmallBlockAllocator = core::dyn_singleton<detail::SmallBlockAllocatorImpl>;
+	using SmallBlockAllocator = detail::arena_singleton<detail::SmallBlockAllocatorImpl>;
 
 	//! \cond INTERNAL
 	namespace detail {
@@ -10520,6 +10501,7 @@ namespace gaia {
 			friend ::gaia::mem::SmallBlockAllocator;
 
 			SmallBlockPageContainer m_pages[SmallBlockSizeTypeCount];
+			ArenaState m_arena;
 			bool m_isDone = false;
 
 			SmallBlockAllocatorImpl() = default;
@@ -10553,7 +10535,8 @@ namespace gaia {
 				if (bytesWanted == 0 || bytesWanted > MAX_SIZE)
 					return nullptr;
 
-				const detail::ArenaLock arenaLock;
+				const detail::ArenaLock arenaLock{m_arena};
+				drain_remote_frees();
 				const auto sizeType = small_block_size_type(bytesWanted);
 				auto& container = m_pages[sizeType];
 
@@ -10586,7 +10569,6 @@ namespace gaia {
 				if (pBlock == nullptr)
 					return;
 
-				const detail::ArenaLock arenaLock;
 				const auto& header = *(const SmallBlockHeader*)(void*)((uint8_t*)pBlock - SmallBlockUsableOffset);
 				const auto pageAddr = header.m_pageAddr;
 				GAIA_ASSERT(pageAddr % sizeof(uintptr_t) == 0);
@@ -10594,6 +10576,15 @@ namespace gaia {
 				GAIA_ASSERT(header.m_requestedBytes > 0);
 #endif
 				auto* pPage = (SmallBlockPage*)pageAddr;
+				if (pPage->m_arena != &m_arena) {
+					GAIA_PROF_FREE(pBlock);
+					pPage->free_block_remote(pBlock);
+					return;
+				}
+				const detail::ArenaLock arenaLock{m_arena};
+				if (!arenaLock.owned())
+					return;
+				drain_remote_frees();
 				const auto prevState = state_for(*pPage);
 				auto& container = m_pages[pPage->m_sizeType];
 
@@ -10615,7 +10606,8 @@ namespace gaia {
 			//! Flushes unused pages.
 			//! \param releaseAll When true, all empty pages are released.
 			void flush(bool releaseAll = false) {
-				const detail::ArenaLock arenaLock;
+				const detail::ArenaLock arenaLock{m_arena};
+				drain_remote_frees();
 				for (uint32_t i = 0; i < SmallBlockSizeTypeCount; ++i)
 					flush_pages(m_pages[i], releaseAll);
 				verify();
@@ -10668,14 +10660,31 @@ namespace gaia {
 			}
 
 		private:
+			void drain_remote_frees() {
+				auto drain_pages = [&](SmallBlockPageContainer& container, auto& pages, SmallBlockPageState state) {
+					for (auto it = pages.begin(); it != pages.end();) {
+						auto* pPage = &(*it);
+						++it;
+						pPage->drain_remote();
+						move_page(container, pPage, state, state_for(*pPage));
+					}
+				};
+
+				for (auto& container: m_pages) {
+					drain_pages(container, container.pagesEmpty, SmallBlockPageState::Empty);
+					drain_pages(container, container.pagesPartial, SmallBlockPageState::Partial);
+					drain_pages(container, container.pagesFull, SmallBlockPageState::Full);
+				}
+			}
+
 			static constexpr const char* s_strSmallBlockData = "SmallBlockData";
 			static constexpr const char* s_strSmallBlockPage = "SmallBlockPage";
 
-			static SmallBlockPage* alloc_page(uint8_t sizeType) {
+			SmallBlockPage* alloc_page(uint8_t sizeType) {
 				const uint32_t size = small_block_stride(sizeType) * SmallBlockPage::NBlocks;
 				auto* pPageData = AllocHelper::alloc_alig<uint8_t>(s_strSmallBlockData, SmallBlockAlignment, size);
 				auto* pMemoryPage = AllocHelper::alloc<SmallBlockPage>(s_strSmallBlockPage);
-				return new (pMemoryPage) SmallBlockPage(pPageData, sizeType);
+				return new (pMemoryPage) SmallBlockPage(pPageData, sizeType, &m_arena);
 			}
 
 			static void free_page(SmallBlockPage* pPage) {
@@ -10842,7 +10851,6 @@ namespace gaia {
 
 #include <cinttypes>
 
-
 namespace gaia {
 	namespace mem {
 		//! \cond INTERNAL
@@ -10997,10 +11005,8 @@ namespace gaia {
 	} // namespace mem
 } // namespace gaia
 
-
 #include <cstdint>
 #include <type_traits>
-
 
 #include <cstdint>
 #include <type_traits>
@@ -11550,12 +11556,10 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -12185,12 +12189,10 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -13091,12 +13093,10 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 #include <cstddef>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -13927,7 +13927,6 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
-
 namespace gaia {
 	namespace cnt {
 		//! Dynamically sized bit set.
@@ -14416,7 +14415,6 @@ namespace gaia {
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-
 
 namespace gaia {
 	namespace cnt {
@@ -15812,7 +15810,6 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 GAIA_CLANG_WARNING_PUSH()
 GAIA_GCC_WARNING_PUSH()
 GAIA_CLANG_WARNING_DISABLE("-Wpadded")
@@ -15856,21 +15853,20 @@ GAIA_GCC_WARNING_DISABLE("-Wconversion")
 // SOFTWARE.
 
 #ifndef ROBIN_HOOD_H_INCLUDED
-#define ROBIN_HOOD_H_INCLUDED
+	#define ROBIN_HOOD_H_INCLUDED
 
-// see https://semver.org/
-#define ROBIN_HOOD_VERSION_MAJOR 3 // for incompatible API changes
-#define ROBIN_HOOD_VERSION_MINOR 11 // for adding functionality in a backwards-compatible manner
-#define ROBIN_HOOD_VERSION_PATCH 5 // for backwards-compatible bug fixes
+	// see https://semver.org/
+	#define ROBIN_HOOD_VERSION_MAJOR 3 // for incompatible API changes
+	#define ROBIN_HOOD_VERSION_MINOR 11 // for adding functionality in a backwards-compatible manner
+	#define ROBIN_HOOD_VERSION_PATCH 5 // for backwards-compatible bug fixes
 
-
-#include <cstdlib>
-#include <cstring>
-#include <initializer_list>
-#include <new>
-#include <tuple>
-#include <type_traits>
-#include <utility>
+	#include <cstdlib>
+	#include <cstring>
+	#include <initializer_list>
+	#include <new>
+	#include <tuple>
+	#include <type_traits>
+	#include <utility>
 
 //! \file
 //! \brief Compile-time serialization entry points.
@@ -15879,18 +15875,14 @@ GAIA_GCC_WARNING_DISABLE("-Wconversion")
 //! Best suited when the serializer type is known at compile time.
 //! This is a binary traversal API. JSON document I/O uses ser::ser_json.
 
+	#include <type_traits>
+	#include <utility>
 
-#include <type_traits>
-#include <utility>
+	#include <type_traits>
+	#include <utility>
 
-
-#include <type_traits>
-#include <utility>
-
-
-#include <cstdint>
-#include <type_traits>
-
+	#include <cstdint>
+	#include <type_traits>
 
 namespace gaia {
 	namespace ser {
@@ -16124,8 +16116,8 @@ namespace gaia {
 		using has_tag_save = decltype(has_tag_save_impl<S, T>(0));
 
 		template <typename S, typename T>
-		auto has_tag_load_impl(int)
-				-> decltype(tag_invoke(load_v, std::declval<S&>(), std::declval<T&>()), std::true_type{});
+		auto
+		has_tag_load_impl(int) -> decltype(tag_invoke(load_v, std::declval<S&>(), std::declval<T&>()), std::true_type{});
 		template <typename, typename>
 		std::false_type has_tag_load_impl(...);
 		template <typename S, typename T>
@@ -16249,7 +16241,7 @@ namespace gaia {
 				load_dispatch(s, arg, loadTrivial);
 			}
 
-#if GAIA_ASSERT_ENABLED
+	#if GAIA_ASSERT_ENABLED
 			template <typename Writer, typename T>
 			void check_one(Writer& s, const T& arg) {
 				T tmp{};
@@ -16266,7 +16258,7 @@ namespace gaia {
 				// Return back to the original position in the buffer.
 				s.seek(pos0);
 			}
-#endif
+	#endif
 
 			//! Minimal writer used by ser::bytes to count produced bytes without storing data.
 			class size_counter {
@@ -16327,7 +16319,7 @@ namespace gaia {
 			detail::load_one(reader, data);
 		}
 
-#if GAIA_ASSERT_ENABLED
+	#if GAIA_ASSERT_ENABLED
 		//! Write \param data using \tparam Writer at compile-time, then read it afterwards.
 		//! Used to verify that both save and load work correctly.
 		//! \param writer Writer used to serialize \a data.
@@ -16340,116 +16332,116 @@ namespace gaia {
 		void check(Writer& writer, const T& data) {
 			detail::check_one(writer, data);
 		}
-#endif
+	#endif
 	} // namespace ser
 } // namespace gaia
 
-// #define ROBIN_HOOD_STD_SMARTPOINTERS
-#if defined(ROBIN_HOOD_STD_SMARTPOINTERS)
-	#include <memory>
-#endif
-
-// #define ROBIN_HOOD_LOG_ENABLED
-#ifdef ROBIN_HOOD_LOG_ENABLED
-	#define ROBIN_HOOD_LOG(x, ...) GAIA_LOG_D("L:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#else
-	#define ROBIN_HOOD_LOG(...)
-#endif
-
-// #define ROBIN_HOOD_TRACE_ENABLED
-#ifdef ROBIN_HOOD_TRACE_ENABLED
-	#define ROBIN_HOOD_TRACE(x, ...) GAIA_LOG_D("T:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
-#else
-	#define ROBIN_HOOD_TRACE(...)
-#endif
-
-// all non-argument macros should use this facility. See
-// https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/
-#define ROBIN_HOOD(x) ROBIN_HOOD_PRIVATE_DEFINITION_##x()
-
-// mark unused members with this macro
-#define ROBIN_HOOD_UNUSED(identifier)
-
-// bitness
-#if SIZE_MAX == UINT32_MAX
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 32
-#elif SIZE_MAX == UINT64_MAX
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 64
-#else
-	#error Unsupported bitness
-#endif
-
-// exceptions
-#if !defined(__cpp_exceptions) && !defined(__EXCEPTIONS) && !defined(_CPPUNWIND)
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 0
-	#define ROBIN_HOOD_STD_OUT_OF_RANGE void
-#else
-	#include <stdexcept>
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 1
-	#define ROBIN_HOOD_STD_OUT_OF_RANGE std::out_of_range
-#endif
-
-// count leading/trailing bits
-#if !defined(ROBIN_HOOD_DISABLE_INTRINSICS)
-	#if ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() == 32
-		#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ(x)
-		#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ(x)
-	#else
-		#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ64(x)
-		#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ64(x)
+	// #define ROBIN_HOOD_STD_SMARTPOINTERS
+	#if defined(ROBIN_HOOD_STD_SMARTPOINTERS)
+		#include <memory>
 	#endif
-#endif
 
-// fallthrough
-#ifndef __has_cpp_attribute // For backwards compatibility
-	#define __has_cpp_attribute(x) 0
-#endif
-#if __has_cpp_attribute(fallthrough)
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH() [[fallthrough]]
-#else
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH()
-#endif
+	// #define ROBIN_HOOD_LOG_ENABLED
+	#ifdef ROBIN_HOOD_LOG_ENABLED
+		#define ROBIN_HOOD_LOG(x, ...) GAIA_LOG_D("L:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+	#else
+		#define ROBIN_HOOD_LOG(...)
+	#endif
 
-// detect if native wchar_t type is availiable in MSVC
-#ifdef _MSC_VER
-	#ifdef _NATIVE_WCHAR_T_DEFINED
+	// #define ROBIN_HOOD_TRACE_ENABLED
+	#ifdef ROBIN_HOOD_TRACE_ENABLED
+		#define ROBIN_HOOD_TRACE(x, ...) GAIA_LOG_D("T:%s@%d: " x, __FUNCTION__, __LINE__, ##__VA_ARGS__)
+	#else
+		#define ROBIN_HOOD_TRACE(...)
+	#endif
+
+	// all non-argument macros should use this facility. See
+	// https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/
+	#define ROBIN_HOOD(x) ROBIN_HOOD_PRIVATE_DEFINITION_##x()
+
+	// mark unused members with this macro
+	#define ROBIN_HOOD_UNUSED(identifier)
+
+	// bitness
+	#if SIZE_MAX == UINT32_MAX
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 32
+	#elif SIZE_MAX == UINT64_MAX
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 64
+	#else
+		#error Unsupported bitness
+	#endif
+
+	// exceptions
+	#if !defined(__cpp_exceptions) && !defined(__EXCEPTIONS) && !defined(_CPPUNWIND)
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 0
+		#define ROBIN_HOOD_STD_OUT_OF_RANGE void
+	#else
+		#include <stdexcept>
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 1
+		#define ROBIN_HOOD_STD_OUT_OF_RANGE std::out_of_range
+	#endif
+
+	// count leading/trailing bits
+	#if !defined(ROBIN_HOOD_DISABLE_INTRINSICS)
+		#if ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() == 32
+			#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ(x)
+			#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ(x)
+		#else
+			#define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) GAIA_CLZ64(x)
+			#define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) GAIA_CTZ64(x)
+		#endif
+	#endif
+
+	// fallthrough
+	#ifndef __has_cpp_attribute // For backwards compatibility
+		#define __has_cpp_attribute(x) 0
+	#endif
+	#if __has_cpp_attribute(fallthrough)
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH() [[fallthrough]]
+	#else
+		#define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH()
+	#endif
+
+	// detect if native wchar_t type is availiable in MSVC
+	#ifdef _MSC_VER
+		#ifdef _NATIVE_WCHAR_T_DEFINED
+			#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
+		#else
+			#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 0
+		#endif
+	#else
 		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
-	#else
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 0
 	#endif
-#else
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
-#endif
 
-// detect if MSVC supports the pair(std::piecewise_construct_t,...) constructor being constexpr
-#ifdef _MSC_VER
-	#if _MSC_VER <= 1900
-		#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 1
+	// detect if MSVC supports the pair(std::piecewise_construct_t,...) constructor being constexpr
+	#ifdef _MSC_VER
+		#if _MSC_VER <= 1900
+			#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 1
+		#else
+			#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
+		#endif
 	#else
 		#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
 	#endif
-#else
-	#define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
-#endif
 
-// workaround missing "is_trivially_copyable" in g++ < 5.0
-// See https://stackoverflow.com/a/31798726/48181
-#if GAIA_COMPILER_GCC && __GNUC__ < 5
-	#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) __has_trivial_copy(__VA_ARGS__)
-#else
-	#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) std::is_trivially_copyable<__VA_ARGS__>::value
-#endif
+	// workaround missing "is_trivially_copyable" in g++ < 5.0
+	// See https://stackoverflow.com/a/31798726/48181
+	#if GAIA_COMPILER_GCC && __GNUC__ < 5
+		#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) __has_trivial_copy(__VA_ARGS__)
+	#else
+		#define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) std::is_trivially_copyable<__VA_ARGS__>::value
+	#endif
 
 namespace robin_hood {
 
 	namespace detail {
 
-// make sure we static_cast to the correct type for hash_int
-#if ROBIN_HOOD(BITNESS) == 64
+	// make sure we static_cast to the correct type for hash_int
+	#if ROBIN_HOOD(BITNESS) == 64
 		using SizeT = uint64_t;
-#else
+	#else
 		using SizeT = uint32_t;
-#endif
+	#endif
 
 		template <typename T>
 		T rotr(T x, unsigned k) {
@@ -16479,16 +16471,18 @@ namespace robin_hood {
 		// inlinings more difficult. Throws are also generally the slow path.
 		template <typename E, typename... Args>
 		[[noreturn]] GAIA_NOINLINE
-#if ROBIN_HOOD(HAS_EXCEPTIONS)
-				void doThrow(Args&&... args) {
+	#if ROBIN_HOOD(HAS_EXCEPTIONS)
+				void
+				doThrow(Args&&... args) {
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 			throw E(GAIA_FWD(args)...);
 		}
-#else
-				void doThrow(Args&&... ROBIN_HOOD_UNUSED(args) /*unused*/) {
+	#else
+				void
+				doThrow(Args&&... ROBIN_HOOD_UNUSED(args) /*unused*/) {
 			abort();
 		}
-#endif
+	#endif
 
 		template <typename E, typename T, typename... Args>
 		T* assertNotNull(T* t, Args&&... args) {
@@ -16535,7 +16529,7 @@ namespace robin_hood {
 
 			BulkPoolAllocator&
 			// NOLINTNEXTLINE(bugprone-unhandled-self-assignment,cert-oop54-cpp)
-			operator=(const BulkPoolAllocator& ROBIN_HOOD_UNUSED(o) /*unused*/) noexcept {
+			operator=(const BulkPoolAllocator & ROBIN_HOOD_UNUSED(o) /*unused*/) noexcept {
 				// does not do anything
 				return *this;
 			}
@@ -16735,9 +16729,9 @@ namespace robin_hood {
 		template <typename... U1, typename... U2>
 		// MSVC 2015 produces error "C2476: ‘constexpr’ constructor does not initialize all members"
 		// if this constructor is constexpr
-#if !ROBIN_HOOD(BROKEN_CONSTEXPR)
+	#if !ROBIN_HOOD(BROKEN_CONSTEXPR)
 		constexpr
-#endif
+	#endif
 				pair(std::piecewise_construct_t /*unused*/, std::tuple<U1...> a, std::tuple<U2...> b) noexcept(noexcept(pair(
 						std::declval<std::tuple<U1...>&>(), std::declval<std::tuple<U2...>&>(), std::index_sequence_for<U1...>(),
 						std::index_sequence_for<U2...>()))):
@@ -16883,7 +16877,7 @@ namespace robin_hood {
 		}
 	};
 
-#ifdef ROBIN_HOOD_STD_SMARTPOINTERS
+	#ifdef ROBIN_HOOD_STD_SMARTPOINTERS
 	template <typename T>
 	struct hash<std::unique_ptr<T>> {
 		size_t operator()(std::unique_ptr<T> const& ptr) const noexcept {
@@ -16897,7 +16891,7 @@ namespace robin_hood {
 			return hash_int(reinterpret_cast<detail::SizeT>(ptr.get()));
 		}
 	};
-#endif
+	#endif
 
 	template <typename Enum>
 	struct hash<Enum, typename std::enable_if<std::is_enum<Enum>::value>::type> {
@@ -16917,18 +16911,18 @@ namespace robin_hood {
 		}
 	};
 
-#define ROBIN_HOOD_HASH_INT(T)                                                                                         \
-	template <>                                                                                                          \
-	struct hash<T> {                                                                                                     \
-		size_t operator()(T const& obj) const noexcept {                                                                   \
-			return hash_int(static_cast<uint64_t>(obj));                                                                     \
-		}                                                                                                                  \
-	}
+	#define ROBIN_HOOD_HASH_INT(T)                                                                                       \
+		template <>                                                                                                        \
+		struct hash<T> {                                                                                                   \
+			size_t operator()(T const& obj) const noexcept {                                                                 \
+				return hash_int(static_cast<uint64_t>(obj));                                                                   \
+			}                                                                                                                \
+		}
 
-#if defined(__GNUC__) && !defined(__clang__)
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wuseless-cast"
-#endif
+	#if defined(__GNUC__) && !defined(__clang__)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wuseless-cast"
+	#endif
 	// see https://en.cppreference.com/w/cpp/utility/hash
 	ROBIN_HOOD_HASH_INT(bool);
 	ROBIN_HOOD_HASH_INT(char);
@@ -16936,9 +16930,9 @@ namespace robin_hood {
 	ROBIN_HOOD_HASH_INT(unsigned char);
 	ROBIN_HOOD_HASH_INT(char16_t);
 	ROBIN_HOOD_HASH_INT(char32_t);
-#if ROBIN_HOOD(HAS_NATIVE_WCHART)
+	#if ROBIN_HOOD(HAS_NATIVE_WCHART)
 	ROBIN_HOOD_HASH_INT(wchar_t);
-#endif
+	#endif
 	ROBIN_HOOD_HASH_INT(short);
 	ROBIN_HOOD_HASH_INT(unsigned short);
 	ROBIN_HOOD_HASH_INT(int);
@@ -16947,9 +16941,9 @@ namespace robin_hood {
 	ROBIN_HOOD_HASH_INT(long long);
 	ROBIN_HOOD_HASH_INT(unsigned long);
 	ROBIN_HOOD_HASH_INT(unsigned long long);
-#if defined(__GNUC__) && !defined(__clang__)
-	#pragma GCC diagnostic pop
-#endif
+	#if defined(__GNUC__) && !defined(__clang__)
+		#pragma GCC diagnostic pop
+	#endif
 	namespace detail {
 		template <typename, typename = void>
 		struct has_is_transparent: public std::false_type {};
@@ -17376,7 +17370,7 @@ namespace robin_hood {
 						mKeyVals += sizeof(size_t);
 						GAIA_MSVC_WARNING_POP()
 					}
-#if defined(ROBIN_HOOD_DISABLE_INTRINSICS)
+	#if defined(ROBIN_HOOD_DISABLE_INTRINSICS)
 					// we know for certain that within the next 8 bytes we'll find a non-zero one.
 					if GAIA_UNLIKELY (0U == detail::unaligned_load<uint32_t>(mInfo)) {
 						mInfo += 4;
@@ -17390,15 +17384,15 @@ namespace robin_hood {
 						mInfo += 1;
 						mKeyVals += 1;
 					}
-#else
-	#if GAIA_LITTLE_ENDIAN
-					auto inc = ROBIN_HOOD_COUNT_TRAILING_ZEROES(n) / 8;
 	#else
+		#if GAIA_LITTLE_ENDIAN
+					auto inc = ROBIN_HOOD_COUNT_TRAILING_ZEROES(n) / 8;
+		#else
 					auto inc = ROBIN_HOOD_COUNT_LEADING_ZEROES(n) / 8;
-	#endif
+		#endif
 					mInfo += inc;
 					mKeyVals += inc;
-#endif
+	#endif
 				}
 
 				friend class Table<IsFlat, MaxLoadFactor100, key_type, mapped_type, hasher, key_equal>;
@@ -18319,9 +18313,9 @@ namespace robin_hood {
 
 			// calculation only allowed for 2^n values
 			GAIA_NODISCARD size_t calcNumBytesTotal(size_t numElements) const {
-#if ROBIN_HOOD(BITNESS) == 64
+	#if ROBIN_HOOD(BITNESS) == 64
 				return (numElements * sizeof(Node)) + calcNumBytesInfo(numElements);
-#else
+	#else
 				// make sure we're doing 64bit operations, so we are at least safe against 32bit overflows.
 				auto const ne = static_cast<uint64_t>(numElements);
 				auto const s = static_cast<uint64_t>(sizeof(Node));
@@ -18334,7 +18328,7 @@ namespace robin_hood {
 					throwOverflowError();
 				}
 				return total;
-#endif
+	#endif
 			}
 
 		private:
@@ -18410,11 +18404,11 @@ namespace robin_hood {
 			}
 
 			GAIA_NOINLINE void throwOverflowError() const {
-#if ROBIN_HOOD(HAS_EXCEPTIONS)
+	#if ROBIN_HOOD(HAS_EXCEPTIONS)
 				throw std::overflow_error("robin_hood::map overflow");
-#else
+	#else
 				abort();
-#endif
+	#endif
 			}
 
 			template <typename OtherKey, typename... Args>
@@ -18779,12 +18773,10 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
-
 #include <cinttypes>
 #include <cstdint>
 #include <cstring>
 #include <type_traits>
-
 
 namespace gaia {
 	namespace mem {
@@ -18801,10 +18793,12 @@ namespace gaia {
 		struct GAIA_API MemoryPageHeader {
 			//! Pointer to data managed by page
 			void* m_data;
+			//! Owner state for the allocation arena that created this page
+			detail::ArenaState* m_arena;
 
 			//! Creates a page header for a backing allocation.
 			//! \param ptr Backing allocation address.
-			MemoryPageHeader(void* ptr): m_data(ptr) {}
+			MemoryPageHeader(void* ptr, detail::ArenaState* arena): m_data(ptr), m_arena(arena) {}
 		};
 
 		//! Fixed-capacity page of equal-sized blocks.
@@ -18849,24 +18843,26 @@ namespace gaia {
 
 			//! Implicit list of blocks
 			BlockArray m_blocks;
+			//! Frees issued by non-owning threads, drained by the owner.
+			std::atomic_uint64_t m_remoteFreeMask{0};
 
 			//! Number of blocks in the block array
-			uint32_t m_blockCnt : NBlocks_Bits;
+			uint32_t m_blockCnt: NBlocks_Bits;
 			//! Number of used blocks out of NBlocks
-			uint32_t m_usedBlocks : NBlocks_Bits;
+			uint32_t m_usedBlocks: NBlocks_Bits;
 			//! Index of the next block to recycle
-			uint32_t m_nextFreeBlock : NBlocks_Bits;
+			uint32_t m_nextFreeBlock: NBlocks_Bits;
 			//! Number of blocks to recycle
-			uint32_t m_freeBlocks : NBlocks_Bits;
+			uint32_t m_freeBlocks: NBlocks_Bits;
 			//! Free bits to use in the future
 			// uint32_t m_unused : 8;
 
 			//! Creates an empty page over a backing allocation.
 			//! \param ptr Backing allocation address.
-			MemoryPage(void* ptr):
-					MemoryPageHeader(ptr), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0), m_freeBlocks(0) {
+			MemoryPage(void* ptr, detail::ArenaState* arena):
+					MemoryPageHeader(ptr, arena), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0), m_freeBlocks(0) {
 				// One cacheline long on x86. The point is for this to be as small as possible
-				static_assert(sizeof(MemoryPage) <= 64);
+				static_assert(sizeof(MemoryPage) <= 88);
 			}
 
 			//! Writes one link in the packed recycled-block list.
@@ -18964,6 +18960,29 @@ namespace gaia {
 				--m_usedBlocks;
 			}
 
+			//! Queues a free issued by a thread that does not own this page.
+			void free_block_remote(void* pBlock) {
+				const auto* pMemoryBlock = (uint8_t*)pBlock - MemoryBlockUsableOffset;
+				const auto blckAddr = (uintptr_t)pMemoryBlock;
+				const auto dataAddr = (uintptr_t)m_data;
+				const auto blockIdx = (uint32_t)((blckAddr - dataAddr) / MemoryBlockBytes);
+				GAIA_ASSERT(blockIdx < NBlocks);
+				const auto bit = uint64_t(1) << blockIdx;
+				const auto previous = m_remoteFreeMask.fetch_or(bit, std::memory_order_release);
+				GAIA_ASSERT((previous & bit) == 0 && "Double free or corrupted block state");
+			}
+
+			//! Applies frees queued by non-owning threads.
+			void drain_remote() {
+				const auto mask = m_remoteFreeMask.exchange(0, std::memory_order_acquire);
+				for (uint32_t blockIdx = 0; blockIdx < NBlocks; ++blockIdx) {
+					if ((mask & (uint64_t(1) << blockIdx)) == 0)
+						continue;
+					auto* pBlock = (uint8_t*)m_data + blockIdx * MemoryBlockBytes + MemoryBlockUsableOffset;
+					free_block(pBlock);
+				}
+			}
+
 			//! Returns the number of live blocks.
 			//! \return Number of allocated blocks.
 			GAIA_NODISCARD uint32_t used_blocks_cnt() const {
@@ -19059,7 +19078,7 @@ namespace gaia {
 		//! \tparam T Allocation category used for singleton separation and diagnostics.
 		//! \tparam RequestedBlockSize Requested bytes per block, or zero for the default.
 		template <typename T, uint32_t RequestedBlockSize = 0>
-		using PagedAllocator = core::dyn_singleton<detail::PagedAllocatorImpl<T, RequestedBlockSize>>;
+		using PagedAllocator = detail::arena_singleton<detail::PagedAllocatorImpl<T, RequestedBlockSize>>;
 
 		//! \cond INTERNAL
 		namespace detail {
@@ -19068,29 +19087,28 @@ namespace gaia {
 			class PagedAllocatorImpl {
 				friend ::gaia::mem::PagedAllocator<T, RequestedBlockSize>;
 
-				inline static char s_strPageData[256]{};
-				inline static char s_strMemPage[256]{};
-
 				using Page = MemoryPage<T, RequestedBlockSize>;
 				using PageContainer = MemoryPageContainer<T, RequestedBlockSize>;
 
 				//! Container for pages storing various-sized chunks
 				PageContainer m_pages;
+				detail::ArenaState m_arena;
 				//! When true, destruction has been requested
 				bool m_isDone = false;
+				char m_strPageData[256]{};
+				char m_strMemPage[256]{};
 
 			private:
 				PagedAllocatorImpl() {
-					// PagedAllocatorImpl is only used as a singleton so the constructor is going to be called just once.
-					// Therefore, the strings are only going to be set once.
+					// Each owner-scoped allocator keeps its diagnostic labels private.
 					auto ct_name = meta::type_info::name<T>();
 					const auto ct_name_len = (uint32_t)ct_name.size();
-					GAIA_STRCPY(s_strPageData, 256, "PageData_");
-					memcpy((void*)&s_strPageData[9], (const void*)ct_name.data(), ct_name_len);
-					s_strPageData[9 + ct_name_len] = 0;
-					GAIA_STRCPY(s_strMemPage, 256, "MemPage_");
-					memcpy((void*)&s_strMemPage[8], (const void*)ct_name.data(), ct_name_len);
-					s_strMemPage[8 + ct_name_len] = 0;
+					GAIA_STRCPY(m_strPageData, 256, "PageData_");
+					memcpy((void*)&m_strPageData[9], (const void*)ct_name.data(), ct_name_len);
+					m_strPageData[9 + ct_name_len] = 0;
+					GAIA_STRCPY(m_strMemPage, 256, "MemPage_");
+					memcpy((void*)&m_strMemPage[8], (const void*)ct_name.data(), ct_name_len);
+					m_strMemPage[8 + ct_name_len] = 0;
 				}
 
 				void on_delete() {
@@ -19117,7 +19135,8 @@ namespace gaia {
 
 				//! Allocates memory
 				void* alloc([[maybe_unused]] uint32_t dummy) {
-					const detail::ArenaLock arenaLock;
+					const detail::ArenaLock arenaLock{m_arena};
+					drain_remote_frees();
 					void* pBlock = nullptr;
 
 					// Find first page with available space
@@ -19150,11 +19169,18 @@ namespace gaia {
 
 				//! Releases memory allocated for pointer
 				void free(void* pBlock) {
-					const detail::ArenaLock arenaLock;
 					// Decode the page from the address
 					const auto pageAddr = *(uintptr_t*)((uint8_t*)pBlock - MemoryBlockUsableOffset);
 					GAIA_ASSERT(pageAddr % MemoryBlockAlignment == 0);
 					auto* pPage = (Page*)pageAddr;
+					if (pPage->m_arena != &m_arena) {
+						pPage->free_block_remote(pBlock);
+						return;
+					}
+					const detail::ArenaLock arenaLock{m_arena};
+					if (!arenaLock.owned())
+						return;
+					drain_remote_frees();
 					const bool wasFull = pPage->full();
 
 #if GAIA_ASSERT_ENABLED
@@ -19210,7 +19236,8 @@ namespace gaia {
 
 				//! Flushes unused memory
 				void flush() {
-					const detail::ArenaLock arenaLock;
+					const detail::ArenaLock arenaLock{m_arena};
+					drain_remote_frees();
 					for (auto it = m_pages.pagesFree.begin(); it != m_pages.pagesFree.end();) {
 						auto* pPage = &(*it);
 						++it;
@@ -19257,19 +19284,33 @@ namespace gaia {
 				}
 
 			private:
-				static Page* alloc_page() {
-					const uint32_t size = Page::NBlocks * Page::MemoryBlockBytes;
-					auto* pPageData = mem::AllocHelper::alloc_alig<uint8_t>(&s_strPageData[0], MemoryBlockAlignment, size);
-					auto* pMemoryPage = mem::AllocHelper::alloc<Page>(&s_strMemPage[0]);
-					return new (pMemoryPage) Page(pPageData);
+				void drain_remote_frees() {
+					for (auto it = m_pages.pagesFull.begin(); it != m_pages.pagesFull.end();) {
+						auto* pPage = &(*it);
+						++it;
+						pPage->drain_remote();
+						if (!pPage->full()) {
+							m_pages.pagesFull.unlink(pPage);
+							m_pages.pagesFree.link(pPage);
+						}
+					}
+					for (auto it = m_pages.pagesFree.begin(); it != m_pages.pagesFree.end(); ++it)
+						it->drain_remote();
 				}
 
-				static void free_page(Page* pMemoryPage) {
+				Page* alloc_page() {
+					const uint32_t size = Page::NBlocks * Page::MemoryBlockBytes;
+					auto* pPageData = mem::AllocHelper::alloc_alig<uint8_t>(&m_strPageData[0], MemoryBlockAlignment, size);
+					auto* pMemoryPage = mem::AllocHelper::alloc<Page>(&m_strMemPage[0]);
+					return new (pMemoryPage) Page(pPageData, &m_arena);
+				}
+
+				void free_page(Page* pMemoryPage) {
 					GAIA_ASSERT(pMemoryPage != nullptr);
 
-					mem::AllocHelper::free_alig(&s_strPageData[0], pMemoryPage->m_data);
+					mem::AllocHelper::free_alig(&m_strPageData[0], pMemoryPage->m_data);
 					pMemoryPage->~MemoryPage();
-					mem::AllocHelper::free(&s_strMemPage[0], pMemoryPage);
+					mem::AllocHelper::free(&m_strMemPage[0], pMemoryPage);
 				}
 
 				void done() {
@@ -20336,8 +20377,7 @@ namespace gaia {
 			//! Forward mutable iterator matching the element data layout.
 			using iterator = std::conditional_t<mem::is_soa_layout_v<T>, iterator_soa, iterator_aos>;
 			//! Reverse mutable iterator matching the element data layout.
-			using iterator_reverse =
-					std::conditional_t<mem::is_soa_layout_v<T>, iterator_soa_reverse, iterator_aos_reverse>;
+			using iterator_reverse = std::conditional_t<mem::is_soa_layout_v<T>, iterator_soa_reverse, iterator_aos_reverse>;
 			//! Forward read-only iterator matching the element data layout.
 			using const_iterator = std::conditional_t<mem::is_soa_layout_v<T>, const_iterator_soa, const_iterator_aos>;
 			//! Reverse read-only iterator matching the element data layout.
@@ -20675,14 +20715,12 @@ namespace gaia {
 
 } // namespace gaia
 
-
 #include <cstddef>
 #include <initializer_list>
 #include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -21277,14 +21315,12 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 #include <cstddef>
 #include <initializer_list>
 #include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -22044,13 +22080,11 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 #include <cstddef>
 #include <new>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -22623,7 +22657,6 @@ namespace gaia {
 	} // namespace cnt
 } // namespace gaia
 
-
 GAIA_CLANG_WARNING_PUSH()
 GAIA_GCC_WARNING_PUSH()
 GAIA_CLANG_WARNING_DISABLE("-Wpadded")
@@ -22650,7 +22683,6 @@ namespace gaia {
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace cnt {
@@ -24545,7 +24577,6 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
-
 namespace gaia {
 	namespace cnt {
 		//! \cond INTERNAL
@@ -24785,7 +24816,6 @@ namespace gaia {
 			}
 
 		public:
-
 			constexpr sringbuffer() noexcept = default;
 
 			//! Constructs a ring buffer from an iterator range.
@@ -25069,13 +25099,11 @@ namespace gaia {
 
 } // namespace gaia
 
-
 #include <cstddef>
 #include <cstdint>
 #include <new>
 #include <type_traits>
 #include <utility>
-
 
 #include <functional>
 #include <type_traits>
@@ -25089,7 +25117,7 @@ namespace gaia {
 		struct is_reference_wrapper<std::reference_wrapper<U>>: std::true_type {};
 
 		template <class C, class Pointed, class Object, class... Args>
-		constexpr decltype(auto) invoke_memptr(Pointed C::* member, Object&& object, Args&&... args) {
+		constexpr decltype(auto) invoke_memptr(Pointed C::*member, Object&& object, Args&&... args) {
 			using object_t = std::decay_t<Object>;
 			constexpr bool is_member_function = std::is_function_v<Pointed>;
 			constexpr bool is_wrapped = is_reference_wrapper<object_t>::value;
@@ -25421,7 +25449,6 @@ namespace gaia {
 #include <tuple>
 #include <typeinfo>
 #include <utility>
-
 
 namespace gaia {
 	namespace util {
@@ -26140,7 +26167,6 @@ namespace gaia {
 #include <cstdint>
 #include <cstring>
 
-
 namespace gaia {
 	namespace util {
 		//! Lightweight non-owning string view over a character sequence.
@@ -26788,10 +26814,7 @@ namespace gaia {
 	} // namespace util
 } // namespace gaia
 
-
-
 #include <type_traits>
-
 
 namespace gaia {
 	namespace ser {
@@ -26951,7 +26974,6 @@ namespace gaia {
 
 #include <type_traits>
 #include <utility>
-
 
 namespace gaia {
 	namespace ser {
@@ -27331,7 +27353,6 @@ namespace gaia {
 	#include <cstring>
 	#include <limits>
 	#include <type_traits>
-
 
 namespace gaia {
 	namespace ser {
@@ -28410,8 +28431,6 @@ namespace gaia {
 
 #endif
 
-
-
 #if GAIA_PLATFORM_WINDOWS
 	#include <cstdio>
 	#include <windows.h>
@@ -28455,8 +28474,6 @@ namespace gaia {
 #endif
 #include <atomic>
 #include <thread>
-
-
 
 #if GAIA_PLATFORM_WINDOWS
 	#define GAIA_USE_MT_STD 1
@@ -28607,7 +28624,6 @@ namespace gaia {
 #include <atomic>
 #include <mutex>
 
-
 namespace gaia {
 	namespace mt {
 		namespace detail {
@@ -28741,10 +28757,7 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
-
-
 #include <atomic>
-
 
 #include <cstdint>
 #include <type_traits>
@@ -28785,11 +28798,11 @@ namespace gaia {
 		private:
 			struct JobData {
 				//! Index in entity array
-				JobInternalType id : IdBits;
+				JobInternalType id: IdBits;
 				//! Generation index. Incremented every time an item is deleted
-				JobInternalType gen : GenBits;
+				JobInternalType gen: GenBits;
 				//! Encoded job priority bit.
-				JobInternalType prio : PrioBits;
+				JobInternalType prio: PrioBits;
 			};
 
 			union {
@@ -29454,10 +29467,8 @@ namespace gaia {
 	} // namespace mt
 } // namespace gaia
 
-
 #include <atomic>
 #include <cinttypes>
-
 
 #define GAIA_LOG_JOB_STATES 0
 
@@ -30068,10 +30079,7 @@ namespace gaia {
 	} // namespace mt
 } // namespace gaia
 
-
 #include <atomic>
-
-
 
 #if GAIA_PLATFORM_WINDOWS
 	#include <windows.h>
@@ -31917,14 +31925,12 @@ namespace gaia {
 	} // namespace mt
 } // namespace gaia
 
-
 #include <cinttypes>
 #include <cstdint>
 
 // #include "gaia/cnt/dbitset.h"
 
 #include <cstdarg>
-
 
 namespace gaia {
 	namespace ecs {
@@ -32186,7 +32192,6 @@ namespace gaia {
 
 #include <cstdint>
 
-
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -32252,14 +32257,11 @@ namespace gaia {
 
 #include <cstdint>
 
-
 #include <cstdint>
 #include <type_traits>
 
-
 #include <cstdint>
 #include <type_traits>
-
 
 namespace gaia {
 	namespace ecs {
@@ -32311,15 +32313,16 @@ namespace gaia {
 				//! Component entity index
 				uint32_t id;
 				//! Component size
-				IdentifierData size : MaxComponentSize_Bits;
+				IdentifierData size: MaxComponentSize_Bits;
 				//! Component alignment as log2(alig) + 1, or 0 for no alignment
-				IdentifierData alig : MaxAlignment_Bits;
+				IdentifierData alig: MaxAlignment_Bits;
 				//! Component storage kind. 0 = table, 1 = sparse.
 				IdentifierData storage : 1;
 				//! Component is SoA
-				IdentifierData soa : meta::StructToTupleMaxTypes_Bits;
+				IdentifierData soa: meta::StructToTupleMaxTypes_Bits;
 				//! Unused bits
-				IdentifierData unused : 64 - 32 - MaxComponentSize_Bits - MaxAlignment_Bits - 1 - meta::StructToTupleMaxTypes_Bits;
+				IdentifierData unused : 64 - 32 - MaxComponentSize_Bits - MaxAlignment_Bits - 1 -
+						meta::StructToTupleMaxTypes_Bits;
 			};
 			static_assert(sizeof(InternalData) == sizeof(Identifier));
 
@@ -33557,8 +33560,7 @@ namespace gaia {
 							GAIA_LOG_N(
 									"    ent [%u:%u], %.*s, aid:%u",
 									//
-									entity.id(), entity.gen(), (int)name.size(), name.empty() ? "" : name.data(),
-									edge.second.id);
+									entity.id(), entity.gen(), (int)name.size(), name.empty() ? "" : name.data(), edge.second.id);
 						}
 					}
 				};
@@ -33586,11 +33588,9 @@ namespace gaia {
 #include <type_traits>
 #include <utility>
 
-
 #include <cinttypes>
 #include <cstdint>
 #include <cstring>
-
 
 namespace gaia {
 	namespace ecs {
@@ -33666,7 +33666,7 @@ namespace gaia {
 			ChunkAllocatorPageStats stats[MemoryBlockSizeClasses];
 		};
 
-		using ChunkAllocator = core::dyn_singleton<detail::ChunkAllocatorImpl>;
+		using ChunkAllocator = ::gaia::mem::detail::arena_singleton<detail::ChunkAllocatorImpl>;
 
 		//! \cond INTERNAL
 		namespace detail {
@@ -33675,8 +33675,10 @@ namespace gaia {
 			struct MemoryPageHeader {
 				//! Pointer to data managed by page
 				void* m_data;
+				//! Owner state for the allocation arena that created this page
+				::gaia::mem::detail::ArenaState* m_arena;
 
-				MemoryPageHeader(void* ptr): m_data(ptr) {}
+				MemoryPageHeader(void* ptr, ::gaia::mem::detail::ArenaState* arena): m_data(ptr), m_arena(arena) {}
 			};
 
 			struct MemoryPage: MemoryPageHeader, cnt::fwd_llist_base<MemoryPage> {
@@ -33692,17 +33694,19 @@ namespace gaia {
 
 				//! Implicit list of blocks
 				BlockArray m_blocks;
+				//! Frees issued by non-owning threads, drained by the owner.
+				std::atomic_uint64_t m_remoteFreeMask{0};
 
 				//! Block size type, 0=8K, 1=16K, 2=32K, 3=64K-class blocks
 				uint32_t m_sizeType : 2;
 				//! Number of blocks in the block array
-				uint32_t m_blockCnt : NBlocks_Bits;
+				uint32_t m_blockCnt: NBlocks_Bits;
 				//! Number of used blocks out of NBlocks
-				uint32_t m_usedBlocks : NBlocks_Bits;
+				uint32_t m_usedBlocks: NBlocks_Bits;
 				//! Index of the next block to recycle
-				uint32_t m_nextFreeBlock : NBlocks_Bits;
+				uint32_t m_nextFreeBlock: NBlocks_Bits;
 				//! Number of blocks to recycle
-				uint32_t m_freeBlocks : NBlocks_Bits;
+				uint32_t m_freeBlocks: NBlocks_Bits;
 				//! Free bits to use in the future
 				// uint32_t m_unused : 6;
 
@@ -33710,13 +33714,13 @@ namespace gaia {
 				uint64_t m_usedMask = 0;
 	#endif
 
-				MemoryPage(void* ptr, uint8_t sizeType):
-						MemoryPageHeader(ptr), m_sizeType(sizeType), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0),
+				MemoryPage(void* ptr, uint8_t sizeType, ::gaia::mem::detail::ArenaState* arena):
+						MemoryPageHeader(ptr, arena), m_sizeType(sizeType), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0),
 						m_freeBlocks(0) {
 	#if GAIA_ASSERT_ENABLED
-					static_assert(sizeof(MemoryPage) <= 72);
+					static_assert(sizeof(MemoryPage) <= 96);
 	#else
-					static_assert(sizeof(MemoryPage) <= 64);
+					static_assert(sizeof(MemoryPage) <= 88);
 	#endif
 				}
 
@@ -33826,6 +33830,29 @@ namespace gaia {
 
 					++m_freeBlocks;
 					--m_usedBlocks;
+				}
+
+				//! Queues a free issued by a thread that does not own this page.
+				void free_block_remote(void* pBlock) {
+					const auto* pMemoryBlock = (uint8_t*)pBlock - MemoryBlockUsableOffset;
+					const auto blckAddr = (uintptr_t)pMemoryBlock;
+					const auto dataAddr = (uintptr_t)m_data;
+					const auto blockIdx = (uint32_t)((blckAddr - dataAddr) / mem_block_size(m_sizeType));
+					GAIA_ASSERT(blockIdx < NBlocks);
+					const auto bit = uint64_t(1) << blockIdx;
+					const auto previous = m_remoteFreeMask.fetch_or(bit, std::memory_order_release);
+					GAIA_ASSERT((previous & bit) == 0 && "Double free or corrupted block state");
+				}
+
+				//! Applies frees queued by non-owning threads.
+				void drain_remote() {
+					const auto mask = m_remoteFreeMask.exchange(0, std::memory_order_acquire);
+					for (uint32_t blockIdx = 0; blockIdx < NBlocks; ++blockIdx) {
+						if ((mask & (uint64_t(1) << blockIdx)) == 0)
+							continue;
+						auto* pBlock = (uint8_t*)m_data + blockIdx * mem_block_size(m_sizeType) + MemoryBlockUsableOffset;
+						free_block(pBlock);
+					}
 				}
 
 				GAIA_NODISCARD uint32_t used_blocks_cnt() const {
@@ -33951,6 +33978,7 @@ namespace gaia {
 
 				//! Container for pages storing various-sized chunks
 				MemoryPageContainer m_pages[MemoryBlockSizeClasses];
+				::gaia::mem::detail::ArenaState m_arena;
 
 				//! When true, destruction has been requested
 				bool m_isDone = false;
@@ -33989,7 +34017,8 @@ namespace gaia {
 					if (bytesWanted == 0 || bytesWanted > MaxMemoryBlockSize)
 						return nullptr;
 
-					const ::gaia::mem::detail::ArenaLock arenaLock;
+					const ::gaia::mem::detail::ArenaLock arenaLock{m_arena};
+					drain_remote_frees();
 					const auto sizeType = mem_block_size_type(bytesWanted);
 					auto& container = m_pages[sizeType];
 
@@ -34026,7 +34055,6 @@ namespace gaia {
 					if (pBlock == nullptr)
 						return;
 
-					const ::gaia::mem::detail::ArenaLock arenaLock;
 					// Decode the page from the address
 					const auto& header = *(const MemoryBlockHeader*)((uint8_t*)pBlock - MemoryBlockUsableOffset);
 					const auto pageAddr = header.m_pageAddr;
@@ -34035,6 +34063,14 @@ namespace gaia {
 					GAIA_ASSERT(header.m_requestedBytes > 0);
 	#endif
 					auto* pPage = (MemoryPage*)pageAddr;
+					if (pPage->m_arena != &m_arena) {
+						pPage->free_block_remote(pBlock);
+						return;
+					}
+					const ::gaia::mem::detail::ArenaLock arenaLock{m_arena};
+					if (!arenaLock.owned())
+						return;
+					drain_remote_frees();
 					const auto prevState = state_for(*pPage);
 
 					auto& container = m_pages[pPage->m_sizeType];
@@ -34082,7 +34118,8 @@ namespace gaia {
 				//! Flushes unused memory.
 				//! Keeps a small, size-class-specific empty-page cache warm by default.
 				void flush(bool releaseAll = false) {
-					const ::gaia::mem::detail::ArenaLock arenaLock;
+					const ::gaia::mem::detail::ArenaLock arenaLock{m_arena};
+					drain_remote_frees();
 					uint32_t i = 0;
 					for (auto& page: m_pages)
 						flushPages(page, i++, releaseAll);
@@ -34125,17 +34162,37 @@ namespace gaia {
 				}
 
 			private:
+				void drain_remote_frees() {
+					for (auto& container: m_pages) {
+						for (auto it = container.pagesFull.begin(); it != container.pagesFull.end();) {
+							auto* pPage = &(*it);
+							++it;
+							pPage->drain_remote();
+							if (!pPage->full())
+								move_page(container, pPage, MemoryPageState::Full, state_for(*pPage));
+						}
+						for (auto it = container.pagesPartial.begin(); it != container.pagesPartial.end();) {
+							auto* pPage = &(*it);
+							++it;
+							pPage->drain_remote();
+							move_page(container, pPage, MemoryPageState::Partial, state_for(*pPage));
+						}
+						for (auto it = container.pagesEmpty.begin(); it != container.pagesEmpty.end(); ++it)
+							it->drain_remote();
+					}
+				}
+
 				static constexpr const char* s_strChunkAlloc_Chunk = "Chunk";
 				static constexpr const char* s_strChunkAlloc_MemPage = "MemoryPage";
 
-				static MemoryPage* alloc_page(uint8_t sizeType) {
+				MemoryPage* alloc_page(uint8_t sizeType) {
 					const uint32_t size = mem_block_size(sizeType) * MemoryPage::NBlocks;
 					auto* pPageData = mem::AllocHelper::alloc_alig<uint8_t>(s_strChunkAlloc_Chunk, MemoryBlockAlignment, size);
 					auto* pMemoryPage = mem::AllocHelper::alloc<MemoryPage>(s_strChunkAlloc_MemPage);
-					return new (pMemoryPage) MemoryPage(pPageData, sizeType);
+					return new (pMemoryPage) MemoryPage(pPageData, sizeType, &m_arena);
 				}
 
-				static void free_page(MemoryPage* pMemoryPage) {
+				void free_page(MemoryPage* pMemoryPage) {
 					GAIA_ASSERT(pMemoryPage != nullptr);
 
 					mem::AllocHelper::free_alig(s_strChunkAlloc_Chunk, pMemoryPage->m_data);
@@ -34285,7 +34342,6 @@ namespace gaia {
 
 #include <cstdint>
 
-
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -34354,13 +34410,13 @@ namespace gaia {
 			uint16_t capacity;
 
 			//! Index of the first enabled entity in the chunk
-			uint16_t rowFirstEnabledEntity : MAX_CHUNK_ENTITIES_BITS;
+			uint16_t rowFirstEnabledEntity: MAX_CHUNK_ENTITIES_BITS;
 			//! True if there's any component that requires custom construction
 			uint16_t hasAnyCustomCtor : 1;
 			//! True if there's any component that requires custom destruction
 			uint16_t hasAnyCustomDtor : 1;
 			//! When it hits 0 the chunk is scheduled for deletion
-			uint16_t lifespanCountdown : CHUNK_LIFESPAN_BITS;
+			uint16_t lifespanCountdown: CHUNK_LIFESPAN_BITS;
 			//! True if deleted, false otherwise
 			uint16_t dead : 1;
 			//! Empty space for future use
@@ -34436,9 +34492,7 @@ namespace gaia {
 #include <cstring>
 #include <type_traits>
 
-
 #include <cstdint>
-
 
 namespace gaia {
 	namespace core {
@@ -34558,12 +34612,10 @@ namespace gaia {
 #include <cstring>
 #include <type_traits>
 
-
 #include <cstdint>
 #include <cstring>
 #include <tuple>
 #include <type_traits>
-
 
 namespace gaia {
 	namespace ecs {
@@ -34938,8 +34990,7 @@ namespace gaia {
 				static constexpr DataStorageType storage_type() {
 					constexpr auto storageType = auto_storage_policy_v<U>;
 					if constexpr (storageType == DataStorageType::DontFragment) {
-						static_assert(
-								!mem::is_soa_layout_v<U>, "GAIA_STORAGE(DontFragment) is not compatible with SoA layouts");
+						static_assert(!mem::is_soa_layout_v<U>, "GAIA_STORAGE(DontFragment) is not compatible with SoA layouts");
 						if constexpr (std::is_empty_v<U>)
 							return DataStorageType::Table;
 						else
@@ -35140,9 +35191,9 @@ namespace gaia {
 						Raw tmp{};
 						const auto* pBase = reinterpret_cast<const uint8_t*>(&tmp);
 						static constexpr const char* FieldNames[meta::StructToTupleMaxTypes] = {
-								"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11", "f12", "f13", "f14",
-								"f15", "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23", "f24", "f25", "f26", "f27", "f28", "f29",
-								"f30"};
+								"f0",	 "f1",	"f2",	 "f3",	"f4",	 "f5",	"f6",	 "f7",	"f8",	 "f9",	"f10",
+								"f11", "f12", "f13", "f14", "f15", "f16", "f17", "f18", "f19", "f20", "f21",
+								"f22", "f23", "f24", "f25", "f26", "f27", "f28", "f29", "f30"};
 						uint32_t fieldCount = 0;
 						meta::each_member(tmp, [&](auto&... members) {
 							auto add_field = [&](auto& member) {
@@ -36965,9 +37016,8 @@ namespace gaia {
 				auto logDesc = [](const ComponentCacheItem& item) {
 					const auto symbol = item.symbol_name();
 					GAIA_LOG_N(
-							"    hash:%016" PRIx64 ", size:%3u B, align:%3u B, [%u:%u] %.*s", item.hashLookup.hash,
-							item.comp.size(), item.comp.alig(), item.entity.id(), item.entity.gen(), (int)symbol.size(),
-							symbol.data());
+							"    hash:%016" PRIx64 ", size:%3u B, align:%3u B, [%u:%u] %.*s", item.hashLookup.hash, item.comp.size(),
+							item.comp.alig(), item.entity.id(), item.entity.gen(), (int)symbol.size(), symbol.data());
 				};
 				for (const auto& [entityId, pItem]: m_compByEntityId) {
 					(void)entityId;
@@ -36982,7 +37032,6 @@ namespace gaia {
 
 #include <cstdint>
 #include <type_traits>
-
 
 //! \cond INTERNAL
 namespace gaia {
@@ -39447,7 +39496,6 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -39680,9 +39728,9 @@ namespace gaia {
 				//! If set the archetype is to be deleted
 				uint32_t dead : 1;
 				//! Max lifespan of the archetype
-				uint32_t lifespanCountdownMax : ARCHETYPE_LIFESPAN_BITS;
+				uint32_t lifespanCountdownMax: ARCHETYPE_LIFESPAN_BITS;
 				//! Remaining lifespan of the archetype
-				uint32_t lifespanCountdown : ARCHETYPE_LIFESPAN_BITS;
+				uint32_t lifespanCountdown: ARCHETYPE_LIFESPAN_BITS;
 
 				RuntimeData(): deleteReq(0), dead(0), lifespanCountdownMax(1), lifespanCountdown(0) {}
 			};
@@ -40993,10 +41041,8 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
-
 #include <cstdint>
 #include <cstring>
-
 
 namespace gaia {
 	namespace ecs {
@@ -42127,7 +42173,6 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
 #include <cstdint>
 
 #if GAIA_OBSERVERS_ENABLED
@@ -42152,7 +42197,6 @@ namespace gaia {
 #endif
 
 #include <type_traits>
-
 
 namespace gaia {
 	namespace ecs {
@@ -46574,7 +46618,6 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
 namespace gaia {
 	namespace ecs {
 		//! \cond INTERNAL
@@ -46987,7 +47030,6 @@ namespace gaia {
 #include <cstdint>
 #include <type_traits>
 
-
 #include <cctype>
 #include <cstdarg>
 #include <cstddef>
@@ -46997,9 +47039,7 @@ namespace gaia {
 #include <cstring>
 #include <type_traits>
 
-
 #include <cstdint>
-
 
 namespace gaia {
 	namespace ecs {
@@ -47064,7 +47104,6 @@ namespace gaia {
 } // namespace gaia
 
 #include <cstdint>
-
 
 namespace gaia {
 	namespace ecs {
@@ -47184,7 +47223,6 @@ namespace gaia {
 
 #include <cstdint>
 
-
 namespace gaia {
 	namespace ecs {
 		class Archetype;
@@ -47233,7 +47271,6 @@ namespace gaia {
 } // namespace gaia
 
 #include <cstdint>
-
 
 namespace gaia {
 	namespace ecs {
@@ -47465,20 +47502,14 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
 #include <cinttypes>
-
 
 #include <cstdarg>
 #include <cstdint>
 #include <type_traits>
 
-
-
-
 #include <cstdint>
 #include <cstring>
-
 
 //! \cond INTERNAL
 namespace gaia {
@@ -47575,7 +47606,6 @@ namespace gaia {
 #include <cstdint>
 #include <cstdio>
 #include <type_traits>
-
 
 namespace gaia {
 	namespace ecs {
@@ -53321,17 +53351,15 @@ namespace gaia {
 							entry.compIdx = compIdx;
 						return;
 					}
-					singleArchetypeLookup.push_back(
-							SingleArchetypeLookupItem{
-									keyLookup, ComponentIndexEntry{const_cast<Archetype*>(&archetype), compIdx, matchCount}});
+					singleArchetypeLookup.push_back(SingleArchetypeLookupItem{
+							keyLookup, ComponentIndexEntry{const_cast<Archetype*>(&archetype), compIdx, matchCount}});
 				};
 				auto archetypeIds = archetype.ids_view();
 				const auto cntIds = (uint32_t)archetypeIds.size();
 				GAIA_FOR(cntIds) {
 					const auto entity = archetypeIds[i];
-					singleArchetypeLookup.push_back(
-							SingleArchetypeLookupItem{
-									EntityLookupKey(entity), ComponentIndexEntry{const_cast<Archetype*>(&archetype), (uint16_t)i, 1}});
+					singleArchetypeLookup.push_back(SingleArchetypeLookupItem{
+							EntityLookupKey(entity), ComponentIndexEntry{const_cast<Archetype*>(&archetype), (uint16_t)i, 1}});
 
 					if (!entity.pair())
 						continue;
@@ -53811,8 +53839,8 @@ namespace gaia {
 						compIdx = core::get_index(pArchetype->ids_view(), queryId);
 					}
 
-					cacheData.indices[fieldIdx] = (compIdx != BadIndex && compIdx != ComponentIndexBad &&
-																				 compIdx < pArchetype->ids_view().size())
+					cacheData.indices[fieldIdx] =
+							(compIdx != BadIndex && compIdx != ComponentIndexBad && compIdx < pArchetype->ids_view().size())
 									? (uint8_t)compIdx
 									: (uint8_t)0xFF;
 				}
@@ -55498,9 +55526,7 @@ namespace gaia {
 } // namespace gaia
 //! \endcond
 
-
 #include <cstdint>
-
 
 namespace gaia {
 	namespace ecs {
@@ -62300,7 +62326,7 @@ namespace gaia {
 						return *this;
 
 					const auto idx = query_var_idx(varEntity);
-					m_varBindingsMask &= (uint8_t)~(uint8_t(1) << idx);
+					m_varBindingsMask &= (uint8_t) ~(uint8_t(1) << idx);
 					return *this;
 				}
 				//! Clears all runtime variable bindings.
@@ -63346,7 +63372,6 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
 namespace gaia {
 	namespace ecs {
 		namespace detail {
@@ -63486,7 +63511,6 @@ namespace gaia {
 		} // namespace detail
 	} // namespace ecs
 } // namespace gaia
-
 
 namespace gaia {
 	namespace ecs {
@@ -65462,10 +65486,9 @@ namespace gaia {
 #if GAIA_ASSERT_ENABLED
 				{
 					auto& queryInfo = fetch();
-					GAIA_ASSERT(
-							ChunkIterImpl::allows_term_access(
-									queryInfo.ctx().data, typed_query_arg_meta<typename Container::value_type>(*queryInfo.world()).termId,
-									false));
+					GAIA_ASSERT(ChunkIterImpl::allows_term_access(
+							queryInfo.ctx().data, typed_query_arg_meta<typename Container::value_type>(*queryInfo.world()).termId,
+							false));
 				}
 #endif
 				const auto entCnt = count(constraints);
@@ -65722,7 +65745,6 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 #endif
-
 
 #if GAIA_OBSERVERS_ENABLED
 namespace gaia {
@@ -66672,7 +66694,6 @@ namespace gaia {
 } // namespace gaia
 #endif
 
-
 //! \cond INTERNAL
 namespace gaia {
 	namespace ecs {
@@ -66836,7 +66857,6 @@ namespace gaia {
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-
 
 //! \cond INTERNAL
 namespace gaia {
@@ -67385,7 +67405,6 @@ namespace gaia {
 } // namespace gaia
 //! \endcond
 
-
 #if GAIA_SYSTEMS_ENABLED
 namespace gaia {
 	namespace ecs {
@@ -67506,7 +67525,6 @@ namespace gaia {
 #endif
 
 #include <cstdint>
-
 
 namespace gaia {
 	namespace ecs {
@@ -82284,7 +82302,6 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
 namespace gaia {
 	namespace ecs {
 		// Component API
@@ -82489,7 +82506,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 #if GAIA_OBSERVERS_ENABLED
-#if GAIA_OBSERVERS_ENABLED
+	#if GAIA_OBSERVERS_ENABLED
 namespace gaia {
 	namespace ecs {
 		inline void ObserverRegistry::DiffDispatcher::collect_query_matches(
@@ -83930,12 +83947,10 @@ namespace gaia {
 		}
 	} // namespace ecs
 } // namespace gaia
+	#endif
 #endif
-#endif
-
 
 #include <cinttypes>
-
 
 #if GAIA_OBSERVERS_ENABLED
 namespace gaia {
@@ -84555,9 +84570,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
-
-#if GAIA_OBSERVERS_ENABLED
+	#if GAIA_OBSERVERS_ENABLED
 namespace gaia {
 	namespace ecs {
 		template <typename T>
@@ -84644,10 +84657,10 @@ namespace gaia {
 			const auto runMappedChunk = detail::typed_run_mapped_chunk_ptr<Func>(InputArgs{});
 			const auto invokeInherited = typed_invoke_inherited_ptr<Func>(InputArgs{});
 
-	#if GAIA_ASSERT_ENABLED
+		#if GAIA_ASSERT_ENABLED
 			ctx.query.match_all(queryInfo);
 			GAIA_ASSERT(typed_query_args_match_query(queryInfo, InputArgs{}));
-	#endif
+		#endif
 
 			ctx.on_each_func = [e = m_entity, func, execState, runDirectChunk, runMappedChunk,
 													invokeInherited](Iter& it) mutable {
@@ -84671,12 +84684,11 @@ namespace gaia {
 		}
 	} // namespace ecs
 } // namespace gaia
-#endif
+	#endif
 
 #endif
 
 #include <cinttypes>
-
 
 #if GAIA_SYSTEMS_ENABLED
 namespace gaia {
@@ -85356,9 +85368,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-
-
-#if GAIA_SYSTEMS_ENABLED
+	#if GAIA_SYSTEMS_ENABLED
 namespace gaia {
 	namespace ecs {
 		//! Adds a typed required term to the underlying system query.
@@ -85560,7 +85570,7 @@ namespace gaia {
 		}
 	} // namespace ecs
 } // namespace gaia
-#endif
+	#endif
 #else
 namespace gaia {
 	namespace ecs {
@@ -85957,11 +85967,10 @@ namespace gaia {
 
 #if GAIA_JSON_ENABLED
 
-#if GAIA_JSON_ENABLED
+	#if GAIA_JSON_ENABLED
 
-	#include <cstdio>
-	#include <cstring>
-
+		#include <cstdio>
+		#include <cstring>
 
 namespace gaia {
 	namespace ecs {
@@ -88011,12 +88020,12 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-#endif
+	#endif
 
-#if GAIA_JSON_ENABLED
+	#if GAIA_JSON_ENABLED
 
-	#include <cstdint>
-	#include <cstring>
+		#include <cstdint>
+		#include <cstring>
 
 namespace gaia {
 	namespace ecs {
@@ -88255,12 +88264,12 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-#endif
+	#endif
 
-#if GAIA_JSON_ENABLED
+	#if GAIA_JSON_ENABLED
 
-	#include <cstdio>
-	#include <cstring>
+		#include <cstdio>
+		#include <cstring>
 
 namespace gaia {
 	namespace ecs {
@@ -88668,7 +88677,7 @@ namespace gaia {
 	} // namespace ecs
 } // namespace gaia
 
-#endif
+	#endif
 #endif
 
 #if GAIA_SYSTEMS_ENABLED
@@ -91646,9 +91655,9 @@ namespace gaia {
 								m_temp2real[op.target.id()] = m_world.copy(resolve(op.other));
 								break;
 							case OpType::INSTANTIATE_ENTITY:
-								m_temp2real[op.target.id()] = op.pairTarget == EntityBad ?
-										m_world.instantiate(resolve(op.other)) :
-										m_world.instantiate(resolve(op.other), resolve(op.pairTarget));
+								m_temp2real[op.target.id()] = op.pairTarget == EntityBad
+																									? m_world.instantiate(resolve(op.other))
+																									: m_world.instantiate(resolve(op.other), resolve(op.pairTarget));
 								break;
 							case OpType::DEL_ENTITY:
 								m_world.del(resolve(op.target));
@@ -91811,7 +91820,8 @@ namespace gaia {
 								continue;
 							}
 
-							if GAIA_UNLIKELY (m_ops[p].other != m_ops[q - 1].other &&
+							if GAIA_UNLIKELY (
+									m_ops[p].other != m_ops[q - 1].other &&
 									(m_ops[p].type != OpType::SET_COMPONENT || m_ops[q - 1].type != OpType::SET_COMPONENT) &&
 									replay_batch(p, q, tgtReal) && p == q) {
 								if (hasDelEntity)
