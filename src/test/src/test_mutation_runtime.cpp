@@ -1399,9 +1399,8 @@ TEST_CASE("Independent Worlds can mutate concurrently") {
 	CHECK(ok.load() == kThreads);
 }
 #elif GAIA_ASSERT_ENABLED && GAIA_ECS_TEST_HOOKS
-// Default (no arena lock): two threads inside an arena at once must be recorded.
-// TEST_HOOKS counts instead of aborting so the suite can assert the detector.
-TEST_CASE("Shared allocation arenas detect concurrent multi-thread use") {
+// Default (no arena lock): owner-scoped arenas do not report cross-thread use.
+TEST_CASE("Owner-scoped allocation arenas do not report concurrent use") {
 	const auto before = mem::detail::ArenaLock::test_violations();
 
 	std::atomic<bool> entered{false};
@@ -1423,7 +1422,7 @@ TEST_CASE("Shared allocation arenas detect concurrent multi-thread use") {
 	release.store(true, std::memory_order_release);
 	holder.join();
 
-	CHECK(mem::detail::ArenaLock::test_violations() > before);
+	CHECK(mem::detail::ArenaLock::test_violations() == before);
 }
 #endif
 

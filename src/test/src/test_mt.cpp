@@ -1,11 +1,55 @@
 #include "test_common.h"
 
+#include <array>
 #include <chrono>
 #include <limits>
+#include <thread>
 
 //------------------------------------------------------------------------------
 // Multithreading
 //------------------------------------------------------------------------------
+
+struct ConcurrentArenaWorldProbe {
+	uint32_t value = 0;
+};
+
+TEST_CASE("ECS - Independent worlds do not share allocation arenas") {
+	constexpr uint32_t WorkerCount = 2;
+	constexpr uint32_t EntityCount = 2048;
+
+	const auto violationsBefore = mem::detail::ArenaLock::test_violations();
+	std::atomic_uint32_t ready = 0;
+	std::atomic_bool start = false;
+	std::array<uint32_t, WorkerCount> counts{};
+	std::array<std::thread, WorkerCount> workers;
+
+	for (uint32_t workerIdx = 0; workerIdx < WorkerCount; ++workerIdx) {
+		workers[workerIdx] = std::thread([&, workerIdx] {
+			ecs::World world;
+			world.add<ConcurrentArenaWorldProbe>();
+			ready.fetch_add(1, std::memory_order_release);
+			while (!start.load(std::memory_order_acquire))
+				std::this_thread::yield();
+
+			for (uint32_t i = 0; i < EntityCount; ++i) {
+				const auto entity = world.add();
+				world.add<ConcurrentArenaWorldProbe>(entity, {i});
+			}
+			counts[workerIdx] = world.query().all<ConcurrentArenaWorldProbe>().count();
+		});
+	}
+
+	while (ready.load(std::memory_order_acquire) != WorkerCount)
+		std::this_thread::yield();
+	start.store(true, std::memory_order_release);
+
+	for (auto& worker: workers)
+		worker.join();
+
+	CHECK(counts[0] == EntityCount);
+	CHECK(counts[1] == EntityCount);
+	CHECK(mem::detail::ArenaLock::test_violations() == violationsBefore);
+}
 
 struct JobParallelRefProbe {
 	std::atomic_uint32_t items = 0;

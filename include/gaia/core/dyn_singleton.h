@@ -18,13 +18,11 @@ namespace gaia {
 		//! destructor is called we tell the internal object it should destroy itself. This way
 		//! there are no memory leaks or access-after-freed issues on app exit reported.
 		//!
-		//! \warning The instance is process-wide, not thread-local and not per-World. All callers
-		//!          on all threads share the same object. Allocation arenas built on dyn_singleton
-		//!          (SmallBlockAllocator, ChunkAllocator, PagedAllocator) are unsynchronized unless
-		//!          GAIA_ALLOC_ARENA_LOCK is 1, in which case alloc/free/flush take a process-wide
-		//!          spinlock so independent Worlds may mutate concurrently. The lock does not make
-		//!          structural mutation of one World thread-safe. When the lock is off, assert builds abort if two
-		//!          threads enter an arena at once.
+		//! \warning The instance is thread-local, not process-wide. Each thread owns its own object,
+		//!          so allocation arenas built on dyn_singleton (SmallBlockAllocator, ChunkAllocator,
+		//!          PagedAllocator) can be used by independent Worlds concurrently without a process-wide
+		//!          lock. This does not make structural mutation of one World thread-safe; a World and
+		//!          its allocations must remain on the owning thread.
 		template <typename T>
 		class dyn_singleton final {
 			T* m_obj = new T();
@@ -32,10 +30,10 @@ namespace gaia {
 			dyn_singleton() = default;
 
 		public:
-			//! Returns the process-wide singleton object.
+			//! Returns the calling thread's singleton object.
 			//! \return Reference to the singleton instance.
 			static T& get() noexcept {
-				static dyn_singleton<T> singleton;
+				thread_local dyn_singleton<T> singleton;
 				return *singleton.m_obj;
 			}
 
