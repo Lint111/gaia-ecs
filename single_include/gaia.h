@@ -43326,7 +43326,9 @@ namespace gaia {
 				uint8_t changedCnt = 0;
 				//! Array of filtered components
 				QueryEntityArray changed;
-				//! Query term index for each changed-filter component after query canonicalization.
+				//! Declared query field index (QueryTerm::fieldIndex) of each changed-filter component. Direct filter paths
+				//! use it to index the per-archetype component mapping, which is keyed by field index, not by the
+				//! canonical (sorted) term position.
 				cnt::sarray<uint8_t, MAX_ITEMS_IN_QUERY> changedFields;
 				//! Explicit grouping invalidation dependencies for custom group_by callbacks.
 				QueryEntityArray groupDeps;
@@ -44233,7 +44235,7 @@ namespace gaia {
 					++compIdx;
 
 				GAIA_ASSERT(compIdx < idsCnt);
-				ctxData.changedFields[i] = compIdx < idsCnt ? (uint8_t)compIdx : (uint8_t)0xFF;
+				ctxData.changedFields[i] = compIdx < idsCnt ? (uint8_t)ctxData.terms[compIdx].fieldIndex : (uint8_t)0xFF;
 			}
 		}
 
@@ -57996,7 +57998,7 @@ namespace gaia {
 				//! \param chunk Chunk being evaluated.
 				//! \param queryInfo Query metadata containing changed-filter terms.
 				//! \param changedWorldVersion World version captured by the previous query pass.
-				//! \param compIndices Per-archetype mapping from query term index to chunk component column.
+				//! \param compIndices Per-archetype mapping from query field index to chunk component column.
 				//! \return True when a tracked component or the chunk's entity order changed since the supplied version.
 				GAIA_NODISCARD static bool match_filters(
 						const Chunk& chunk, const QueryInfo& queryInfo, uint32_t changedWorldVersion,

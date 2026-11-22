@@ -1915,7 +1915,7 @@ namespace gaia {
 				//! \param chunk Chunk being evaluated.
 				//! \param queryInfo Query metadata containing changed-filter terms.
 				//! \param changedWorldVersion World version captured by the previous query pass.
-				//! \param compIndices Per-archetype mapping from query term index to chunk component column.
+				//! \param compIndices Per-archetype mapping from query field index to chunk component column.
 				//! \return True when a tracked component or the chunk's entity order changed since the supplied version.
 				GAIA_NODISCARD static bool match_filters(
 						const Chunk& chunk, const QueryInfo& queryInfo, uint32_t changedWorldVersion,

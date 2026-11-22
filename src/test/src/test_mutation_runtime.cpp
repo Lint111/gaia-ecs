@@ -4442,6 +4442,81 @@ TEST_CASE("Query Filter - changed order cache keys") {
 	CHECK(qAB.gen() == qBA.gen());
 }
 
+namespace {
+	struct ChangedTermA {
+		float value;
+	};
+	struct ChangedTermB {
+		float value;
+	};
+	struct ChangedTermC {
+		float value;
+	};
+} // namespace
+
+//! Runs a cached changed<ChangedTermC>() query whose terms are declared as T0, T1, T2 and checks that every
+//! external write to ChangedTermC makes all rows visible again. The declared term order differs from the
+//! canonical (sorted) term order, so this covers the mapping from the changed filter to the query field index.
+//! \tparam T0 First declared term.
+//! \tparam T1 Second declared term.
+//! \tparam T2 Third declared term.
+//! \param execType Query execution type used for the changed query.
+template <typename T0, typename T1, typename T2>
+void Test_Query_Filter_Changed_Term_Position(ecs::QueryExecType execType) {
+	TestWorld twld;
+	(void)wld.add<ChangedTermA>();
+	(void)wld.add<ChangedTermB>();
+	(void)wld.add<ChangedTermC>();
+
+	constexpr uint32_t N = 100;
+	GAIA_FOR(N) {
+		const auto e = wld.add();
+		wld.add<ChangedTermA>(e, {1.0f});
+		wld.add<ChangedTermB>(e, {2.0f});
+		wld.add<ChangedTermC>(e, {(float)i});
+	}
+
+	ecs::Query q = wld.query().template all<T0>().template all<T1>().template all<T2>().template changed<ChangedTermC>();
+	ecs::Query qWriteC = wld.query().all<ChangedTermC&>();
+
+	auto visited = [&]() {
+		std::atomic_uint32_t rows = 0;
+		q.each(
+				[&](ecs::Iter& it) {
+					rows.fetch_add(it.size(), std::memory_order_relaxed);
+				},
+				execType);
+		return rows.load();
+	};
+
+	// The first run sees every row as changed.
+	CHECK(visited() == N);
+
+	for (uint32_t tick = 0; tick < 4; ++tick) {
+		qWriteC.each([](ecs::Iter& it) {
+			auto view = it.view_mut<ChangedTermC>(0);
+			GAIA_EACH(it) view[i].value += 1.0f;
+		});
+		CHECK(visited() == N);
+	}
+}
+
+TEST_CASE("Query Filter - changed term position does not depend on declared term order") {
+	const ecs::QueryExecType execTypes[] = {ecs::QueryExecType::Default, ecs::QueryExecType::Parallel};
+	for (const auto execType: execTypes) {
+		// Read access to the changed component at declared positions 0, 1 and 2.
+		Test_Query_Filter_Changed_Term_Position<const ChangedTermC, const ChangedTermA, ChangedTermB&>(execType);
+		Test_Query_Filter_Changed_Term_Position<const ChangedTermA, const ChangedTermC, ChangedTermB&>(execType);
+		Test_Query_Filter_Changed_Term_Position<const ChangedTermA, ChangedTermB&, const ChangedTermC>(execType);
+		Test_Query_Filter_Changed_Term_Position<ChangedTermB&, const ChangedTermC, const ChangedTermA>(execType);
+		// Write access to the changed component at declared positions 0, 1 and 2.
+		Test_Query_Filter_Changed_Term_Position<ChangedTermC&, const ChangedTermA, const ChangedTermB>(execType);
+		Test_Query_Filter_Changed_Term_Position<const ChangedTermA, ChangedTermC&, const ChangedTermB>(execType);
+		Test_Query_Filter_Changed_Term_Position<const ChangedTermA, const ChangedTermB, ChangedTermC&>(execType);
+		Test_Query_Filter_Changed_Term_Position<const ChangedTermB, ChangedTermC&, const ChangedTermA>(execType);
+	}
+}
+
 TEST_CASE("Query Filter - cached changed queries with instance-local reporting state") {
 	TestWorld twld;
 	struct Marker {};

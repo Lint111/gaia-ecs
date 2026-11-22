@@ -1145,7 +1145,9 @@ namespace gaia {
 				uint8_t changedCnt = 0;
 				//! Array of filtered components
 				QueryEntityArray changed;
-				//! Query term index for each changed-filter component after query canonicalization.
+				//! Declared query field index (QueryTerm::fieldIndex) of each changed-filter component. Direct filter paths
+				//! use it to index the per-archetype component mapping, which is keyed by field index, not by the
+				//! canonical (sorted) term position.
 				cnt::sarray<uint8_t, MAX_ITEMS_IN_QUERY> changedFields;
 				//! Explicit grouping invalidation dependencies for custom group_by callbacks.
 				QueryEntityArray groupDeps;
@@ -2052,7 +2054,7 @@ namespace gaia {
 					++compIdx;
 
 				GAIA_ASSERT(compIdx < idsCnt);
-				ctxData.changedFields[i] = compIdx < idsCnt ? (uint8_t)compIdx : (uint8_t)0xFF;
+				ctxData.changedFields[i] = compIdx < idsCnt ? (uint8_t)ctxData.terms[compIdx].fieldIndex : (uint8_t)0xFF;
 			}
 		}
 
