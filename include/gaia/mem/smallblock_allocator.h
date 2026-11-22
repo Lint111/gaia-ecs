@@ -255,7 +255,7 @@ namespace gaia {
 				const auto blockIdx = (uint32_t)((blckAddr - dataAddr) / block_stride());
 				GAIA_ASSERT(blockIdx < NBlocks);
 				const auto bit = uint64_t(1) << blockIdx;
-				const auto previous = m_remoteFreeMask.fetch_or(bit, std::memory_order_release);
+				[[maybe_unused]] const auto previous = m_remoteFreeMask.fetch_or(bit, std::memory_order_release);
 				GAIA_ASSERT((previous & bit) == 0 && "Double free or corrupted block state");
 			}
 
