@@ -31875,6 +31875,13 @@ namespace gaia {
 
 				m_jobManager.executing(jobData, ctx->workerIdx);
 
+				//! Store-load barrier for the handshake with wait(). wait() publishes its bit in m_blockedInWorkUntil
+				//! and then re-reads the job state; this thread publishes the job state above and then reads
+				//! m_blockedInWorkUntil. Without a full fence the state store may still be buffered when the load
+				//! below executes (release/acquire does not order a store before a later load, and x86 store buffers
+				//! do exactly that). Both sides then read stale values: wait() sleeps on the old state and this thread
+				//! skips the wake. Nothing wakes the waiter afterwards because the waited job never starts again.
+				std::atomic_thread_fence(std::memory_order_seq_cst);
 				if (m_blockedInWorkUntil.load() != 0) {
 					const auto blockedCnt = m_blockedInWorkUntil.exchange(0);
 					if (blockedCnt != 0)

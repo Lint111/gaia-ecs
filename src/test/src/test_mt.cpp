@@ -15,6 +15,9 @@ struct ConcurrentArenaWorldProbe {
 
 struct CrossThreadPagedProbe {};
 
+//! Iterations of the lost-wakeup regression test (see "Multithreading - wait on a parallel sync job ...").
+static constexpr uint32_t LostWakeupIters = 200000;
+
 TEST_CASE("ECS - Independent worlds do not share allocation arenas") {
 	constexpr uint32_t WorkerCount = 2;
 	constexpr uint32_t EntityCount = 2048;
@@ -2108,6 +2111,76 @@ TEST_CASE("Multithreading - CompleteMany") {
 
 		work();
 	}
+}
+
+TEST_CASE("Multithreading - wait on a parallel sync job never misses the start of that job") {
+	// Regression test for a lost wakeup in ThreadPool::wait(). It mirrors the default ECS parallel query path
+	// (ecs/sched.h add_par_def/sched_par_def/sched_wait_def/sched_del_def): a handful of tiny ManualDelete jobs,
+	// one func-less sync job depending on them, submit, wait on the sync job, delete. The waiter parks on
+	// m_blockedInWorkUntil and is woken only when some job starts executing. The worker that starts the sync job
+	// stored its new state and then read m_blockedInWorkUntil without a store-load barrier, so both sides could
+	// read stale values and the waiter slept forever with the sync job already Done.
+	// The window is a few nanoseconds; the iteration count gives the base revision a hang well inside the run on a
+	// 32-thread host. A hang is reported by the watchdog and aborts the test binary.
+	auto& tp = mt::ThreadPool::get();
+	const auto threads = tp.hw_thread_cnt();
+	tp.set_max_workers(threads, threads);
+
+	constexpr uint32_t Iters = LostWakeupIters;
+	constexpr uint32_t MaxJobs = 64;
+
+	std::atomic_uint32_t done = 0;
+	std::atomic_bool finished = false;
+	std::thread watchdog([&]() {
+		uint32_t last = 0;
+		auto lastChange = std::chrono::steady_clock::now();
+		while (!finished.load(std::memory_order_acquire)) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			const auto cur = done.load(std::memory_order_relaxed);
+			const auto now = std::chrono::steady_clock::now();
+			if (cur != last) {
+				last = cur;
+				lastChange = now;
+				continue;
+			}
+			if (now - lastChange > std::chrono::seconds(10)) {
+				std::fprintf(stderr, "ThreadPool::wait() did not return for 10 s at iteration %u (lost wakeup)\n", cur);
+				std::fflush(stderr);
+				std::abort();
+			}
+		}
+	});
+
+	std::atomic_uint32_t executed = 0;
+	uint32_t expected = 0;
+	uint32_t rng = 12345;
+	mt::JobHandle handles[MaxJobs + 1];
+	GAIA_FOR(Iters) {
+		rng = rng * 1664525u + 1013904223u;
+		const uint32_t jobs = 1 + ((rng >> 8) % MaxJobs);
+		GAIA_FOR_(jobs, j) {
+			mt::Job job;
+			job.flags = mt::JobCreationFlags::ManualDelete;
+			job.func = [&executed]() {
+				executed.fetch_add(1, std::memory_order_relaxed);
+			};
+			handles[j] = tp.add(GAIA_MOV(job));
+		}
+		mt::Job syncJob;
+		syncJob.flags = mt::JobCreationFlags::ManualDelete;
+		handles[jobs] = tp.add(GAIA_MOV(syncJob));
+		tp.dep(std::span(handles, jobs), handles[jobs]);
+		tp.submit(std::span(handles, jobs + 1));
+		tp.wait(handles[jobs]);
+		GAIA_FOR_(jobs + 1, j) tp.del(handles[j]);
+		expected += jobs;
+		done.fetch_add(1, std::memory_order_relaxed);
+	}
+
+	finished.store(true, std::memory_order_release);
+	watchdog.join();
+	CHECK(done.load() == Iters);
+	CHECK(executed.load() == expected);
 }
 
 TEST_CASE("Multithreading - Reset reusable handles") {
