@@ -31749,42 +31749,35 @@ namespace gaia {
 				return (jobData.flags & JobCreationFlags::Background) != 0U;
 			}
 
-			uint32_t signal_edges(JobContainer& jobData, JobHandle* pReadyHandles) {
-				const auto max = jobData.edges.depCnt;
-
-				// Nothing to do if there are no dependencies
-				if (max == 0)
-					return 0;
-
-				// One dependency
-				if (max == 1) {
-					auto depHandle = jobData.edges.dep;
-#if GAIA_LOG_JOB_STATES
-					GAIA_LOG_N("SIGNAL %u.%u -> %u.%u", jobData.idx, jobData.gen, depHandle.id(), depHandle.gen());
-#endif
-
-					// See the conditions can't be satisfied for us to submit the job we skip
-					auto& depData = m_jobManager.data(depHandle);
-					if (!JobManager::signal_edge(depData))
-						return 0;
-
-					pReadyHandles[0] = depHandle;
-					return 1;
+			//! Copies the outgoing dependency edges of a job.
+			//! \param jobData Job whose edges are copied.
+			//! \param pDepHandles Output array with room for jobData.edges.depCnt handles.
+			static void copy_edges(const JobContainer& jobData, JobHandle* pDepHandles) {
+				const auto cnt = jobData.edges.depCnt;
+				if (cnt == 1) {
+					pDepHandles[0] = jobData.edges.dep;
+					return;
 				}
 
-				// Multiple dependencies. The array has to be set
 				GAIA_ASSERT(jobData.edges.pDeps != nullptr);
+				GAIA_FOR(cnt) pDepHandles[i] = jobData.edges.pDeps[i];
+			}
 
+			//! Signals one finished prerequisite to each dependent and compacts the dependents that became ready.
+			//! \param depHandles Dependents of the finished job. Ready handles are written back to its front.
+			//! \return Number of dependents that became ready.
+			uint32_t signal_edges(std::span<JobHandle> depHandles) {
 				uint32_t cnt = 0;
-				GAIA_FOR(max) {
-					auto depHandle = jobData.edges.pDeps[i];
-
+				for (auto depHandle: depHandles) {
+#if GAIA_LOG_JOB_STATES
+					GAIA_LOG_N("SIGNAL -> %u.%u", depHandle.id(), depHandle.gen());
+#endif
 					// See if all conditions were satisfied for us to submit the job
 					auto& depData = m_jobManager.data(depHandle);
 					if (!JobManager::signal_edge(depData))
 						continue;
 
-					pReadyHandles[cnt++] = depHandle;
+					depHandles[cnt++] = depHandle;
 				}
 
 				return cnt;
@@ -31896,15 +31889,21 @@ namespace gaia {
 				if (jobData.edges.depCnt == 0) {
 					JobManager::finalize(jobData);
 				} else {
-					// Resolve outgoing edges before publishing completion so the job can be reused safely.
-					auto* pReadyHandles = (JobHandle*)alloca(sizeof(JobHandle) * jobData.edges.depCnt);
-					const auto readyHandlesCnt = signal_edges(jobData, pReadyHandles);
+					//! Publish completion before signalling any dependent. A dependent becomes ready on the last signal
+					//! from any of its prerequisites, and whoever waits on it may then delete or reuse every
+					//! prerequisite (the default ECS scheduler deletes all handles right after waiting on its sync
+					//! job). Signalling first let another prerequisite's worker complete the dependent while this job
+					//! was still Executing, so the waiter released a job this thread was still finishing. The edges are
+					//! copied first because this thread must not touch the job once it is Done.
+					const auto depCnt = jobData.edges.depCnt;
+					auto* pDepHandles = (JobHandle*)alloca(sizeof(JobHandle) * depCnt);
+					copy_edges(jobData, pDepHandles);
 					if (!manualDelete)
 						JobManager::free_edges(jobData);
 					JobManager::finalize(jobData);
 
-					// Dependents can only start after the prerequisite has published its final state.
-					process(std::span(pReadyHandles, readyHandlesCnt), ctx);
+					const auto readyHandlesCnt = signal_edges(std::span(pDepHandles, depCnt));
+					process(std::span(pDepHandles, readyHandlesCnt), ctx);
 				}
 
 				// Signal we finished
