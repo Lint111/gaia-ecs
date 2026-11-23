@@ -30354,6 +30354,10 @@ namespace gaia {
 
 			//! Futex counter
 			std::atomic_uint32_t m_blockedInWorkUntil;
+			//! Number of threads without a worker context (see caller_thread()) blocked in wait().
+			std::atomic_uint32_t m_externalWaiters{};
+			//! Bumped after a job publishes its Done state while external waiters exist. They sleep on it.
+			std::atomic_uint32_t m_externalWaitEpoch{};
 
 			//! Manager for internal jobs
 			JobManager m_jobManager;
@@ -30560,7 +30564,7 @@ namespace gaia {
 			//! \param jobSecond The job that will run after \a jobFirst.
 			//! \warning This must be called before any of the listed jobs are scheduled.
 			void dep(JobHandle jobFirst, JobHandle jobSecond) {
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 
 				m_jobManager.dep(std::span(&jobFirst, 1), jobSecond);
 			}
@@ -30571,7 +30575,7 @@ namespace gaia {
 			//! \param jobSecond The job that will run after \a jobsFirst.
 			//! \warning This must must to be called before any of the listed jobs are scheduled.
 			void dep(std::span<JobHandle> jobsFirst, JobHandle jobSecond) {
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 
 				m_jobManager.dep(jobsFirst, jobSecond);
 			}
@@ -30611,7 +30615,7 @@ namespace gaia {
 			//! \return Job handle of the scheduled job.
 			template <typename TJob>
 			JobHandle add(TJob job) {
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 
 				job.priority = final_prio(job);
 
@@ -30624,7 +30628,7 @@ namespace gaia {
 
 		private:
 			void add_n(JobPriority prio, std::span<JobHandle> jobHandles) {
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 				GAIA_ASSERT(!jobHandles.empty());
 
 				auto& mtx = GAIA_PROF_EXTRACT_MUTEX(m_jobAllocMtx);
@@ -30847,7 +30851,7 @@ namespace gaia {
 			//! \warning Dependencies can't be modified for this job.
 			//! \return Job handle of the scheduled batch of jobs.
 			JobHandle sched_par(JobParallel job, uint32_t itemsToProcess, uint32_t groupSize) {
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 
 				// Empty data set are considered wrong inputs
 				GAIA_ASSERT(itemsToProcess != 0);
@@ -30954,7 +30958,7 @@ namespace gaia {
 			//! \warning The pointed-to context must remain alive until the returned handle completes.
 			//! \return Job handle of the scheduled batch of jobs.
 			JobHandle sched_par(JobParallelRef job, uint32_t itemsToProcess, uint32_t groupSize) {
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 				GAIA_ASSERT(job.pCtx != nullptr);
 				GAIA_ASSERT(job.invoke != nullptr);
 
@@ -31038,12 +31042,14 @@ namespace gaia {
 			//! The calling thread participates in frame job processing until \a jobHandle is done.
 			//! For background jobs, the calling thread only runs background work when no
 			//! background workers are configured.
+			//! A thread outside the pool (no worker context, e.g. a thread of another task scheduler) does not
+			//! process jobs; it sleeps until the job is done (see wait_external()).
 			//! \param jobHandle Job handle to wait for.
-			//! \warning Must be called from the effective main thread.
+			//! \warning Must be called from the effective main thread or from a thread outside the pool.
 			void wait(JobHandle jobHandle) {
 				GAIA_PROF_SCOPE(tp::wait);
 
-				GAIA_ASSERT(main_thread());
+				GAIA_ASSERT(caller_thread());
 
 				// Skip waiting for unset job handles.
 				if (jobHandle == (JobHandle)JobNull_t{})
@@ -31051,6 +31057,10 @@ namespace gaia {
 
 				auto* ctx = detail::tl_workerCtx;
 				auto& jobData = m_jobManager.data(jobHandle);
+				if (ctx == nullptr) {
+					wait_external(jobData);
+					return;
+				}
 				const bool waitBackground = is_background(jobData);
 				auto state = jobData.state.load(std::memory_order_acquire);
 
@@ -31510,6 +31520,43 @@ namespace gaia {
 				return std::this_thread::get_id() == m_mainThreadId;
 			}
 
+			//! Threads allowed to create, link, submit and wait for jobs: the effective main thread and threads
+			//! outside the pool (no worker context). Pool workers may not block on other jobs.
+			GAIA_NODISCARD bool caller_thread() const {
+				return main_thread() || detail::tl_workerCtx == nullptr;
+			}
+
+			//! Wait path for a thread without a worker context. Such a thread cannot run jobs (run() records the
+			//! executing worker and signals its event), so it sleeps on m_externalWaitEpoch until \a jobData is
+			//! done. Handshake with publish_done(): the waiter registers in m_externalWaiters and reads the epoch
+			//! before it reads the job state; publish_done() stores Done, issues a full fence and then reads
+			//! m_externalWaiters. Either the waiter reads Done, or publish_done() sees the waiter and bumps the
+			//! epoch after Done, so Futex::wait() returns at once or is woken.
+			//! \param jobData Job to wait for.
+			void wait_external(const JobContainer& jobData) {
+				m_externalWaiters.fetch_add(1);
+				while (true) {
+					const auto epoch = m_externalWaitEpoch.load();
+					if ((jobData.state.load() & JobState::STATE_BITS_MASK) >= JobState::Done)
+						break;
+					Futex::wait(&m_externalWaitEpoch, epoch, detail::WaitMaskAny);
+				}
+				m_externalWaiters.fetch_sub(1);
+			}
+
+			//! Publishes that \a jobData finished and wakes threads blocked in wait_external().
+			//! \param jobData Job that finished.
+			void publish_done(JobContainer& jobData) {
+				JobManager::finalize(jobData);
+
+				//! Store-load barrier for the handshake with wait_external(), see there.
+				std::atomic_thread_fence(std::memory_order_seq_cst);
+				if (m_externalWaiters.load(std::memory_order_relaxed) == 0)
+					return;
+				m_externalWaitEpoch.fetch_add(1);
+				Futex::wake(&m_externalWaitEpoch, detail::WaitMaskAll);
+			}
+
 			//! Runs one main-thread work-drain pass.
 			//! Pops ready jobs from the queues and executes them until no more work is immediately available.
 			void main_thread_tick() {
@@ -31599,7 +31646,7 @@ namespace gaia {
 			}
 
 			//! Checks whether \a ctx is allowed to execute \a jobData inline.
-			//! \param ctx Calling worker context. Null when the submission comes from outside worker execution.
+			//! \param ctx Calling worker context. Never null: threads without one do not run jobs.
 			//! \param jobData Job being considered.
 			//! \return True when inline execution is allowed for forward progress.
 			GAIA_NODISCARD bool can_run_inline(const ThreadCtx* ctx, const JobContainer& jobData) const {
@@ -31608,7 +31655,8 @@ namespace gaia {
 					return (ctx != nullptr && ctx->background) || m_backgroundWorkersCnt == 0;
 
 				// The main thread is allowed to help with both priority classes.
-				if (ctx == nullptr || ctx->workerIdx == 0)
+				GAIA_ASSERT(ctx != nullptr);
+				if (ctx->workerIdx == 0)
 					return true;
 
 				// Matching worker classes may execute their own overflow inline.
@@ -31623,12 +31671,10 @@ namespace gaia {
 			//! Helps the scheduler make progress when a priority queue is temporarily full.
 			//! \param ctx Calling worker context.
 			//! \param jobData Job whose target queue is saturated.
-			void wait_for_queue_space(ThreadCtx& ctx, const JobContainer& jobData) {
-				const bool background = is_background(jobData);
-
-				// Wake one worker from the target class in case all of them are asleep while
-				// the producer is waiting for queue space to become available.
-				if (background) {
+			//! Releases one worker of the kind that runs \a jobData.
+			//! \param jobData Job whose queue needs draining.
+			void wake_workers_for(const JobContainer& jobData) {
+				if (is_background(jobData)) {
 					if (m_backgroundWorkersCnt != 0)
 						m_semBackground.release(1);
 				} else {
@@ -31636,6 +31682,12 @@ namespace gaia {
 					if (m_workerThreadsCnt[prioIdx] != 0)
 						m_sem[prioIdx].release(1);
 				}
+			}
+
+			void wait_for_queue_space(ThreadCtx& ctx, const JobContainer& jobData) {
+				// Wake one worker from the target class in case all of them are asleep while
+				// the producer is waiting for queue space to become available.
+				wake_workers_for(jobData);
 
 				// Keep the current worker productive without violating the priority boundary.
 				JobHandle otherJobHandle;
@@ -31785,7 +31837,7 @@ namespace gaia {
 
 			//! Moves ready jobs into execution queues or runs them inline when queue capacity is exhausted.
 			//! \param jobHandles Ready job handles to process.
-			//! \param ctx Calling worker context. Null when the submission comes from outside worker execution.
+			//! \param ctx Calling worker context. Null for a thread outside the pool, which only queues jobs.
 			void process(std::span<JobHandle> jobHandles, ThreadCtx* ctx) {
 				auto* pHandles = (JobHandle*)alloca(sizeof(JobHandle) * jobHandles.size());
 				uint32_t handlesCnt = 0;
@@ -31800,7 +31852,7 @@ namespace gaia {
 					// need to wait for N jobs, rather than waiting for each of them
 					// separately you make them a dependency of a dummy/sync job and
 					// wait just for that one.
-					if (!jobData.func.operator bool())
+					if (!jobData.func.operator bool() && ctx != nullptr)
 						(void)run(handle, ctx);
 					else
 						pHandles[handlesCnt++] = handle;
@@ -31852,13 +31904,16 @@ namespace gaia {
 						const auto handle = handles[0];
 						const auto& jobData = m_jobManager.data(handle);
 
-						if (can_run_inline(ctx, jobData)) {
+						if (ctx == nullptr) {
+							// No worker context: the queues are full, so wake the workers and let them drain.
+							wake_workers_for(jobData);
+							std::this_thread::yield();
+						} else if (can_run_inline(ctx, jobData)) {
 							// The queue was full. Execute the job right away only when the
 							// current execution context is allowed to run this priority class.
 							run(handle, ctx);
 							handles = handles.subspan(1);
 						} else {
-							GAIA_ASSERT(ctx != nullptr);
 							wait_for_queue_space(*ctx, jobData);
 						}
 					}
@@ -31894,7 +31949,7 @@ namespace gaia {
 				m_jobManager.run(jobData);
 
 				if (jobData.edges.depCnt == 0) {
-					JobManager::finalize(jobData);
+					publish_done(jobData);
 				} else {
 					//! Publish completion before signalling any dependent. A dependent becomes ready on the last signal
 					//! from any of its prerequisites, and whoever waits on it may then delete or reuse every
@@ -31907,7 +31962,7 @@ namespace gaia {
 					copy_edges(jobData, pDepHandles);
 					if (!manualDelete)
 						JobManager::free_edges(jobData);
-					JobManager::finalize(jobData);
+					publish_done(jobData);
 
 					const auto readyHandlesCnt = signal_edges(std::span(pDepHandles, depCnt));
 					process(std::span(pDepHandles, readyHandlesCnt), ctx);

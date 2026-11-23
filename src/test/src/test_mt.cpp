@@ -2183,6 +2183,114 @@ TEST_CASE("Multithreading - wait on a parallel sync job never misses the start o
 	CHECK(executed.load() == expected);
 }
 
+struct ExternalThreadProbe {
+	float value;
+};
+
+TEST_CASE("Multithreading - threads outside the pool schedule and wait for parallel work") {
+	// Native hosts run systems on threads of another task scheduler. Those threads have no worker context, yet a
+	// parallel query on them schedules pool jobs and waits for them. Before the fix wait() dereferenced the
+	// missing worker context and crashed. Several external threads and the main thread run at the same time:
+	// the mt-level default ECS pattern (jobs + func-less sync job, wait, delete) and a Parallel query.each on a
+	// world owned by the external thread. A hang is reported by the watchdog and aborts the test binary.
+	auto& tp = mt::ThreadPool::get();
+	const auto threads = tp.hw_thread_cnt();
+	tp.set_max_workers(threads, threads);
+
+	constexpr uint32_t ExternalThreads = 4;
+	constexpr uint32_t Iters = 5000;
+	constexpr uint32_t Rows = 256;
+
+	std::atomic_uint32_t done = 0;
+	std::atomic_bool finished = false;
+	std::thread watchdog([&]() {
+		uint32_t last = 0;
+		auto lastChange = std::chrono::steady_clock::now();
+		while (!finished.load(std::memory_order_acquire)) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(50));
+			const auto cur = done.load(std::memory_order_relaxed);
+			const auto now = std::chrono::steady_clock::now();
+			if (cur != last) {
+				last = cur;
+				lastChange = now;
+				continue;
+			}
+			if (now - lastChange > std::chrono::seconds(10)) {
+				std::fprintf(stderr, "ThreadPool::wait() did not return for 10 s after %u waits\n", cur);
+				std::fflush(stderr);
+				std::abort();
+			}
+		}
+	});
+
+	auto runJobs = [&](uint32_t seed, std::atomic_uint32_t& executed, uint32_t& expected) {
+		uint32_t rng = seed;
+		mt::JobHandle handles[65];
+		GAIA_FOR(Iters) {
+			rng = rng * 1664525u + 1013904223u;
+			const uint32_t jobs = 1 + ((rng >> 8) % 64);
+			GAIA_FOR_(jobs, j) {
+				mt::Job job;
+				job.flags = mt::JobCreationFlags::ManualDelete;
+				job.func = [&executed]() {
+					executed.fetch_add(1, std::memory_order_relaxed);
+				};
+				handles[j] = tp.add(GAIA_MOV(job));
+			}
+			mt::Job syncJob;
+			syncJob.flags = mt::JobCreationFlags::ManualDelete;
+			handles[jobs] = tp.add(GAIA_MOV(syncJob));
+			tp.dep(std::span(handles, jobs), handles[jobs]);
+			tp.submit(std::span(handles, jobs + 1));
+			tp.wait(handles[jobs]);
+			GAIA_FOR_(jobs + 1, j) tp.del(handles[j]);
+			expected += jobs;
+			done.fetch_add(1, std::memory_order_relaxed);
+		}
+	};
+
+	std::atomic_uint32_t executed[ExternalThreads + 1]{};
+	uint32_t expected[ExternalThreads + 1]{};
+	std::atomic_uint32_t queryRows[ExternalThreads]{};
+
+	std::thread external[ExternalThreads];
+	GAIA_FOR(ExternalThreads) {
+		external[i] = std::thread([&, i]() {
+			if (i % 2 == 0) {
+				runJobs(777u + i, executed[i], expected[i]);
+				return;
+			}
+
+			ecs::World w;
+			GAIA_FOR_(Rows, r) w.add<ExternalThreadProbe>(w.add(), {(float)r});
+			auto q = w.query().all<ExternalThreadProbe&>();
+			GAIA_FOR_(Iters, it) {
+				q.each(
+						[&queryRows, idx = i](ecs::Iter& iter) {
+							auto v = iter.view_mut<ExternalThreadProbe>(0);
+							GAIA_EACH_(iter, k) v[k].value += 1.0f;
+							queryRows[idx].fetch_add(iter.size(), std::memory_order_relaxed);
+						},
+						ecs::QueryExecType::Parallel);
+				done.fetch_add(1, std::memory_order_relaxed);
+			}
+		});
+	}
+	runJobs(12345u, executed[ExternalThreads], expected[ExternalThreads]);
+	GAIA_FOR(ExternalThreads) external[i].join();
+
+	finished.store(true, std::memory_order_release);
+	watchdog.join();
+
+	CHECK(done.load() == (ExternalThreads + 1) * Iters);
+	GAIA_FOR(ExternalThreads + 1) {
+		if (i < ExternalThreads && i % 2 == 1)
+			CHECK(queryRows[i].load() == Rows * Iters);
+		else
+			CHECK(executed[i].load() == expected[i]);
+	}
+}
+
 TEST_CASE("Multithreading - Reset reusable handles") {
 	auto& tp = mt::ThreadPool::get();
 
