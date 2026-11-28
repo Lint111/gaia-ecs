@@ -7,9 +7,8 @@
 #include <cstring>
 
 #include "gaia/cnt/fwd_llist.h"
-#include "gaia/cnt/sarray.h"
-#include "gaia/core/bit_utils.h"
 #include "gaia/core/utility.h"
+#include "gaia/mem/arena.h"
 #include "gaia/mem/mem_alloc.h"
 #include "gaia/util/logging.h"
 
@@ -93,29 +92,20 @@ namespace gaia {
 
 			class SmallBlockAllocatorImpl;
 
-			struct SmallBlockPage final: cnt::fwd_llist_base<SmallBlockPage> {
+			struct alignas(64) SmallBlockPage final: cnt::fwd_llist_base<SmallBlockPage> {
 				static constexpr uint16_t NBlocks = 64;
-				static constexpr uint16_t NBlocks_Bits = (uint16_t)core::count_bits(NBlocks);
-				static constexpr uint16_t SizeTypeBits = (uint16_t)core::count_bits(SmallBlockSizeTypeCount - 1);
 				static constexpr uint32_t InvalidBlockId = NBlocks + 1;
 #if GAIA_DEBUG
 				static constexpr uint8_t FreedBlockPattern = 0xDD;
 #endif
-				static constexpr uint32_t BlockArrayBytes = ((uint32_t)NBlocks_Bits * (uint32_t)NBlocks + 7) / 8;
-
-				using BlockArray = cnt::sarray<uint8_t, BlockArrayBytes>;
-				using BitView = core::bit_view<NBlocks_Bits>;
-
 				void* m_data;
 				ArenaState* m_arena;
-				std::atomic_uint64_t m_remoteFreeMask{0};
-				BlockArray m_blocks;
 
-				uint32_t m_sizeType : SizeTypeBits;
-				uint32_t m_blockCnt : NBlocks_Bits;
-				uint32_t m_usedBlocks : NBlocks_Bits;
-				uint32_t m_nextFreeBlock : NBlocks_Bits;
-				uint32_t m_freeBlocks : NBlocks_Bits;
+				uint8_t m_sizeType;
+				uint8_t m_blockCnt;
+				uint8_t m_usedBlocks;
+				uint8_t m_nextFreeBlock;
+				uint8_t m_freeBlocks;
 
 #if GAIA_ASSERT_ENABLED
 				uint64_t m_usedMask = 0;
@@ -124,30 +114,30 @@ namespace gaia {
 				//! Constructs a page for the given size class.
 				//! \param ptr Raw page data.
 				//! \param sizeType Size class index.
+				//! \param arena Arena that owns this page.
 				SmallBlockPage(void* ptr, uint8_t sizeType, ArenaState* arena):
 						m_data(ptr), m_arena(arena), m_sizeType(sizeType), m_blockCnt(0), m_usedBlocks(0), m_nextFreeBlock(0),
-						m_freeBlocks(0) {}
+						m_freeBlocks(0) {
+					static_assert(sizeof(SmallBlockPage) == 64);
+				}
 
 				//! Returns the stride of one block in this page.
 				GAIA_NODISCARD uint32_t block_stride() const {
 					return small_block_stride(m_sizeType);
 				}
 
+				//! Keeps the recycle link in the block prefix so it does not expand the page header.
 				void write_block_idx(uint32_t blockIdx, uint32_t value) {
-					const uint32_t bitPosition = blockIdx * NBlocks_Bits;
-
-					GAIA_ASSERT(bitPosition < NBlocks * NBlocks_Bits);
+					GAIA_ASSERT(blockIdx < NBlocks);
 					GAIA_ASSERT(value <= InvalidBlockId);
-
-					BitView{{(uint8_t*)m_blocks.data(), BlockArrayBytes}}.set(bitPosition, (uint8_t)value);
+					auto* block = (uint8_t*)m_data + blockIdx * block_stride();
+					block_header(block).m_reserved = value;
 				}
 
 				GAIA_NODISCARD uint8_t read_block_idx(uint32_t blockIdx) const {
-					const uint32_t bitPosition = blockIdx * NBlocks_Bits;
-
-					GAIA_ASSERT(bitPosition < NBlocks * NBlocks_Bits);
-
-					return BitView{{(uint8_t*)m_blocks.data(), BlockArrayBytes}}.get(bitPosition);
+					GAIA_ASSERT(blockIdx < NBlocks);
+					const auto* block = (const uint8_t*)m_data + blockIdx * block_stride();
+					return (uint8_t)block_header(block).m_reserved;
 				}
 
 #if GAIA_DEBUG
@@ -183,7 +173,6 @@ namespace gaia {
 					index = m_blockCnt;
 					++m_usedBlocks;
 					++m_blockCnt;
-					write_block_idx(index, index);
 				} else {
 					GAIA_ASSERT(m_nextFreeBlock < m_blockCnt && "Block allocator recycle list broken!");
 
@@ -204,7 +193,8 @@ namespace gaia {
 
 			//! Frees one block back to this page.
 			//! \param pBlock Pointer previously returned by alloc_block().
-			void free_block(void* pBlock) {
+			void
+			free_block(void* pBlock) {
 				GAIA_ASSERT(pBlock != nullptr);
 				GAIA_ASSERT(m_usedBlocks > 0);
 				GAIA_ASSERT(m_freeBlocks <= NBlocks);
@@ -241,33 +231,10 @@ namespace gaia {
 					write_block_idx(blockIdx, InvalidBlockId);
 				else
 					write_block_idx(blockIdx, m_nextFreeBlock);
-				m_nextFreeBlock = blockIdx;
+				m_nextFreeBlock = (uint8_t)blockIdx;
 
 				++m_freeBlocks;
 				--m_usedBlocks;
-			}
-
-			//! Queues a free issued by a thread that does not own this page.
-			void free_block_remote(void* pBlock) {
-				const auto* pMemoryBlock = (uint8_t*)pBlock - SmallBlockUsableOffset;
-				const auto blckAddr = (uintptr_t)pMemoryBlock;
-				const auto dataAddr = (uintptr_t)m_data;
-				const auto blockIdx = (uint32_t)((blckAddr - dataAddr) / block_stride());
-				GAIA_ASSERT(blockIdx < NBlocks);
-				const auto bit = uint64_t(1) << blockIdx;
-				[[maybe_unused]] const auto previous = m_remoteFreeMask.fetch_or(bit, std::memory_order_release);
-				GAIA_ASSERT((previous & bit) == 0 && "Double free or corrupted block state");
-			}
-
-			//! Applies frees queued by non-owning threads.
-			void drain_remote() {
-				const auto mask = m_remoteFreeMask.exchange(0, std::memory_order_acquire);
-				for (uint32_t blockIdx = 0; blockIdx < NBlocks; ++blockIdx) {
-					if ((mask & (uint64_t(1) << blockIdx)) == 0)
-						continue;
-					auto* pBlock = (uint8_t*)m_data + blockIdx * block_stride() + SmallBlockUsableOffset;
-					free_block(pBlock);
-				}
 			}
 
 			//! Returns the number of live blocks.
@@ -387,46 +354,14 @@ namespace gaia {
 	//! \cond INTERNAL
 	namespace detail {
 		//! General-purpose allocator for small, variable-sized allocations up to 512 bytes.
-		class SmallBlockAllocatorImpl final {
-			friend ::gaia::mem::SmallBlockAllocator;
-
+		class SmallBlockAllocatorArena final: public ArenaState, public cnt::fwd_llist_base<SmallBlockAllocatorArena> {
 			SmallBlockPageContainer m_pages[SmallBlockSizeTypeCount];
-			ArenaState m_arena;
-			bool m_isDone = false;
-
-			SmallBlockAllocatorImpl() = default;
 
 		public:
-			static constexpr uint32_t MAX_SIZE = SmallBlockMaxSize;
-
-			~SmallBlockAllocatorImpl() {
-				flush(true);
-
-#if GAIA_ASSERT_ENABLED
-				for (const auto& container: m_pages) {
-					const bool hasPages = container.pagesEmpty.first != nullptr || container.pagesPartial.first != nullptr ||
-																container.pagesFull.first != nullptr;
-					GAIA_ASSERT(!hasPages && "SmallBlockAllocator leaking memory");
-				}
-#endif
-			}
-
-			SmallBlockAllocatorImpl(SmallBlockAllocatorImpl&&) = delete;
-			SmallBlockAllocatorImpl(const SmallBlockAllocatorImpl&) = delete;
-			SmallBlockAllocatorImpl& operator=(SmallBlockAllocatorImpl&&) = delete;
-			SmallBlockAllocatorImpl& operator=(const SmallBlockAllocatorImpl&) = delete;
-
 			//! Allocates storage for up to 512 bytes.
 			//! \param bytesWanted Requested usable bytes.
 			//! \return Pointer to aligned usable storage.
-			GAIA_NODISCARD void* alloc(uint32_t bytesWanted) {
-				GAIA_ASSERT(bytesWanted > 0);
-				GAIA_ASSERT(bytesWanted <= MAX_SIZE);
-				if (bytesWanted == 0 || bytesWanted > MAX_SIZE)
-					return nullptr;
-
-				const detail::ArenaLock arenaLock{m_arena};
-				drain_remote_frees();
+			GAIA_NODISCARD void* alloc_local(uint32_t bytesWanted) {
 				const auto sizeType = small_block_size_type(bytesWanted);
 				auto& container = m_pages[sizeType];
 
@@ -452,52 +387,33 @@ namespace gaia {
 				return pBlock;
 			}
 
-			//! Releases storage allocated for the given pointer.
-			//! \param pBlock Pointer previously returned by alloc().
-			void free(void* pBlock) {
-				GAIA_ASSERT(pBlock != nullptr);
-				if (pBlock == nullptr)
-					return;
-
+			static SmallBlockPage* page_from_block(void* pBlock) {
 				const auto& header = *(const SmallBlockHeader*)(void*)((uint8_t*)pBlock - SmallBlockUsableOffset);
 				const auto pageAddr = header.m_pageAddr;
-				GAIA_ASSERT(pageAddr % sizeof(uintptr_t) == 0);
+				GAIA_ASSERT(pageAddr % alignof(SmallBlockPage) == 0);
 #if GAIA_DEBUG
 				GAIA_ASSERT(header.m_requestedBytes > 0);
 #endif
-				auto* pPage = (SmallBlockPage*)pageAddr;
-				if (pPage->m_arena != &m_arena) {
-					GAIA_PROF_FREE(pBlock);
-					pPage->free_block_remote(pBlock);
-					return;
-				}
-				const detail::ArenaLock arenaLock{m_arena};
-				if (!arenaLock.owned())
-					return;
-				drain_remote_frees();
+				return (SmallBlockPage*)pageAddr;
+			}
+
+			void free_local(void* pBlock, bool releaseEmpty) {
+				auto* pPage = page_from_block(pBlock);
 				const auto prevState = state_for(*pPage);
 				auto& container = m_pages[pPage->m_sizeType];
 
-				GAIA_PROF_FREE(pBlock);
 				pPage->free_block(pBlock);
 				move_page(container, pPage, prevState, state_for(*pPage));
-				verify();
 
-				if (m_isDone) {
-					if (pPage->empty()) {
-						container.pagesEmpty.unlink(pPage);
-						free_page(pPage);
-					}
-
-					try_delete_this();
+				if (releaseEmpty && pPage->empty()) {
+					container.pagesEmpty.unlink(pPage);
+					free_page(pPage);
 				}
 			}
 
 			//! Flushes unused pages.
 			//! \param releaseAll When true, all empty pages are released.
-			void flush(bool releaseAll = false) {
-				const detail::ArenaLock arenaLock{m_arena};
-				drain_remote_frees();
+			void trim(bool releaseAll) {
 				for (uint32_t i = 0; i < SmallBlockSizeTypeCount; ++i)
 					flush_pages(m_pages[i], releaseAll);
 				verify();
@@ -512,35 +428,6 @@ namespace gaia {
 				return stats;
 			}
 
-			//! Performs diagnostics of allocator memory usage.
-			void diag() const {
-				const auto allStats = stats();
-				for (uint32_t sizeType = 0; sizeType < SmallBlockSizeTypeCount; ++sizeType) {
-					const auto& stats = allStats.stats[sizeType];
-					if (stats.num_pages == 0)
-						continue;
-
-					GAIA_LOG_N("SmallBlockAllocator %u B stats", small_block_size(sizeType));
-					GAIA_LOG_N("  Allocated: %" PRIu64 " B", stats.mem_total);
-					GAIA_LOG_N("  Reserved by live blocks: %" PRIu64 " B", stats.mem_used);
-					GAIA_LOG_N("  Pages: %u", stats.num_pages);
-					GAIA_LOG_N("  Reusable pages: %u", stats.num_pages_free);
-#if !GAIA_DEBUG
-					GAIA_LOG_N(
-							"  Utilization: %.1f%%",
-							stats.mem_total ? 100.0 * ((double)stats.mem_used / (double)stats.mem_total) : 0.0);
-#else
-						GAIA_LOG_N("  Requested: %" PRIu64 " B", stats.mem_requested);
-						GAIA_LOG_N("  Free capacity: %" PRIu64 " B", stats.mem_total - stats.mem_used);
-						GAIA_LOG_N("  Internal slack: %" PRIu64 " B", stats.mem_used - stats.mem_requested);
-						GAIA_LOG_N(
-								"  Utilization: %.1f%%",
-								stats.mem_total ? 100.0 * ((double)stats.mem_requested / (double)stats.mem_total) : 0.0);
-						GAIA_LOG_N("  Empty pages: %u", stats.num_pages_empty);
-#endif
-				}
-			}
-
 			//! Verifies allocator invariants.
 			void verify() const {
 #if GAIA_ASSERT_ENABLED
@@ -549,56 +436,39 @@ namespace gaia {
 #endif
 			}
 
-		private:
-			void drain_remote_frees() {
-				auto drain_pages = [&](SmallBlockPageContainer& container, auto& pages, SmallBlockPageState state) {
-					for (auto it = pages.begin(); it != pages.end();) {
-						auto* pPage = &(*it);
-						++it;
-						pPage->drain_remote();
-						move_page(container, pPage, state, state_for(*pPage));
-					}
-				};
-
-				for (auto& container: m_pages) {
-					drain_pages(container, container.pagesEmpty, SmallBlockPageState::Empty);
-					drain_pages(container, container.pagesPartial, SmallBlockPageState::Partial);
-					drain_pages(container, container.pagesFull, SmallBlockPageState::Full);
+			bool empty() const {
+				for (const auto& container: m_pages) {
+					if (container.pagesEmpty.first != nullptr || container.pagesPartial.first != nullptr ||
+							container.pagesFull.first != nullptr)
+						return false;
 				}
+				return true;
 			}
 
+		private:
 			static constexpr const char* s_strSmallBlockData = "SmallBlockData";
 			static constexpr const char* s_strSmallBlockPage = "SmallBlockPage";
 
 			SmallBlockPage* alloc_page(uint8_t sizeType) {
 				const uint32_t size = small_block_stride(sizeType) * SmallBlockPage::NBlocks;
 				auto* pPageData = AllocHelper::alloc_alig<uint8_t>(s_strSmallBlockData, SmallBlockAlignment, size);
-				auto* pMemoryPage = AllocHelper::alloc<SmallBlockPage>(s_strSmallBlockPage);
-				return new (pMemoryPage) SmallBlockPage(pPageData, sizeType, &m_arena);
+				auto* pMemoryPage = AllocHelper::alloc_alig<SmallBlockPage>(s_strSmallBlockPage, alignof(SmallBlockPage));
+#if GAIA_ECS_TEST_HOOKS
+				ArenaTestHooks::record_bytes(int64_t(size + sizeof(SmallBlockPage)));
+#endif
+				return new (pMemoryPage) SmallBlockPage(pPageData, sizeType, this);
 			}
 
 			static void free_page(SmallBlockPage* pPage) {
 				GAIA_ASSERT(pPage != nullptr);
 
+#if GAIA_ECS_TEST_HOOKS
+				ArenaTestHooks::record_bytes(
+						-int64_t(pPage->block_stride() * SmallBlockPage::NBlocks + sizeof(SmallBlockPage)));
+#endif
 				AllocHelper::free_alig(s_strSmallBlockData, pPage->m_data);
 				pPage->~SmallBlockPage();
-				AllocHelper::free(s_strSmallBlockPage, pPage);
-			}
-
-			void done() {
-				m_isDone = true;
-			}
-
-			void try_delete_this() {
-				bool allEmpty = true;
-				for (const auto& container: m_pages) {
-					const bool hasPages = container.pagesEmpty.first != nullptr || container.pagesPartial.first != nullptr ||
-																container.pagesFull.first != nullptr;
-					allEmpty = allEmpty && !hasPages;
-				}
-
-				if (allEmpty)
-					delete this;
+				AllocHelper::free_alig(s_strSmallBlockPage, pPage);
 			}
 
 			static constexpr uint32_t warm_pages_to_keep() {
@@ -712,6 +582,106 @@ namespace gaia {
 					container.pagesEmpty.unlink(pPage);
 					free_page(pPage);
 				}
+			}
+		};
+
+		//! Allocates through the calling thread's arena and routes frees to the block owner.
+		class SmallBlockAllocatorImpl final {
+			friend ::gaia::mem::SmallBlockAllocator;
+
+			using Arenas = ArenaRegistry<SmallBlockAllocatorArena>;
+
+			SmallBlockAllocatorImpl() = default;
+			SmallBlockAllocatorImpl(const SmallBlockAllocatorImpl&) = delete;
+			SmallBlockAllocatorImpl& operator=(const SmallBlockAllocatorImpl&) = delete;
+
+		public:
+			static constexpr uint32_t MAX_SIZE = SmallBlockMaxSize;
+
+			GAIA_NODISCARD void* alloc(uint32_t bytesWanted) {
+				GAIA_ASSERT(bytesWanted > 0);
+				GAIA_ASSERT(bytesWanted <= MAX_SIZE);
+				if (bytesWanted == 0 || bytesWanted > MAX_SIZE)
+					return nullptr;
+				return Arenas::alloc(bytesWanted);
+			}
+
+			void free(void* pBlock) {
+				GAIA_ASSERT(pBlock != nullptr);
+				if (pBlock == nullptr)
+					return;
+				auto* page = SmallBlockAllocatorArena::page_from_block(pBlock);
+				GAIA_PROF_FREE(pBlock);
+				Arenas::free(static_cast<SmallBlockAllocatorArena&>(*page->m_arena), pBlock);
+			}
+
+			//! Drains pending frees and trims idle pages across all arenas of this allocator.
+			//! \param releaseAll Releases all idle pages when true.
+			void flush(bool releaseAll = false) {
+				Arenas::visit([releaseAll](SmallBlockAllocatorArena& arena) {
+					arena.trim(releaseAll);
+				});
+			}
+
+			//! Reports the calling thread's allocation statistics.
+			GAIA_NODISCARD SmallBlockAllocatorStats stats() const {
+				SmallBlockAllocatorStats stats{};
+				Arenas::with_local([&](SmallBlockAllocatorArena& arena) {
+					stats = arena.stats();
+				});
+				return stats;
+			}
+
+			//! Performs diagnostics of allocator memory usage.
+			void diag() const {
+				SmallBlockAllocatorStats allStats{};
+				Arenas::visit([&](SmallBlockAllocatorArena& arena) {
+					const auto current = arena.stats();
+					for (uint32_t i = 0; i < SmallBlockSizeTypeCount; ++i) {
+						auto& total = allStats.stats[i];
+						const auto& page = current.stats[i];
+						total.mem_total += page.mem_total;
+						total.mem_used += page.mem_used;
+						total.num_pages += page.num_pages;
+						total.num_pages_free += page.num_pages_free;
+#if GAIA_DEBUG
+						total.mem_requested += page.mem_requested;
+						total.num_pages_empty += page.num_pages_empty;
+#endif
+					}
+				});
+				for (uint32_t sizeType = 0; sizeType < SmallBlockSizeTypeCount; ++sizeType) {
+					const auto& stats = allStats.stats[sizeType];
+					if (stats.num_pages == 0)
+						continue;
+
+					GAIA_LOG_N("SmallBlockAllocator %u B stats", small_block_size(sizeType));
+					GAIA_LOG_N("  Allocated: %" PRIu64 " B", stats.mem_total);
+					GAIA_LOG_N("  Reserved by live blocks: %" PRIu64 " B", stats.mem_used);
+					GAIA_LOG_N("  Pages: %u", stats.num_pages);
+					GAIA_LOG_N("  Reusable pages: %u", stats.num_pages_free);
+#if !GAIA_DEBUG
+					GAIA_LOG_N(
+							"  Utilization: %.1f%%",
+							stats.mem_total ? 100.0 * ((double)stats.mem_used / (double)stats.mem_total) : 0.0);
+#else
+						GAIA_LOG_N("  Requested: %" PRIu64 " B", stats.mem_requested);
+						GAIA_LOG_N("  Free capacity: %" PRIu64 " B", stats.mem_total - stats.mem_used);
+						GAIA_LOG_N("  Internal slack: %" PRIu64 " B", stats.mem_used - stats.mem_requested);
+						GAIA_LOG_N(
+								"  Utilization: %.1f%%",
+								stats.mem_total ? 100.0 * ((double)stats.mem_requested / (double)stats.mem_total) : 0.0);
+						GAIA_LOG_N("  Empty pages: %u", stats.num_pages_empty);
+#endif
+				}
+			}
+
+			void verify() const {
+#if GAIA_ASSERT_ENABLED
+				Arenas::with_local([](SmallBlockAllocatorArena& arena) {
+					arena.verify();
+				});
+#endif
 			}
 		};
 

@@ -44,9 +44,7 @@
 	#define GAIA_FUNC_WRAPPER_SMALLBLOCK 1
 #endif
 
-//! If enabled, process-wide allocation arenas take a spinlock on alloc/free/flush so independent
-//! Worlds may mutate concurrently. Default is 0. When disabled, assert builds abort if two threads
-//! enter an arena at once.
+//! Use one shared arena mutation lock when enabled. The default uses a separate gate per arena.
 #ifndef GAIA_ALLOC_ARENA_LOCK
 	#define GAIA_ALLOC_ARENA_LOCK 0
 #endif

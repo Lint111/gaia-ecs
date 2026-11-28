@@ -22,7 +22,6 @@ TEST_CASE("ECS - Independent worlds do not share allocation arenas") {
 	constexpr uint32_t WorkerCount = 2;
 	constexpr uint32_t EntityCount = 2048;
 
-	const auto violationsBefore = mem::detail::ArenaLock::test_violations();
 	std::atomic_uint32_t ready = 0;
 	std::atomic_bool start = false;
 	std::array<uint32_t, WorkerCount> counts{};
@@ -53,7 +52,6 @@ TEST_CASE("ECS - Independent worlds do not share allocation arenas") {
 
 	CHECK(counts[0] == EntityCount);
 	CHECK(counts[1] == EntityCount);
-	CHECK(mem::detail::ArenaLock::test_violations() == violationsBefore);
 }
 
 TEST_CASE("Allocation arenas route cross-thread small-block frees to the owner") {
@@ -98,8 +96,226 @@ TEST_CASE("Allocation arenas route cross-thread small-block frees to the owner")
 		CHECK(stats.num_pages == 0);
 		CHECK(stats.mem_used == 0);
 	}
-	CHECK(PagedProbeAllocator::get().alloc(0) != nullptr);
+	auto* localPagedBlock = PagedProbeAllocator::get().alloc(0);
+	CHECK(localPagedBlock != nullptr);
+	PagedProbeAllocator::get().free(localPagedBlock);
 	PagedProbeAllocator::get().flush();
+}
+
+namespace {
+	struct ArenaTestCategory {};
+
+	using TestPagedArena = mem::PagedAllocator<ArenaTestCategory, 64>;
+	using ArenaTestHooks = mem::detail::ArenaTestHooks;
+
+	struct ArenaTestBlocks {
+		void* small;
+		void* paged;
+#if GAIA_ECS_CHUNK_ALLOCATOR
+		void* chunk;
+#endif
+	};
+
+	ArenaTestBlocks alloc_test_blocks() {
+		return {
+				mem::SmallBlockAllocator::get().alloc(64),
+				TestPagedArena::get().alloc(0),
+#if GAIA_ECS_CHUNK_ALLOCATOR
+				ecs::ChunkAllocator::get().alloc(ecs::MinMemoryBlockSize),
+#endif
+		};
+	}
+
+	void free_test_blocks(ArenaTestBlocks blocks) {
+		mem::SmallBlockAllocator::get().free(blocks.small);
+		TestPagedArena::get().free(blocks.paged);
+#if GAIA_ECS_CHUNK_ALLOCATOR
+		ecs::ChunkAllocator::get().free(blocks.chunk);
+#endif
+	}
+
+	void flush_test_arenas() {
+		mem::SmallBlockAllocator::get().flush(true);
+		TestPagedArena::get().flush();
+#if GAIA_ECS_CHUNK_ALLOCATOR
+		ecs::ChunkAllocator::get().flush(true);
+#endif
+	}
+
+	void wait_for_arena_phase(const std::atomic_uint32_t& phase, uint32_t target) {
+		while (phase.load(std::memory_order_acquire) < target)
+			std::this_thread::yield();
+	}
+
+	struct TestArenaUsage {
+		uint32_t pages;
+		uint64_t small;
+		uint64_t paged;
+#if GAIA_ECS_CHUNK_ALLOCATOR
+		uint64_t chunk;
+#endif
+	};
+
+	TestArenaUsage arena_usage() {
+		const auto small = mem::SmallBlockAllocator::get().stats().stats[mem::small_block_size_type(64)];
+		const auto paged = TestPagedArena::get().stats();
+#if GAIA_ECS_CHUNK_ALLOCATOR
+		const auto chunk = ecs::ChunkAllocator::get().stats().stats[0];
+		return {small.num_pages + paged.num_pages + chunk.num_pages, small.mem_used, paged.mem_used, chunk.mem_used};
+#else
+		return {small.num_pages + paged.num_pages, small.mem_used, paged.mem_used};
+#endif
+	}
+} // namespace
+
+TEST_CASE("Allocation arenas - short-lived threads release arena objects and pages") {
+	const auto before = ArenaTestHooks::live();
+	for (uint32_t i = 0; i < 24; ++i)
+		std::thread([] { free_test_blocks(alloc_test_blocks()); }).join();
+	const auto after = ArenaTestHooks::live();
+	CHECK(after.arenas == before.arenas);
+	CHECK(after.bytes == before.bytes);
+}
+
+TEST_CASE("Allocation arenas - blocks can be freed after the owner exits") {
+	const auto before = ArenaTestHooks::live();
+	ArenaTestBlocks blocks[2]{};
+	std::thread([&] {
+		blocks[0] = alloc_test_blocks();
+		blocks[1] = alloc_test_blocks();
+	}).join();
+	const auto orphaned = ArenaTestHooks::live();
+	CHECK(orphaned.arenas > before.arenas);
+	CHECK(orphaned.bytes > before.bytes);
+
+	std::thread([&] { free_test_blocks(blocks[0]); }).join();
+	const auto halfFreed = ArenaTestHooks::live();
+	CHECK(halfFreed.arenas == orphaned.arenas);
+	CHECK(halfFreed.bytes == orphaned.bytes);
+
+	std::thread([&] { free_test_blocks(blocks[1]); }).join();
+	const auto after = ArenaTestHooks::live();
+	CHECK(after.arenas == before.arenas);
+	CHECK(after.bytes == before.bytes);
+}
+
+TEST_CASE("Allocation arenas - flush on the caller reclaims parked worker pages") {
+	std::atomic_uint32_t phase{0};
+	ArenaTestBlocks blocks[2]{};
+	TestArenaUsage full{}, partial{}, empty{};
+	std::thread worker([&] {
+		blocks[0] = alloc_test_blocks();
+		blocks[1] = alloc_test_blocks();
+		full = arena_usage();
+		phase.store(1, std::memory_order_release);
+		wait_for_arena_phase(phase, 2);
+		partial = arena_usage();
+		phase.store(3, std::memory_order_release);
+		wait_for_arena_phase(phase, 4);
+		empty = arena_usage();
+	});
+
+	wait_for_arena_phase(phase, 1);
+	free_test_blocks(blocks[0]);
+	flush_test_arenas();
+	phase.store(2, std::memory_order_release);
+	wait_for_arena_phase(phase, 3);
+
+	free_test_blocks(blocks[1]);
+	flush_test_arenas();
+	phase.store(4, std::memory_order_release);
+	worker.join();
+
+	CHECK(partial.pages == full.pages);
+	CHECK(empty.pages == 0);
+	CHECK(partial.small > 0);
+	CHECK(partial.small * 2 == full.small);
+	CHECK(partial.paged > 0);
+	CHECK(partial.paged * 2 == full.paged);
+	CHECK(empty.small == 0);
+	CHECK(empty.paged == 0);
+#if GAIA_ECS_CHUNK_ALLOCATOR
+	CHECK(partial.chunk > 0);
+	CHECK(partial.chunk * 2 == full.chunk);
+	CHECK(empty.chunk == 0);
+#endif
+}
+
+#if GAIA_ECS_CHUNK_ALLOCATOR
+TEST_CASE("Allocation arenas - remote drain work stays constant as live pages grow") {
+	constexpr uint32_t MaxPages = 24;
+	constexpr auto BlocksPerPage = ecs::detail::MemoryPage::NBlocks;
+
+	for (uint32_t pages: {1U, MaxPages}) {
+		auto& alloc = ecs::ChunkAllocator::get();
+		alloc.flush(true);
+		void* held[MaxPages * BlocksPerPage]{};
+		const auto count = pages * BlocksPerPage - 1;
+		for (uint32_t idx = 0; idx < count; ++idx)
+			held[idx] = alloc.alloc(ecs::MinMemoryBlockSize);
+		CHECK(alloc.stats().stats[0].num_pages == pages);
+
+		auto visits = ArenaTestHooks::remote_visits();
+		auto* extra = alloc.alloc(ecs::MinMemoryBlockSize);
+		alloc.free(extra);
+		CHECK(ArenaTestHooks::remote_visits() - visits == 0);
+
+		std::thread([&] { ecs::ChunkAllocator::get().free(held[0]); }).join();
+		visits = ArenaTestHooks::remote_visits();
+		auto* recycled = alloc.alloc(ecs::MinMemoryBlockSize);
+		CHECK(ArenaTestHooks::remote_visits() - visits == 1);
+		CHECK(recycled == held[0]);
+		held[0] = recycled;
+
+		for (uint32_t idx = 0; idx < count; ++idx)
+			alloc.free(held[idx]);
+		alloc.flush(true);
+	}
+}
+#endif
+
+TEST_CASE("Allocation arenas - concurrent enqueue and retirement keep all releases") {
+	constexpr uint32_t Rounds = 12;
+	constexpr uint32_t BlocksPerProducer = 32;
+	constexpr uint32_t ProducerCount = 3;
+	const auto before = ArenaTestHooks::live();
+
+	for (uint32_t round = 0; round < Rounds; ++round) {
+		std::atomic_uint32_t phase{0};
+		ArenaTestBlocks blocks[ProducerCount][BlocksPerProducer]{};
+		std::thread owner([&] {
+			for (auto& group: blocks) {
+				for (auto& block: group)
+					block = alloc_test_blocks();
+			}
+			phase.store(1, std::memory_order_release);
+			wait_for_arena_phase(phase, 2);
+			for (uint32_t i = 0; i < BlocksPerProducer; ++i)
+				free_test_blocks(alloc_test_blocks());
+		});
+		std::thread producers[ProducerCount];
+		for (uint32_t n = 0; n < ProducerCount; ++n) {
+			producers[n] = std::thread([&, n] {
+				wait_for_arena_phase(phase, 2);
+				for (uint32_t i = 0; i < BlocksPerProducer - 1; ++i)
+					free_test_blocks(blocks[n][i]);
+				wait_for_arena_phase(phase, 3);
+				free_test_blocks(blocks[n][BlocksPerProducer - 1]);
+			});
+		}
+
+		wait_for_arena_phase(phase, 1);
+		phase.store(2, std::memory_order_release);
+		flush_test_arenas();
+		owner.join();
+		phase.store(3, std::memory_order_release);
+		for (auto& producer: producers)
+			producer.join();
+	}
+
+	const auto after = ArenaTestHooks::live();
+	CHECK(after.arenas == before.arenas);
+	CHECK(after.bytes == before.bytes);
 }
 
 struct JobParallelRefProbe {

@@ -4451,11 +4451,11 @@ Relocation into raw AoS storage uses `mem::move_ctor_elements`, which constructs
 
 Do not mutate the same World from two threads at once. Running queries and systems in parallel inside one World is fine.
 
-`mem::SmallBlockAllocator`, `ecs::ChunkAllocator`, and `mem::PagedAllocator` are shared by every World in the process and are not locked by default.
+Independent Worlds can allocate concurrently with the default configuration. `mem::SmallBlockAllocator`, `ecs::ChunkAllocator`, and each `mem::PagedAllocator` specialization keep allocation arenas per allocating thread. Blocks can be freed from any thread, including after their allocating thread exits. An active arena processes queued foreign frees on allocator operations and during maintenance. At thread exit it releases idle pages, and the last outstanding free releases the retired arena.
 
-To run several Worlds at once, set `GAIA_ALLOC_ARENA_LOCK` to `1` before including gaia.h, or pass `-DGAIA_ALLOC_ARENA_LOCK=1`. The allocators then take a spinlock on `alloc` / `free` / `flush`. That does not make one World safe to mutate from two threads. The default is `0`. With the lock off, assert builds abort if two threads enter an allocator together.
+Explicit `flush()` drains foreign frees and trims idle pages across the allocator's arenas. `flush(true)` releases every idle chunk or small-block page. By default chunk flush retains up to one idle page in each of the 8 KiB and 16 KiB classes per active arena. World cleanup trims its local chunk arena. `stats()` reports the calling thread's arena, and `diag()` reports totals across arenas.
 
-The job system (`mt::ThreadPool`) has its own synchronization and is not affected by this flag.
+`GAIA_ALLOC_ARENA_LOCK` defaults to `0` and keeps arena mutations independent. Setting it to `1` uses a shared mutation lock. The job system (`mt::ThreadPool`) has its own synchronization.
 
 ### Jobs
 To fully utilize your system's potential **Gaia-ECS** allows you to spread your tasks into multiple threads. This can be achieved in multiple ways.
@@ -4966,7 +4966,7 @@ Parameter | Description
 **GAIA_PROFILER_BUILD** | Builds the [profiler](#profiling) ([Tracy](https://github.com/wolfpld/tracy) by default)
 **GAIA_USE_SANITIZER** | Applies the specified set of [sanitizers](#sanitizers)
 **GAIA_FUNC_WRAPPER_SMALLBLOCK** | Uses `SmallBlockAllocator` for `SmallFunc` and `MoveFunc` callables that are too large for their inline buffer. Enabled by default. Set to `0` to allocate those larger callables with the platform heap instead.
-**GAIA_ALLOC_ARENA_LOCK** | Process-wide spinlock on alloc/free/flush of `mem::SmallBlockAllocator`, `ecs::ChunkAllocator`, and `mem::PagedAllocator`. Off by default (`0`). Set to `1` to allow independent Worlds to mutate concurrently. With the lock off, assert builds abort if two threads enter an allocator at once. See [Worlds, threads, and allocation arenas](#worlds-threads-and-allocation-arenas).
+**GAIA_ALLOC_ARENA_LOCK** | Uses a process-wide spinlock for arena mutations when set to `1`. The default (`0`) uses a separate gate per arena. See [Worlds, threads, and allocation arenas](#worlds-threads-and-allocation-arenas).
 **GAIA_FORCE_DEBUG** | Forces `GAIA_DEBUG` and Gaia asserts on even in optimized configurations
 **GAIA_DISABLE_ASSERTS** | Disables all Gaia asserts even in Debug builds
 

@@ -14260,7 +14260,7 @@ namespace gaia {
 				cleanup_inter();
 
 #if GAIA_ECS_CHUNK_ALLOCATOR
-				ChunkAllocator::get().flush();
+				ChunkAllocator::get().flush_local();
 #endif
 			}
 
